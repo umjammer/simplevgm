@@ -1,4 +1,16 @@
-Simple VGM
+# Simple VGM
+
+## References
+
+ * https://github.com/fedex81/simplevgm
+ * https://vgmrips.net/packs/
+ * https://github.com/vlcoo/P3synthVG
+ * https://github.com/GhostSonic21/Java_VGMPlayer
+
+---
+
+# [Original](https://github.com/fedex81/simplevgm)
+
 ----------
 a (very) simple - Java based - [VGM][1] 1.50 player  
 

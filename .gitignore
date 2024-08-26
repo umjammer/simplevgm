@@ -2,3 +2,4 @@ docs/**
 vgm/**
 /out/
 /.idea/
+tmp/
