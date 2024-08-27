@@ -1,27 +1,26 @@
 package uk.co.omgdrv.simplevgm.psg.nuked;
 
-import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
-import uk.co.omgdrv.simplevgm.psg.PsgCompare;
-import uk.co.omgdrv.simplevgm.util.BlipBuffer;
-import uk.co.omgdrv.simplevgm.util.DspUtil;
-import uk.co.omgdrv.simplevgm.util.Util;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
+import uk.co.omgdrv.simplevgm.psg.PsgCompare;
+import uk.co.omgdrv.simplevgm.util.BlipBuffer;
+import uk.co.omgdrv.simplevgm.util.DspUtil;
+import uk.co.omgdrv.simplevgm.util.Util;
+
 import static uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ;
 
+
 /**
- * ${FILE}
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2019
- * <p>
- * https://forums.nesdev.com/viewtopic.php?f=23&t=15562
+ * NukedPsgProvider.
+ *
+ * @author Federico Berti
+ * @version Copyright 2019
+ * @see "https://forums.nesdev.com/viewtopic.php?f=23&t=15562"
  */
 public class NukedPsgProvider implements VgmPsgProvider {
 

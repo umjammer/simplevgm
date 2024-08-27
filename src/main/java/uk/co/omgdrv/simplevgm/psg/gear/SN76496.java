@@ -20,9 +20,10 @@
 
 package uk.co.omgdrv.simplevgm.psg.gear;
 
-import javax.sound.sampled.AudioFormat;
 import java.io.FileWriter;
 import java.io.IOException;
+import javax.sound.sampled.AudioFormat;
+
 
 /**
  * Texas SN76496 Emulation.

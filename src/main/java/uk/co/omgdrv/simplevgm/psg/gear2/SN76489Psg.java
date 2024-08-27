@@ -2,12 +2,12 @@ package uk.co.omgdrv.simplevgm.psg.gear2;
 
 import uk.co.omgdrv.simplevgm.psg.gear.PsgProvider;
 
+
 /**
- * ${FILE}
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2019
+ * SN76489Psg.
+ *
+ * @author Federico Berti
+ * @version Copyright 2019
  */
 public class SN76489Psg implements PsgProvider {
 
@@ -41,6 +41,5 @@ public class SN76489Psg implements PsgProvider {
 
     @Override
     public void reset() {
-
     }
 }

@@ -57,6 +57,7 @@ public interface IYm3438 {
 
 
     class IYm3438_Type {
+
         int cycles;   //32 bit unsigned
         int channel;  //32 bit unsigned
         /* 16 bit signed */ int mol, mor;

@@ -1,11 +1,12 @@
 package uk.co.omgdrv.simplevgm.test;
 
+import java.io.IOException;
+import java.util.Arrays;
+
 import uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.nuked.NukedPsgProvider;
 import uk.co.omgdrv.simplevgm.util.DspUtil;
 
-import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * ${FILE}

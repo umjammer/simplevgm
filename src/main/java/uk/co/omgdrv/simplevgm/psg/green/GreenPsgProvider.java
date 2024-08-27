@@ -6,12 +6,12 @@ import uk.co.omgdrv.simplevgm.psg.PsgCompare;
 import uk.co.omgdrv.simplevgm.psg.gear.PsgProvider;
 import uk.co.omgdrv.simplevgm.util.StereoBuffer;
 
+
 /**
- * ${FILE}
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2019
+ * GreenPsgProvider.
+ *
+ * @author Federico Berti
+ * @version Copyright 2019
  */
 public class GreenPsgProvider extends BaseVgmPsgProvider {
 

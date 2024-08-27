@@ -3,15 +3,14 @@ package uk.co.omgdrv.simplevgm.psg;
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 import uk.co.omgdrv.simplevgm.util.BlipBuffer;
 
+
 /**
- * ${FILE}
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2019
+ * BaseVgmPsgProvider.
+ *
+ * @author Federico Berti
+ * @version Copyright 2019
  */
 public abstract class BaseVgmPsgProvider implements VgmPsgProvider {
-
 
     public static final double NANOS_TO_SEC = 1_000_000_000;
     public static final int VGM_SAMPLE_RATE_HZ = 44100;

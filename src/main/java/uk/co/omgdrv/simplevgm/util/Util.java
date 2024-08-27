@@ -1,10 +1,5 @@
 package uk.co.omgdrv.simplevgm.util;
 
-
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -15,27 +10,30 @@ import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.zip.GZIPInputStream;
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+
 
 /**
- * ${FILE}
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2018
+ * Util.
+ *
+ * @author Federico Berti
+ * @version Copyright 2018
  */
 public class Util {
 
-    static Predicate<String> compressedVgm = n ->  n.endsWith(".GZ") || n.endsWith(".VGZ");
+    static Predicate<String> compressedVgm = n -> n.endsWith(".GZ") || n.endsWith(".VGZ");
 
     // Loads given URL and file within archive, and caches archive for future access
-    public static byte[] readFile(String path) throws Exception
-    {
+    public static byte[] readFile(String path) throws Exception {
         boolean isCompressed = isCompressedByteStream(path);
         byte[] res;
         try (
                 InputStream inFile = new FileInputStream(path);
                 InputStream inContent = isCompressed ? DataReader.openGZIP(inFile) : inFile
-                ) {
+        ) {
             res = DataReader.loadData(inContent);
         }
         return res;
@@ -54,8 +52,7 @@ public class Util {
     }
 
     // "Resizes" array to new size and preserves elements from in
-    public static byte[] resize(byte[] in, int size)
-    {
+    public static byte[] resize(byte[] in, int size) {
         byte[] out = new byte[size];
         if (size > in.length)
             size = in.length;
@@ -113,14 +110,14 @@ public class Util {
     }
 
     // unit / pow( 2.0, (double) x / step )
-    public static int int_log(int x, int step, int unit){
+    public static int int_log(int x, int step, int unit) {
         int shift = x / step;
         int fraction = (x - shift * step) * unit / step;
         return ((unit - fraction) + (fraction >> 1)) >> shift;
     }
 
     public static int getUInt32LE(byte[] data, int pos) {
-        return getUInt32LE(data[pos], data[pos+1], data[pos+2], data[pos+3]);
+        return getUInt32LE(data[pos], data[pos + 1], data[pos + 2], data[pos + 3]);
     }
 
     public static int getUInt32LE(int... bytes) {

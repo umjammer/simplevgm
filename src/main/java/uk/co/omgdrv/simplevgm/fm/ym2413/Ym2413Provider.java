@@ -2,15 +2,15 @@ package uk.co.omgdrv.simplevgm.fm.ym2413;
 
 import uk.co.omgdrv.simplevgm.model.VgmFmProvider;
 
+
 /**
- * ${FILE}
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2019
- *
+ * Ym2413Provider.
+ * <pre>
  * F = (49716 * Fnum) / (2^19 - (octave-1)) ??
+ * </pre>
  *
+ * @author Federico Berti
+ * @version Copyright 2019
  */
 public class Ym2413Provider implements VgmFmProvider {
 
@@ -42,7 +42,6 @@ public class Ym2413Provider implements VgmFmProvider {
         Emu2413.OPLL_init();
         opll = Emu2413.OPLL_new();
     }
-
 
     static int AUDIO_SCALE_BITS = 3;
 

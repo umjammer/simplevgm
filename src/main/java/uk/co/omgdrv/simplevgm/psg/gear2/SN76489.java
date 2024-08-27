@@ -1,45 +1,15 @@
-package uk.co.omgdrv.simplevgm.psg.gear2;
-
-/**
- * SN76489 PSG
- *
- * @author (C) 2008 Chris White (pointblnk@hotmail.com)
- * <p>
- * see http://www.smspower.org/dev/docs/wiki/Sound/PSG
- * <p>
- * <p>
- * Special Thanks:
- * <p>
- * - This sound rewrite is heavily based on the documentation and research of Maxim.
- * Used and relicensed with permission :)
- * <p>
- * Timing Notes:
- * <p>
- * - NTSC Clockspeed = 3579545 Hz
- * - Sample Rate = 44100 Hz
- * - PSG Clock = 223721.5625 Hz (Divide Clockspeed by 16)
- * - Include Sampling Rate = 5.07 (Divide PSG Clock by Sample Rate)
- * - So we want to decrement our counters by 5.07 per cycle
- * <p>
- * Notes:
- * <p>
- * - To use with other systems other than Sega Master System / GameGear, update the feedback
- * pattern appropriately.
- * @version 17th June 2008
- */ 
-
 /*
     This file is part of JavaGear.
 
     Copyright (c) 2002-2008 Chris White
-    All rights reserved. 
-    
+    All rights reserved.
+
     Redistribution and use of this code or any derivative works are permitted
-    provided that the following conditions are met: 
-    
+    provided that the following conditions are met:
+
     * Redistributions may not be sold, nor may they be used in a commercial
-    product or activity. 
-    
+    product or activity.
+
     * Redistributions that are modified from the original source must include the
     complete source code, including the source code for all components used by a
     binary built from the modified sources. However, as a special exception, the
@@ -47,25 +17,56 @@ package uk.co.omgdrv.simplevgm.psg.gear2;
     (in either source or binary form) with the major components (compiler, kernel,
     and so on) of the operating system on which the executable runs, unless that
     component itself accompanies the executable.
-    
+
     * Redistributions must reproduce the above copyright notice, this list of
     conditions and the following disclaimer in the documentation and/or other
-    materials provided with the distribution. 
-    
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
-    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
-    ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
-    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
-    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-    INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+    materials provided with the distribution.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+    ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+    INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
     POSSIBILITY OF SUCH DAMAGE.
 */
 
+package uk.co.omgdrv.simplevgm.psg.gear2;
+
+/**
+ * SN76489 PSG
+ *
+ * <p>
+ * Special Thanks:
+ * <ul>
+ * <li>This sound rewrite is heavily based on the documentation and research of Maxim.
+ * Used and relicensed with permission :)</li>
+ * </ul>
+ * <p>
+ * Timing Notes:
+ * <ul>
+ *  <li>NTSC Clockspeed = 3579545 Hz</li>
+ *  <li>Sample Rate = 44100 Hz</li>
+ *  <li>PSG Clock = 223721.5625 Hz (Divide Clockspeed by 16)</li>
+ *  <li>Include Sampling Rate = 5.07 (Divide PSG Clock by Sample Rate)</li>
+ *  <li>So we want to decrement our counters by 5.07 per cycle</li>
+ * </ul>
+ * Notes:
+ * <ul>
+ * <li>To use with other systems other than Sega Master System / GameGear, update the feedback
+ * pattern appropriately.</li>
+ * </ul>
+ *
+ * @author (C) 2008 Chris White (pointblnk@hotmail.com)
+ * @version 17th June 2008
+ * @see "http://www.smspower.org/dev/docs/wiki/Sound/PSG"
+ */
 public class SN76489 {
+
     /**
      * Fixed point scaling
      */
@@ -86,12 +87,12 @@ public class SN76489 {
      */
     private final static int NO_ANTIALIAS = Integer.MIN_VALUE;
 
-    // --------------------------------------------------------------------------------------------
+    // ----
     // The SN76489 has 8 "registers": 
     // 4 x 4 bit volume registers, 
     // 3 x 10 bit tone registers and 
     // 1 x 3 bit noise register. 
-    // --------------------------------------------------------------------------------------------
+    // ----
 
     /**
      * SN76489 Registers
@@ -138,9 +139,9 @@ public class SN76489 {
      */
     private final static int FEEDBACK_PATTERN = 0x9;
 
-    // --------------------------------------------------------------------------------------------
+    //
     // Output & Amplification
-    // --------------------------------------------------------------------------------------------
+    //
 
     /**
      * Output channels
@@ -148,17 +149,14 @@ public class SN76489 {
     private final int[] outputChannel;
 
     // Tests with an SMS and a TV card found the highest three volume levels to be clipped    
-    private final static int[] PSG_VOLUME =
-            {
-                    //1516,1205,957,760,603,479,381,303,240,191,152,120,96,76,60,0
-                    25, 20, 16, 13, 10, 8, 6, 5, 4, 3, 3, 2, 2, 1, 1, 0
-            };
-
+    private final static int[] PSG_VOLUME = {
+            //1516,1205,957,760,603,479,381,303,240,191,152,120,96,76,60,0
+            25, 20, 16, 13, 10, 8, 6, 5, 4, 3, 3, 2, 2, 1, 1, 0
+    };
 
     /**
      * SN76489 Constructor.
      */
-
     public SN76489() {
         // Create various arrays
         outputChannel = new int[4];
@@ -168,14 +166,12 @@ public class SN76489 {
         freqPos = new int[3];
     }
 
-
     /**
      * Init SN76496 to Default Values.
      *
      * @param clockSpeed Clock Speed (Hz)
      * @param sampleRate Sample Rate (Hz)
      */
-
     public void init(int clockSpeed, int sampleRate) {
         // Master clock divided by 16 to get internal clock
         // e.g. 3579545 / 16 / 44100 = 5
@@ -209,15 +205,14 @@ public class SN76489 {
      *
      * @param value Value to write (0-0xFF)
      */
-
     public final void write(int value) {
-        // ----------------------------------------------------------------------------------------
+        //
         // If bit 7 is 1 then the byte is a LATCH/DATA byte.
         //    %1cctdddd
         //    |||````-- Data
         //    ||`------ Type
         //    ``------- Channel
-        // ----------------------------------------------------------------------------------------
+        //
 
         if ((value & 0x80) != 0) {
             // Bits 6 and 5 ("cc") give the channel to be latched, ALWAYS.

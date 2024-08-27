@@ -2,8 +2,9 @@ package uk.co.omgdrv.simplevgm.psg.green;
 
 import uk.co.omgdrv.simplevgm.util.BlipBuffer;
 
-public class SmsOsc
-{
+
+public class SmsOsc {
+
     static final int masterVolume = (int) (0.40 * 65536 / 128);
 
     BlipBuffer output;
@@ -13,8 +14,7 @@ public class SmsOsc
     int lastAmp;
     int volume;
 
-    void reset()
-    {
+    void reset() {
         delay = 0;
         lastAmp = 0;
         volume = 0;

@@ -1,5 +1,12 @@
 package uk.co.omgdrv.simplevgm.psg;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.sound.sampled.AudioFormat;
+
 import uk.co.omgdrv.simplevgm.VgmEmu;
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.gear.GearPsgProvider;
@@ -11,27 +18,19 @@ import uk.co.omgdrv.simplevgm.psg.nuked.NukedPsgProvider;
 import uk.co.omgdrv.simplevgm.util.BlipBuffer;
 import uk.co.omgdrv.simplevgm.util.Util;
 
-import javax.sound.sampled.AudioFormat;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import static uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ;
 
+
 /**
- * ${FILE}
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2019
+ * PsgCompare.
+ *
+ * @author Federico Berti
+ * @version Copyright 2019
  */
 public class PsgCompare implements VgmPsgProvider {
 
     private static final int RUN_FOR_SECONDS = 30;
     private static final boolean WRITE_FILE = false;
-
 
     public enum PsgType {
         GEAR,

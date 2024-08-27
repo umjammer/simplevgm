@@ -8,12 +8,12 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
- * ${FILE}
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2019
+ * BlipHelper.
+ *
+ * @author Federico Berti
+ * @version Copyright 2019
  */
 public class BlipHelper {
 

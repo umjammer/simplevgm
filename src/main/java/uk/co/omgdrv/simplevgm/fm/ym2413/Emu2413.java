@@ -1,12 +1,29 @@
+/*
+ * Port of emu2413.c v0.61 -- YM2413 emulator
+ *
+ * written by Mitsutaka Okazaki
+ *
+ * zlib license
+ */
+
 package uk.co.omgdrv.simplevgm.fm.ym2413;
 
-import static java.lang.Math.*;
-import static uk.co.omgdrv.simplevgm.fm.ym2413.OPLL.OPLL_EG_STATE.*;
+import static java.lang.Math.PI;
+import static java.lang.Math.log;
+import static java.lang.Math.log10;
+import static java.lang.Math.min;
+import static java.lang.Math.pow;
+import static java.lang.Math.sin;
+import static uk.co.omgdrv.simplevgm.fm.ym2413.OPLL.OPLL_EG_STATE.ATTACK;
+import static uk.co.omgdrv.simplevgm.fm.ym2413.OPLL.OPLL_EG_STATE.DECAY;
+import static uk.co.omgdrv.simplevgm.fm.ym2413.OPLL.OPLL_EG_STATE.FINISH;
+import static uk.co.omgdrv.simplevgm.fm.ym2413.OPLL.OPLL_EG_STATE.RELEASE;
+import static uk.co.omgdrv.simplevgm.fm.ym2413.OPLL.OPLL_EG_STATE.SETTLE;
+import static uk.co.omgdrv.simplevgm.fm.ym2413.OPLL.OPLL_EG_STATE.SUSHOLD;
+import static uk.co.omgdrv.simplevgm.fm.ym2413.OPLL.OPLL_EG_STATE.SUSTINE;
 import static uk.co.omgdrv.simplevgm.fm.ym2413.OPLL.OPLL_PATCH;
 import static uk.co.omgdrv.simplevgm.fm.ym2413.OPLL.OPLL_SLOT;
 
-// Port of emu2413.c v0.61 -- YM2413 emulator written by Mitsutaka Okazaki
-// zlib license
 
 /**
  * Ported by the nintaco team: https://nintaco.com
@@ -18,7 +35,6 @@ import static uk.co.omgdrv.simplevgm.fm.ym2413.OPLL.OPLL_SLOT;
  * - update 2413 instruments
  * - adaptation work
  */
-
 public final class Emu2413 {
 
     //unused
@@ -44,12 +60,14 @@ public final class Emu2413 {
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     };
 
-    /* YM2413 TONES by Mitsutaka Okazaki
+    /**
+     * YM2413 TONES by Mitsutaka Okazaki
      * The following patches are referred from VRC7
      * - @5: Clarinet
      * - @7: Trumpet
      * - Drums: BD/SD/HH/TM/TC
-     * https://siliconpr0n.org/archive/doku.php?id=vendor:yamaha:opl2#opll_vrc7_patch_format
+     *
+     * @see "https://siliconpr0n.org/archive/doku.php?id=vendor:yamaha:opl2#opll_vrc7_patch_format"
      */
     public static final short[] ym2413_inst = {
             /* MULT  MULT modTL DcDmFb AR/DR AR/DR SL/RR SL/RR */
@@ -451,7 +469,7 @@ public final class Emu2413 {
 
     private static void makeDefaultPatch() {
         for (int i = 0; i < PATCHES; i++) {
-            OPLL_getDefaultPatch(i, new OPLL_PATCH[]{
+            OPLL_getDefaultPatch(i, new OPLL_PATCH[] {
                     default_patch[i * 2] = new OPLL_PATCH(),
                     default_patch[i * 2 + 1] = new OPLL_PATCH(),
             });

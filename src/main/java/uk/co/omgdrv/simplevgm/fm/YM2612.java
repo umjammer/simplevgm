@@ -2,15 +2,17 @@ package uk.co.omgdrv.simplevgm.fm;
 
 /**
  * Test port of Gens YM2612 core.
- * Stephan Dittrich, 2005
+ *
+ * @author Stephan Dittrich
+ * @version 2005
  */
-public final class YM2612 implements MdFmProvider
-{
+public final class YM2612 implements MdFmProvider {
+
     static final int NULL_RATE_SIZE = 32;
 
     // YM2612 Hardware
-    private final class cSlot
-    {
+    private final class cSlot {
+
         int[] DT;
         int MUL;
         int TL;
@@ -39,8 +41,8 @@ public final class YM2612 implements MdFmProvider
         int AMSon;
     }
 
-    private final class cChannel
-    {
+    private final class cChannel {
+
         final int[] S0_OUT = new int[4];
         int Old_OUTd;
         int OUTd;
@@ -56,14 +58,13 @@ public final class YM2612 implements MdFmProvider
         final cSlot[] SLOT = new cSlot[4];
         int FFlag;
 
-        public cChannel()
-        {
+        public cChannel() {
             for (int i = 0; i < 4; i++) SLOT[i] = new cSlot();
         }
     }
 
-    private final class cYM2612
-    {
+    private final class cYM2612 {
+
         int Clock;
         int Rate;
         int TimerBase;
@@ -84,8 +85,7 @@ public final class YM2612 implements MdFmProvider
         final cChannel[] CHANNEL = new cChannel[6];
         final int[][] REG = new int[2][0x100];
 
-        public cYM2612()
-        {
+        public cYM2612() {
             for (int i = 0; i < 6; i++) CHANNEL[i] = new cChannel();
         }
     }
@@ -232,8 +232,7 @@ public final class YM2612 implements MdFmProvider
     /**
      * Creates a new instance of YM2612
      */
-    public YM2612()
-    {
+    public YM2612() {
         for (int i = 0; i < 6; i++) YM2612_CHANNEL[i] = new cChannel();
     }
 
@@ -247,13 +246,11 @@ public final class YM2612 implements MdFmProvider
      * *********************************************
      */
 
-    static private double log10(double x)
-    {
+    static private double log10(double x) {
         return Math.log(x) / Math.log(10.0);
     }
 
-    public final void init(int Clock, int Rate)
-    {
+    public final void init(int Clock, int Rate) {
         int i, j;
         double x;
 
@@ -272,14 +269,10 @@ public final class YM2612 implements MdFmProvider
         // [0	  -	 4095] = +output  [4095	 - ...] = +output overflow (fill with 0)
         // [12288 - 16383] = -output  [16384 - ...] = -output overflow (fill with 0)
 
-        for (i = 0; i < TLLEN; i++)
-        {
-            if (i >= PG_CUT_OFF)
-            {
+        for (i = 0; i < TLLEN; i++) {
+            if (i >= PG_CUT_OFF) {
                 TL_TAB[TLLEN + i] = TL_TAB[i] = 0;
-            }
-            else
-            {
+            } else {
                 x = MAX_OUT;                // Max output
                 x /= Math.pow(10, (ENV_STEP * i) / 20);
                 TL_TAB[i] = (int) x;
@@ -294,8 +287,7 @@ public final class YM2612 implements MdFmProvider
         SIN_TAB[0] = PG_CUT_OFF;
         SIN_TAB[SINLEN / 2] = PG_CUT_OFF;
 
-        for (i = 1; i <= SINLEN / 4; i++)
-        {
+        for (i = 1; i <= SINLEN / 4; i++) {
             x = Math.sin(2.0 * PI * (double) (i) / (double) (SINLEN));    // Sinus
             x = 20 * log10(1 / x);                       // convert to dB
 
@@ -311,8 +303,7 @@ public final class YM2612 implements MdFmProvider
 
         // LFO Table (LFO wav) :
 
-        for (i = 0; i < LFOLEN; i++)
-        {
+        for (i = 0; i < LFOLEN; i++) {
             x = Math.sin(2.0 * PI * (double) (i) / (double) (LFOLEN));    // Sinus
             x += 1.0;
             x /= 2.0;
@@ -324,8 +315,7 @@ public final class YM2612 implements MdFmProvider
         }
 
 
-        for (i = 0; i < ENVLEN; i++)
-        {
+        for (i = 0; i < ENVLEN; i++) {
             x = Math.pow(((double) ((ENVLEN - 1) - i) / (double) (ENVLEN)), 8);
             x *= ENVLEN;
             ENV_TAB[i] = (int) x;
@@ -338,16 +328,14 @@ public final class YM2612 implements MdFmProvider
 
         // Table Decay and Decay
 
-        for (i = 0, j = ENVLEN - 1; i < ENVLEN; i++)
-        {
+        for (i = 0, j = ENVLEN - 1; i < ENVLEN; i++) {
             while (j != 0 && (ENV_TAB[j] < i)) j--;
             DECAY_TO_ATTACK[i] = j << ENV_LBITS;
         }
 
         // Sustain Level Table
 
-        for (i = 0; i < 15; i++)
-        {
+        for (i = 0; i < 15; i++) {
             x = i * 3;
             x /= ENV_STEP;
 
@@ -362,16 +350,12 @@ public final class YM2612 implements MdFmProvider
 
         //Frequency Step Table
 
-        for (i = 0; i < 2048; i++)
-        {
+        for (i = 0; i < 2048; i++) {
             x = (double) i * YM2612_Frequency;
 
-            if ((SIN_LBITS + SIN_HBITS - (21 - 7)) < 0)
-            {
+            if ((SIN_LBITS + SIN_HBITS - (21 - 7)) < 0) {
                 x /= (double) (1 << ((21 - 7) - SIN_LBITS - SIN_HBITS));
-            }
-            else
-            {
+            } else {
                 x *= (double) (1 << (SIN_LBITS + SIN_HBITS - (21 - 7)));
             }
             x /= 2.0;  // because MUL = value * 2
@@ -380,14 +364,12 @@ public final class YM2612 implements MdFmProvider
 
         // Attack & Decay Rate Table
 
-        for (i = 0; i < 4; i++)
-        {
+        for (i = 0; i < 4; i++) {
             AR_TAB[i] = 0;
             DR_TAB[i] = 0;
         }
 
-        for (i = 0; i < 60; i++)
-        {
+        for (i = 0; i < 60; i++) {
             x = YM2612_Frequency;
             x *= 1.0 + ((i & 3) * 0.25);          // bits 0-1 : x1.00, x1.25, x1.50, x1.75
             x *= (double) (1 << ((i >> 2)));        // bits 2-5 : shift bits (x2^0 - x2^15)
@@ -397,8 +379,7 @@ public final class YM2612 implements MdFmProvider
             DR_TAB[i + 4] = (int) (x / DR_RATE);   // (unsigned int) (x / DR_RATE);
         }
 
-        for (i = 64; i < 96; i++)
-        {
+        for (i = 64; i < 96; i++) {
             AR_TAB[i] = AR_TAB[63];
             DR_TAB[i] = DR_TAB[63];
             AR_TAB[i - 64 + AR_NULL_RATE] = 0;
@@ -406,16 +387,11 @@ public final class YM2612 implements MdFmProvider
         }
 
         // Detune Table
-        for (i = 0; i < 4; i++)
-        {
-            for (j = 0; j < 32; j++)
-            {
-                if ((SIN_LBITS + SIN_HBITS - 21) < 0)
-                {
+        for (i = 0; i < 4; i++) {
+            for (j = 0; j < 32; j++) {
+                if ((SIN_LBITS + SIN_HBITS - 21) < 0) {
                     x = (double) DT_DEF_TAB[(i << 5) + j] * YM2612_Frequency / (double) (1 << (21 - SIN_LBITS - SIN_HBITS));
-                }
-                else
-                {
+                } else {
                     x = (double) DT_DEF_TAB[(i << 5) + j] * YM2612_Frequency * (double) (1 << (SIN_LBITS + SIN_HBITS - 21));
                 }
                 DT_TAB[i + 0][j] = (int) x;
@@ -438,8 +414,7 @@ public final class YM2612 implements MdFmProvider
         reset();
     }
 
-    public final void reset()
-    {
+    public final void reset() {
         int i, j;
 
         YM2612_LFOcnt = 0;
@@ -455,8 +430,7 @@ public final class YM2612 implements MdFmProvider
 
         YM2612_Inter_Cnt = 0;
 
-        for (i = 0; i < 6; i++)
-        {
+        for (i = 0; i < 6; i++) {
             YM2612_CHANNEL[i].Old_OUTd = 0;
             YM2612_CHANNEL[i].OUTd = 0;
             YM2612_CHANNEL[i].LEFT = 0xFFFFFFFF;
@@ -466,8 +440,7 @@ public final class YM2612 implements MdFmProvider
             YM2612_CHANNEL[i].FMS = 0;
             YM2612_CHANNEL[i].AMS = 0;
 
-            for (j = 0; j < 4; j++)
-            {
+            for (j = 0; j < 4; j++) {
                 YM2612_CHANNEL[i].S0_OUT[j] = 0;
                 YM2612_CHANNEL[i].FNUM[j] = 0;
                 YM2612_CHANNEL[i].FOCT[j] = 0;
@@ -484,20 +457,17 @@ public final class YM2612 implements MdFmProvider
             }
         }
 
-        for (i = 0; i < 0x100; i++)
-        {
+        for (i = 0; i < 0x100; i++) {
             YM2612_REG[0][i] = -1;
             YM2612_REG[1][i] = -1;
         }
 
-        for (i = 0xB6; i >= 0xB4; i--)
-        {
+        for (i = 0xB6; i >= 0xB4; i--) {
             write0(i, 0xC0);
             write1(i, 0xC0);
         }
 
-        for (i = 0xB2; i >= 0x22; i--)
-        {
+        for (i = 0xB2; i >= 0x22; i--) {
             write0(i, 0);
             write1(i, 0);
         }
@@ -511,8 +481,7 @@ public final class YM2612 implements MdFmProvider
     }
 
 
-    public final int read()
-    {
+    public final int read() {
         return (YM2612_Status);
     }
 
@@ -559,15 +528,11 @@ public final class YM2612 implements MdFmProvider
         //DO NOTHING
     }
 
-    private final void write0(int addr, int data)
-    {
-        if (addr < 0x30)
-        {
+    private final void write0(int addr, int data) {
+        if (addr < 0x30) {
             YM2612_REG[0][addr] = data;
             setYM(addr, data);
-        }
-        else if (YM2612_REG[0][addr] != data)
-        {
+        } else if (YM2612_REG[0][addr] != data) {
             YM2612_REG[0][addr] = data;
 
             if (addr < 0xA0)
@@ -577,10 +542,8 @@ public final class YM2612 implements MdFmProvider
         }
     }
 
-    private final void write1(int addr, int data)
-    {
-        if (addr >= 0x30 && YM2612_REG[1][addr] != data)
-        {
+    private final void write1(int addr, int data) {
+        if (addr >= 0x30 && YM2612_REG[1][addr] != data) {
             YM2612_REG[1][addr] = data;
 
             if (addr < 0xA0)
@@ -590,24 +553,19 @@ public final class YM2612 implements MdFmProvider
         }
     }
 
-    public final void update(int[] buf_lr, int offset, int end)
-    {
+    public final void update(int[] buf_lr, int offset, int end) {
         offset *= 2;
         end = end * 2 + offset;
 
         if (YM2612_CHANNEL[0].SLOT[0].Finc == -1) calc_FINC_CH(YM2612_CHANNEL[0]);
         if (YM2612_CHANNEL[1].SLOT[0].Finc == -1) calc_FINC_CH(YM2612_CHANNEL[1]);
-        if (YM2612_CHANNEL[2].SLOT[0].Finc == -1)
-        {
-            if ((YM2612_Mode & 0x40) != 0)
-            {
+        if (YM2612_CHANNEL[2].SLOT[0].Finc == -1) {
+            if ((YM2612_Mode & 0x40) != 0) {
                 calc_FINC_SL((YM2612_CHANNEL[2].SLOT[S0]), FINC_TAB[YM2612_CHANNEL[2].FNUM[2]] >> (7 - YM2612_CHANNEL[2].FOCT[2]), YM2612_CHANNEL[2].KC[2]);
                 calc_FINC_SL((YM2612_CHANNEL[2].SLOT[S1]), FINC_TAB[YM2612_CHANNEL[2].FNUM[3]] >> (7 - YM2612_CHANNEL[2].FOCT[3]), YM2612_CHANNEL[2].KC[3]);
                 calc_FINC_SL((YM2612_CHANNEL[2].SLOT[S2]), FINC_TAB[YM2612_CHANNEL[2].FNUM[1]] >> (7 - YM2612_CHANNEL[2].FOCT[1]), YM2612_CHANNEL[2].KC[1]);
                 calc_FINC_SL((YM2612_CHANNEL[2].SLOT[S3]), FINC_TAB[YM2612_CHANNEL[2].FNUM[0]] >> (7 - YM2612_CHANNEL[2].FOCT[0]), YM2612_CHANNEL[2].KC[0]);
-            }
-            else
-            {
+            } else {
                 calc_FINC_CH(YM2612_CHANNEL[2]);
             }
         }
@@ -619,11 +577,9 @@ public final class YM2612 implements MdFmProvider
 //		  else algo_type = 16;
         int algo_type = 0;
 
-        if ((YM2612_LFOinc) != 0)
-        {
+        if ((YM2612_LFOinc) != 0) {
             // Precalculate LFO wave
-            for (int o = offset; o < end; o += 2)
-            {
+            for (int o = offset; o < end; o += 2) {
                 int i = o >> 1;
                 int j = ((YM2612_LFOcnt += YM2612_LFOinc) >> LFO_LBITS) & LFO_MSK;
 
@@ -645,28 +601,23 @@ public final class YM2612 implements MdFmProvider
         YM2612_Inter_Cnt = int_cnt;
     }
 
-    public final void synchronizeTimers(int length)
-    {
+    public final void synchronizeTimers(int length) {
         int i;
 
         i = YM2612_TimerBase * length;
 
-        if ((YM2612_Mode & 1) != 0)
-        {
+        if ((YM2612_Mode & 1) != 0) {
 //			  if((YM2612_TimerAcnt -= 14073) <= 0){	   // 13879=NTSC (old: 14475=NTSC  14586=PAL)
-            if ((YM2612_TimerAcnt -= i) <= 0)
-            {
+            if ((YM2612_TimerAcnt -= i) <= 0) {
                 YM2612_Status |= (YM2612_Mode & 0x04) >> 2;
                 YM2612_TimerAcnt += YM2612_TimerAL;
 
                 if ((YM2612_Mode & 0x80) != 0) CSM_Key_Control();
             }
         }
-        if ((YM2612_Mode & 2) != 0)
-        {
+        if ((YM2612_Mode & 2) != 0) {
 //			  if((YM2612_TimerBcnt -= 14073) <= 0){	   // 13879=NTSC (old: 14475=NTSC  14586=PAL)
-            if ((YM2612_TimerBcnt -= i) <= 0)
-            {
+            if ((YM2612_TimerBcnt -= i) <= 0) {
                 YM2612_Status |= (YM2612_Mode & 0x08) >> 2;
                 YM2612_TimerBcnt += YM2612_TimerBL;
             }
@@ -681,13 +632,11 @@ public final class YM2612 implements MdFmProvider
      * *********************************************
      */
 
-    private final void calc_FINC_SL(cSlot SL, int finc, int kc)
-    {
+    private final void calc_FINC_SL(cSlot SL, int finc, int kc) {
         int ksr;
         SL.Finc = (finc + SL.DT[kc]) * SL.MUL;
         ksr = kc >> SL.KSR_S;
-        if (SL.KSR != ksr)
-        {
+        if (SL.KSR != ksr) {
             SL.KSR = ksr;
             SL.EincA = AR_TAB[SL.AR + ksr];
             SL.EincD = DR_TAB[SL.DR + ksr];
@@ -695,16 +644,14 @@ public final class YM2612 implements MdFmProvider
             SL.EincR = DR_TAB[SL.RR + ksr];
             if (SL.Ecurp == ATTACK) SL.Einc = SL.EincA;
             else if (SL.Ecurp == DECAY) SL.Einc = SL.EincD;
-            else if (SL.Ecnt < ENV_END)
-            {
+            else if (SL.Ecnt < ENV_END) {
                 if (SL.Ecurp == SUSTAIN) SL.Einc = SL.EincS;
                 else if (SL.Ecurp == RELEASE) SL.Einc = SL.EincR;
             }
         }
     }
 
-    private final void calc_FINC_CH(cChannel CH)
-    {
+    private final void calc_FINC_CH(cChannel CH) {
         int finc, kc;
         finc = FINC_TAB[CH.FNUM[0]] >> (7 - CH.FOCT[0]);
         kc = CH.KC[0];
@@ -722,11 +669,9 @@ public final class YM2612 implements MdFmProvider
      * *********************************************
      */
 
-    private final void KEY_ON(cChannel CH, int nsl)
-    {
+    private final void KEY_ON(cChannel CH, int nsl) {
         cSlot SL = CH.SLOT[nsl];
-        if (SL.Ecurp == RELEASE)
-        {
+        if (SL.Ecurp == RELEASE) {
             SL.Fcnt = 0;
             // Fix Ecco 2 splash sound
             SL.Ecnt = (DECAY_TO_ATTACK[ENV_TAB[SL.Ecnt >> ENV_LBITS]] + ENV_ATTACK) & SL.ChgEnM;
@@ -737,13 +682,10 @@ public final class YM2612 implements MdFmProvider
         }
     }
 
-    private final void KEY_OFF(cChannel CH, int nsl)
-    {
+    private final void KEY_OFF(cChannel CH, int nsl) {
         cSlot SL = CH.SLOT[nsl];
-        if (SL.Ecurp != RELEASE)
-        {
-            if (SL.Ecnt < ENV_DECAY)
-            {
+        if (SL.Ecurp != RELEASE) {
+            if (SL.Ecnt < ENV_DECAY) {
                 SL.Ecnt = (ENV_TAB[SL.Ecnt >> ENV_LBITS] << ENV_LBITS) + ENV_DECAY;
             }
             SL.Einc = SL.EincR;
@@ -752,16 +694,14 @@ public final class YM2612 implements MdFmProvider
         }
     }
 
-    private final void CSM_Key_Control()
-    {
+    private final void CSM_Key_Control() {
         KEY_ON(YM2612_CHANNEL[2], 0);
         KEY_ON(YM2612_CHANNEL[2], 1);
         KEY_ON(YM2612_CHANNEL[2], 2);
         KEY_ON(YM2612_CHANNEL[2], 3);
     }
 
-    private final int setSlot(int address, int data)
-    {  // INT, UCHAR
+    private final int setSlot(int address, int data) {  // INT, UCHAR
         data &= 0xFF;    // unsign
         cChannel CH;
         cSlot SL;
@@ -775,8 +715,7 @@ public final class YM2612 implements MdFmProvider
         CH = YM2612_CHANNEL[nch];
         SL = CH.SLOT[nsl];
 
-        switch (address & 0xF0)
-        {
+        switch (address & 0xF0) {
             case 0x30:
                 if ((SL.MUL = (data & 0x0F)) != 0) SL.MUL <<= 1;
                 else SL.MUL = 1;
@@ -821,8 +760,7 @@ public final class YM2612 implements MdFmProvider
                 if ((SL.Ecurp == RELEASE) && (SL.Ecnt < ENV_END)) SL.Einc = SL.EincR;
                 break;
             case 0x90:
-                if (EnableSSGEG)
-                {
+                if (EnableSSGEG) {
                     if ((data & 0x08) != 0) SL.SEG = data & 0x0F;
                     else SL.SEG = 0;
                 }
@@ -831,16 +769,14 @@ public final class YM2612 implements MdFmProvider
         return 0;
     }
 
-    private final int setChannel(int address, int data)
-    {   // INT,UCHAR
+    private final int setChannel(int address, int data) {   // INT,UCHAR
         data &= 0xFF;        // unsign
         cChannel CH;
         int num;
 
         if ((num = address & 3) == 3) return 1;
 
-        switch (address & 0xFC)
-        {
+        switch (address & 0xFC) {
             case 0xA0:
                 if ((address & 0x100) != 0) num += 3;
                 CH = YM2612_CHANNEL[num];
@@ -857,8 +793,7 @@ public final class YM2612 implements MdFmProvider
                 CH.SLOT[0].Finc = -1;
                 break;
             case 0xA8:
-                if (address < 0x100)
-                {
+                if (address < 0x100) {
                     num++;
                     YM2612_CHANNEL[2].FNUM[num] = (YM2612_CHANNEL[2].FNUM[num] & 0x700) + data;
                     YM2612_CHANNEL[2].KC[num] = (YM2612_CHANNEL[2].FOCT[num] << 2) | FKEY_TAB[YM2612_CHANNEL[2].FNUM[num] >> 7];
@@ -866,8 +801,7 @@ public final class YM2612 implements MdFmProvider
                 }
                 break;
             case 0xAC:
-                if (address < 0x100)
-                {
+                if (address < 0x100) {
                     num++;
                     YM2612_CHANNEL[2].FNUM[num] = (YM2612_CHANNEL[2].FNUM[num] & 0x0FF) + ((data & 0x07) << 8);
                     YM2612_CHANNEL[2].FOCT[num] = (data & 0x38) >> 3;
@@ -878,8 +812,7 @@ public final class YM2612 implements MdFmProvider
             case 0xB0:
                 if ((address & 0x100) != 0) num += 3;
                 CH = YM2612_CHANNEL[num];
-                if (CH.ALGO != (data & 7))
-                {
+                if (CH.ALGO != (data & 7)) {
                     CH.ALGO = data & 7;
                     CH.SLOT[0].ChgEnM = 0;
                     CH.SLOT[1].ChgEnM = 0;
@@ -913,52 +846,43 @@ public final class YM2612 implements MdFmProvider
     }
 
 
-    private final int setYM(int address, int data)
-    {       // INT, UCHAR
+    private final int setYM(int address, int data) {       // INT, UCHAR
         cChannel CH;
         int nch;
 
-        switch (address)
-        {
+        switch (address) {
             case 0x22:
-                if ((data & 8) != 0)
-                {
+                if ((data & 8) != 0) {
                     // Cool Spot music 1, LFO modified severals time which
                     // distorts the sound, have to check that on a real genesis...
                     YM2612_LFOinc = LFO_INC_TAB[data & 7];
-                }
-                else
-                {
+                } else {
                     YM2612_LFOinc = YM2612_LFOcnt = 0;
                 }
                 break;
             case 0x24:
                 YM2612_TimerA = (YM2612_TimerA & 0x003) | (data << 2);
-                if (YM2612_TimerAL != ((1024 - YM2612_TimerA) << 12))
-                {
+                if (YM2612_TimerAL != ((1024 - YM2612_TimerA) << 12)) {
                     YM2612_TimerAcnt = YM2612_TimerAL = (1024 - YM2612_TimerA) << 12;
                 }
 //				  System.out.println("Timer AH: " + Integer.toHexString(YM2612_TimerA));
                 break;
             case 0x25:
                 YM2612_TimerA = (YM2612_TimerA & 0x3fc) | (data & 3);
-                if (YM2612_TimerAL != ((1024 - YM2612_TimerA) << 12))
-                {
+                if (YM2612_TimerAL != ((1024 - YM2612_TimerA) << 12)) {
                     YM2612_TimerAcnt = YM2612_TimerAL = (1024 - YM2612_TimerA) << 12;
                 }
 //				  System.out.println("Timer AL: " + Integer.toHexString(YM2612_TimerA));
                 break;
             case 0x26:
                 YM2612_TimerB = data;
-                if (YM2612_TimerBL != ((256 - YM2612_TimerB) << (4 + 12)))
-                {
+                if (YM2612_TimerBL != ((256 - YM2612_TimerB) << (4 + 12))) {
                     YM2612_TimerBcnt = YM2612_TimerBL = (256 - YM2612_TimerB) << (4 + 12);
                 }
 //				  System.out.println("Timer B : " + Integer.toHexString(YM2612_TimerB));
                 break;
             case 0x27:
-                if (((data ^ YM2612_Mode) & 0x40) != 0)
-                {
+                if (((data ^ YM2612_Mode) & 0x40) != 0) {
                     // We changed the channel 2 mode, so recalculate phase step
                     // This fix the punch sound in Street of Rage 2
                     YM2612_CHANNEL[2].SLOT[0].Finc = -1;    // recalculate phase step
@@ -997,73 +921,57 @@ public final class YM2612 implements MdFmProvider
      * *********************************************
      */
 
-    private final void Env_NULL_Next(cSlot SL)
-    {
+    private final void Env_NULL_Next(cSlot SL) {
     }
 
-    private final void Env_Attack_Next(cSlot SL)
-    {
+    private final void Env_Attack_Next(cSlot SL) {
         SL.Ecnt = ENV_DECAY;
         SL.Einc = SL.EincD;
         SL.Ecmp = SL.SLL;
         SL.Ecurp = DECAY;
     }
 
-    private final void Env_Decay_Next(cSlot SL)
-    {
+    private final void Env_Decay_Next(cSlot SL) {
         SL.Ecnt = SL.SLL;
         SL.Einc = SL.EincS;
         SL.Ecmp = ENV_END;
         SL.Ecurp = SUSTAIN;
     }
 
-    private final void Env_Sustain_Next(cSlot SL)
-    {
-        if (EnableSSGEG)
-        {
-            if ((SL.SEG & 8) != 0)
-            {
-                if ((SL.SEG & 1) != 0)
-                {
+    private final void Env_Sustain_Next(cSlot SL) {
+        if (EnableSSGEG) {
+            if ((SL.SEG & 8) != 0) {
+                if ((SL.SEG & 1) != 0) {
                     SL.Ecnt = ENV_END;
                     SL.Einc = 0;
                     SL.Ecmp = ENV_END + 1;
-                }
-                else
-                {
+                } else {
                     SL.Ecnt = 0;
                     SL.Einc = SL.EincA;
                     SL.Ecmp = ENV_DECAY;
                     SL.Ecurp = ATTACK;
                 }
                 SL.SEG ^= (SL.SEG & 2) << 1;
-            }
-            else
-            {
+            } else {
                 SL.Ecnt = ENV_END;
                 SL.Einc = 0;
                 SL.Ecmp = ENV_END + 1;
             }
-        }
-        else
-        {
+        } else {
             SL.Ecnt = ENV_END;
             SL.Einc = 0;
             SL.Ecmp = ENV_END + 1;
         }
     }
 
-    private final void Env_Release_Next(cSlot SL)
-    {
+    private final void Env_Release_Next(cSlot SL) {
         SL.Ecnt = ENV_END;
         SL.Einc = 0;
         SL.Ecmp = ENV_END + 1;
     }
 
-    private final void ENV_NEXT_EVENT(int which, cSlot SL)
-    {
-        switch (which)
-        {
+    private final void ENV_NEXT_EVENT(int which, cSlot SL) {
+        switch (which) {
             case 0:
                 Env_Attack_Next(SL);
                 return;
@@ -1080,14 +988,12 @@ public final class YM2612 implements MdFmProvider
         }
     }
 
-    private final void calcChannel(int ALGO, cChannel CH)
-    {
+    private final void calcChannel(int ALGO, cChannel CH) {
         // DO_FEEDBACK
         in0 += (CH.S0_OUT[0] + CH.S0_OUT[1]) >> CH.FB;
         CH.S0_OUT[1] = CH.S0_OUT[0];
         CH.S0_OUT[0] = TL_TAB[SIN_TAB[(in0 >> SIN_LBITS) & SIN_MSK] + en0];
-        switch (ALGO)
-        {
+        switch (ALGO) {
             case 0:
                 in1 += CH.S0_OUT[1];
                 in2 += TL_TAB[SIN_TAB[(in1 >> SIN_LBITS) & SIN_MSK] + en1];
@@ -1141,32 +1047,23 @@ public final class YM2612 implements MdFmProvider
         else if (CH.OUTd < -LIMIT_CH_OUT) CH.OUTd = -LIMIT_CH_OUT;
     }
 
-    private final void processChannel(cChannel CH, int[] buf_lr, int OFFSET, int END, int ALGO)
-    {
-        if (ALGO < 4)
-        {
+    private final void processChannel(cChannel CH, int[] buf_lr, int OFFSET, int END, int ALGO) {
+        if (ALGO < 4) {
             if (CH.SLOT[S3].Ecnt == ENV_END)
                 return;
-        }
-        else if (ALGO == 4)
-        {
+        } else if (ALGO == 4) {
             if ((CH.SLOT[S1].Ecnt == ENV_END) && (CH.SLOT[S3].Ecnt == ENV_END))
                 return;
-        }
-        else if (ALGO < 7)
-        {
+        } else if (ALGO < 7) {
             if ((CH.SLOT[S1].Ecnt == ENV_END) && (CH.SLOT[S2].Ecnt == ENV_END) && (CH.SLOT[S3].Ecnt == ENV_END))
                 return;
-        }
-        else
-        {
+        } else {
             if ((CH.SLOT[S0].Ecnt == ENV_END) && (CH.SLOT[S1].Ecnt == ENV_END) &&
                     (CH.SLOT[S2].Ecnt == ENV_END) && (CH.SLOT[S3].Ecnt == ENV_END))
                 return;
         }
 
-        do
-        {
+        do {
             // GET_CURRENT_PHASE
             in0 = CH.SLOT[S0].Fcnt;
             in1 = CH.SLOT[S1].Fcnt;
@@ -1178,45 +1075,33 @@ public final class YM2612 implements MdFmProvider
             CH.SLOT[S2].Fcnt += CH.SLOT[S2].Finc;
             CH.SLOT[S3].Fcnt += CH.SLOT[S3].Finc;
             // GET_CURRENT_ENV
-            if ((CH.SLOT[S0].SEG & 4) != 0)
-            {
+            if ((CH.SLOT[S0].SEG & 4) != 0) {
                 if ((en0 = ENV_TAB[(CH.SLOT[S0].Ecnt >> ENV_LBITS)] + CH.SLOT[S0].TLL) > ENV_MSK) en0 = 0;
                 else en0 ^= ENV_MSK;
-            }
-            else en0 = ENV_TAB[(CH.SLOT[S0].Ecnt >> ENV_LBITS)] + CH.SLOT[S0].TLL;
-            if ((CH.SLOT[S1].SEG & 4) != 0)
-            {
+            } else en0 = ENV_TAB[(CH.SLOT[S0].Ecnt >> ENV_LBITS)] + CH.SLOT[S0].TLL;
+            if ((CH.SLOT[S1].SEG & 4) != 0) {
                 if ((en1 = ENV_TAB[(CH.SLOT[S1].Ecnt >> ENV_LBITS)] + CH.SLOT[S1].TLL) > ENV_MSK) en1 = 0;
                 else en1 ^= ENV_MSK;
-            }
-            else en1 = ENV_TAB[(CH.SLOT[S1].Ecnt >> ENV_LBITS)] + CH.SLOT[S1].TLL;
-            if ((CH.SLOT[S2].SEG & 4) != 0)
-            {
+            } else en1 = ENV_TAB[(CH.SLOT[S1].Ecnt >> ENV_LBITS)] + CH.SLOT[S1].TLL;
+            if ((CH.SLOT[S2].SEG & 4) != 0) {
                 if ((en2 = ENV_TAB[(CH.SLOT[S2].Ecnt >> ENV_LBITS)] + CH.SLOT[S2].TLL) > ENV_MSK) en2 = 0;
                 else en2 ^= ENV_MSK;
-            }
-            else en2 = ENV_TAB[(CH.SLOT[S2].Ecnt >> ENV_LBITS)] + CH.SLOT[S2].TLL;
-            if ((CH.SLOT[S3].SEG & 4) != 0)
-            {
+            } else en2 = ENV_TAB[(CH.SLOT[S2].Ecnt >> ENV_LBITS)] + CH.SLOT[S2].TLL;
+            if ((CH.SLOT[S3].SEG & 4) != 0) {
                 if ((en3 = ENV_TAB[(CH.SLOT[S3].Ecnt >> ENV_LBITS)] + CH.SLOT[S3].TLL) > ENV_MSK) en3 = 0;
                 else en3 ^= ENV_MSK;
-            }
-            else en3 = ENV_TAB[(CH.SLOT[S3].Ecnt >> ENV_LBITS)] + CH.SLOT[S3].TLL;
+            } else en3 = ENV_TAB[(CH.SLOT[S3].Ecnt >> ENV_LBITS)] + CH.SLOT[S3].TLL;
             // UPDATE_ENV
-            if ((CH.SLOT[S0].Ecnt += CH.SLOT[S0].Einc) >= CH.SLOT[S0].Ecmp)
-            {
+            if ((CH.SLOT[S0].Ecnt += CH.SLOT[S0].Einc) >= CH.SLOT[S0].Ecmp) {
                 ENV_NEXT_EVENT(CH.SLOT[S0].Ecurp, CH.SLOT[S0]);
             }
-            if ((CH.SLOT[S1].Ecnt += CH.SLOT[S1].Einc) >= CH.SLOT[S1].Ecmp)
-            {
+            if ((CH.SLOT[S1].Ecnt += CH.SLOT[S1].Einc) >= CH.SLOT[S1].Ecmp) {
                 ENV_NEXT_EVENT(CH.SLOT[S1].Ecurp, CH.SLOT[S1]);
             }
-            if ((CH.SLOT[S2].Ecnt += CH.SLOT[S2].Einc) >= CH.SLOT[S2].Ecmp)
-            {
+            if ((CH.SLOT[S2].Ecnt += CH.SLOT[S2].Einc) >= CH.SLOT[S2].Ecmp) {
                 ENV_NEXT_EVENT(CH.SLOT[S2].Ecurp, CH.SLOT[S2]);
             }
-            if ((CH.SLOT[S3].Ecnt += CH.SLOT[S3].Einc) >= CH.SLOT[S3].Ecmp)
-            {
+            if ((CH.SLOT[S3].Ecnt += CH.SLOT[S3].Einc) >= CH.SLOT[S3].Ecmp) {
                 ENV_NEXT_EVENT(CH.SLOT[S3].Ecurp, CH.SLOT[S3]);
             }
             calcChannel(ALGO, CH);
@@ -1228,32 +1113,23 @@ public final class YM2612 implements MdFmProvider
         while (OFFSET < END);
     }
 
-    private final void processChannel_LFO(cChannel CH, int[] buf_lr, int OFFSET, int END, int ALGO)
-    {
-        if (ALGO < 4)
-        {
+    private final void processChannel_LFO(cChannel CH, int[] buf_lr, int OFFSET, int END, int ALGO) {
+        if (ALGO < 4) {
             if (CH.SLOT[S3].Ecnt == ENV_END)
                 return;
-        }
-        else if (ALGO == 4)
-        {
+        } else if (ALGO == 4) {
             if ((CH.SLOT[S1].Ecnt == ENV_END) && (CH.SLOT[S3].Ecnt == ENV_END))
                 return;
-        }
-        else if (ALGO < 7)
-        {
+        } else if (ALGO < 7) {
             if ((CH.SLOT[S1].Ecnt == ENV_END) && (CH.SLOT[S2].Ecnt == ENV_END) && (CH.SLOT[S3].Ecnt == ENV_END))
                 return;
-        }
-        else
-        {
+        } else {
             if ((CH.SLOT[S0].Ecnt == ENV_END) && (CH.SLOT[S1].Ecnt == ENV_END) &&
                     (CH.SLOT[S2].Ecnt == ENV_END) && (CH.SLOT[S3].Ecnt == ENV_END))
                 return;
         }
 
-        do
-        {
+        do {
             final int i = OFFSET >> 1;
 
             // GET_CURRENT_PHASE
@@ -1263,15 +1139,12 @@ public final class YM2612 implements MdFmProvider
             in3 = CH.SLOT[S3].Fcnt;
             // UPDATE_PHASE_LFO
             int freq_LFO = (CH.FMS * LFO_FREQ_UP[i]) >> (LFO_HBITS - 1);
-            if (freq_LFO != 0)
-            {
+            if (freq_LFO != 0) {
                 CH.SLOT[S0].Fcnt += CH.SLOT[S0].Finc + ((CH.SLOT[S0].Finc * freq_LFO) >> LFO_FMS_LBITS);
                 CH.SLOT[S1].Fcnt += CH.SLOT[S1].Finc + ((CH.SLOT[S1].Finc * freq_LFO) >> LFO_FMS_LBITS);
                 CH.SLOT[S2].Fcnt += CH.SLOT[S2].Finc + ((CH.SLOT[S2].Finc * freq_LFO) >> LFO_FMS_LBITS);
                 CH.SLOT[S3].Fcnt += CH.SLOT[S3].Finc + ((CH.SLOT[S3].Finc * freq_LFO) >> LFO_FMS_LBITS);
-            }
-            else
-            {
+            } else {
                 CH.SLOT[S0].Fcnt += CH.SLOT[S0].Finc;
                 CH.SLOT[S1].Fcnt += CH.SLOT[S1].Finc;
                 CH.SLOT[S2].Fcnt += CH.SLOT[S2].Finc;
@@ -1279,30 +1152,22 @@ public final class YM2612 implements MdFmProvider
             }
             // GET_CURRENT_ENV_LFO
             int env_LFO = LFO_ENV_UP[i];
-            if ((CH.SLOT[S0].SEG & 4) != 0)
-            {
+            if ((CH.SLOT[S0].SEG & 4) != 0) {
                 if ((en0 = ENV_TAB[(CH.SLOT[S0].Ecnt >> ENV_LBITS)] + CH.SLOT[S0].TLL) > ENV_MSK) en0 = 0;
                 else en0 = (en0 ^ ENV_MSK) + (env_LFO >> CH.SLOT[S0].AMS);
-            }
-            else en0 = ENV_TAB[(CH.SLOT[S0].Ecnt >> ENV_LBITS)] + CH.SLOT[S0].TLL + (env_LFO >> CH.SLOT[S0].AMS);
-            if ((CH.SLOT[S1].SEG & 4) != 0)
-            {
+            } else en0 = ENV_TAB[(CH.SLOT[S0].Ecnt >> ENV_LBITS)] + CH.SLOT[S0].TLL + (env_LFO >> CH.SLOT[S0].AMS);
+            if ((CH.SLOT[S1].SEG & 4) != 0) {
                 if ((en1 = ENV_TAB[(CH.SLOT[S1].Ecnt >> ENV_LBITS)] + CH.SLOT[S1].TLL) > ENV_MSK) en1 = 0;
                 else en1 = (en1 ^ ENV_MSK) + (env_LFO >> CH.SLOT[S1].AMS);
-            }
-            else en1 = ENV_TAB[(CH.SLOT[S1].Ecnt >> ENV_LBITS)] + CH.SLOT[S1].TLL + (env_LFO >> CH.SLOT[S1].AMS);
-            if ((CH.SLOT[S2].SEG & 4) != 0)
-            {
+            } else en1 = ENV_TAB[(CH.SLOT[S1].Ecnt >> ENV_LBITS)] + CH.SLOT[S1].TLL + (env_LFO >> CH.SLOT[S1].AMS);
+            if ((CH.SLOT[S2].SEG & 4) != 0) {
                 if ((en2 = ENV_TAB[(CH.SLOT[S2].Ecnt >> ENV_LBITS)] + CH.SLOT[S2].TLL) > ENV_MSK) en2 = 0;
                 else en2 = (en2 ^ ENV_MSK) + (env_LFO >> CH.SLOT[S2].AMS);
-            }
-            else en2 = ENV_TAB[(CH.SLOT[S2].Ecnt >> ENV_LBITS)] + CH.SLOT[S2].TLL + (env_LFO >> CH.SLOT[S2].AMS);
-            if ((CH.SLOT[S3].SEG & 4) != 0)
-            {
+            } else en2 = ENV_TAB[(CH.SLOT[S2].Ecnt >> ENV_LBITS)] + CH.SLOT[S2].TLL + (env_LFO >> CH.SLOT[S2].AMS);
+            if ((CH.SLOT[S3].SEG & 4) != 0) {
                 if ((en3 = ENV_TAB[(CH.SLOT[S3].Ecnt >> ENV_LBITS)] + CH.SLOT[S3].TLL) > ENV_MSK) en3 = 0;
                 else en3 = (en3 ^ ENV_MSK) + (env_LFO >> CH.SLOT[S3].AMS);
-            }
-            else
+            } else
                 en3 = ENV_TAB[(CH.SLOT[S3].Ecnt >> ENV_LBITS)] + CH.SLOT[S3].TLL + (env_LFO >> CH.SLOT[S3].AMS);
 
             // UPDATE_ENV
@@ -1330,14 +1195,10 @@ public final class YM2612 implements MdFmProvider
         while (OFFSET < END);
     }
 
-    private final void updateChannel(int ALGO, cChannel CH, int[] buf_lr, int OFFSET, int END)
-    {
-        if (ALGO < 8)
-        {
+    private final void updateChannel(int ALGO, cChannel CH, int[] buf_lr, int OFFSET, int END) {
+        if (ALGO < 8) {
             processChannel(CH, buf_lr, OFFSET, END, ALGO);
-        }
-        else
-        {
+        } else {
             processChannel_LFO(CH, buf_lr, OFFSET, END, ALGO - 8);
         }
     }

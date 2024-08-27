@@ -1,22 +1,30 @@
 package uk.co.omgdrv.simplevgm;
 
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.PsgCompare;
 import uk.co.omgdrv.simplevgm.util.Util;
 
-import java.io.IOException;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
- * ${FILE}
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2019
+ * Runner.
+ *
+ * @author Federico Berti
+ * @version Copyright 2019
  */
 public class Runner {
 
@@ -32,21 +40,21 @@ public class Runner {
         Path path = getPathToPlay(args);
         boolean isFolder = path.toFile().isDirectory();
         System.out.println(String.format("Playing %s: %s",
-                (isFolder ? "folder" : "file"), path.toAbsolutePath().toString()));
+                (isFolder ? "folder" : "file"), path.toAbsolutePath()));
         VgmPsgProvider psgProvider = runPsgCompare ? PsgCompare.createInstance() : null;
         VGMPlayer v = VGMPlayer.createInstance(psgProvider);
-        if(isFolder){
+        if (isFolder) {
             playRecursive(v, path);
         } else {
             playOne(v, path);
         }
     }
 
-    private static Path getPathToPlay(String[] args){
+    private static Path getPathToPlay(String[] args) {
         String s = VGM_FILE != null ? VGM_FILE : (VGM_FOLDER != null ? VGM_FOLDER : ".");
         Path p = Paths.get(s);
-        if(args.length > 0){
-             p = Paths.get(args[0]);
+        if (args.length > 0) {
+            p = Paths.get(args[0]);
         }
         return p;
     }
@@ -88,7 +96,7 @@ public class Runner {
         } while (v.isPlaying());
     }
 
-    private static FileVisitor<Path> createFileVisitor(Set<Path> fileSet){
+    private static FileVisitor<Path> createFileVisitor(Set<Path> fileSet) {
         return new FileVisitor<Path>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
@@ -97,7 +105,7 @@ public class Runner {
 
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-                if(vgmFilesPredicate.test(file)) {
+                if (vgmFilesPredicate.test(file)) {
                     fileSet.add(file);
                 }
                 return FileVisitResult.CONTINUE;

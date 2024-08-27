@@ -1,17 +1,31 @@
 package uk.co.omgdrv.simplevgm.model;
 
-import uk.co.omgdrv.simplevgm.util.Util;
-
 import java.util.Objects;
 
-import static uk.co.omgdrv.simplevgm.model.VgmHeader.Field.*;
+import uk.co.omgdrv.simplevgm.util.Util;
+
+import static uk.co.omgdrv.simplevgm.model.VgmHeader.Field.DATA_OFFSET;
+import static uk.co.omgdrv.simplevgm.model.VgmHeader.Field.EOF_OFFSET;
+import static uk.co.omgdrv.simplevgm.model.VgmHeader.Field.GD3_OFFSET;
+import static uk.co.omgdrv.simplevgm.model.VgmHeader.Field.IDENT;
+import static uk.co.omgdrv.simplevgm.model.VgmHeader.Field.LOOP_OFFSET;
+import static uk.co.omgdrv.simplevgm.model.VgmHeader.Field.LOOP_SAMPLES;
+import static uk.co.omgdrv.simplevgm.model.VgmHeader.Field.NUM_SAMPLES;
+import static uk.co.omgdrv.simplevgm.model.VgmHeader.Field.RATE;
+import static uk.co.omgdrv.simplevgm.model.VgmHeader.Field.SN76489_CLK;
+import static uk.co.omgdrv.simplevgm.model.VgmHeader.Field.SN76489_FB;
+import static uk.co.omgdrv.simplevgm.model.VgmHeader.Field.SN76489_FLAGS;
+import static uk.co.omgdrv.simplevgm.model.VgmHeader.Field.SN76489_SHIFT;
+import static uk.co.omgdrv.simplevgm.model.VgmHeader.Field.VERSION;
+import static uk.co.omgdrv.simplevgm.model.VgmHeader.Field.YM2413_CLK;
+import static uk.co.omgdrv.simplevgm.model.VgmHeader.Field.YM2612_CLK;
+
 
 /**
- * ${FILE}
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2019
+ * VgmHeader.
+ *
+ * @author Federico Berti
+ * @version Copyright 2019
  */
 public class VgmHeader {
 
@@ -40,11 +54,11 @@ public class VgmHeader {
         private int position;
         private int size;
 
-        Field(int pos){
+        Field(int pos) {
             this(pos, 4); //4bytes
         }
 
-        Field(int pos, int size){
+        Field(int pos, int size) {
             this.position = pos;
             this.size = size;
         }
@@ -95,20 +109,20 @@ public class VgmHeader {
         v.versionString = toVersionString(v.version);
         v.sn76489Clk = getIntValue(data, SN76489_CLK);
         v.ym2413Clk = getIntValue(data, YM2413_CLK);
-        v.gd3Offset =  getIntValue(data, GD3_OFFSET);
-        v.numSamples=  getIntValue(data, NUM_SAMPLES);
-        v.loopOffset=  getIntValue(data, LOOP_OFFSET);
+        v.gd3Offset = getIntValue(data, GD3_OFFSET);
+        v.numSamples = getIntValue(data, NUM_SAMPLES);
+        v.loopOffset = getIntValue(data, LOOP_OFFSET);
         v.loopOffset = v.loopOffset == 0 ? 0 : v.loopOffset + LOOP_OFFSET.getPosition();
-        v.loopSamples=  getIntValue(data, LOOP_SAMPLES);
-        v.rate=  getIntValue(data, RATE);
+        v.loopSamples = getIntValue(data, LOOP_SAMPLES);
+        v.rate = getIntValue(data, RATE);
         v.sn76489Fb = Util.getUInt32LE(data[SN76489_FB.getPosition()], data[SN76489_FB.getPosition() + 1]);
         v.sn76489Shift = Util.getUInt32LE(data[SN76489_SHIFT.getPosition()]);
         v.sn76489Flags = Util.getUInt32LE(data[SN76489_FLAGS.getPosition()]);
-        v.ym2612Clk=  getIntValue(data, YM2612_CLK);
-        if(v.ym2612Clk == 0 && v.version <= 0x101){
+        v.ym2612Clk = getIntValue(data, YM2612_CLK);
+        if (v.ym2612Clk == 0 && v.version <= 0x101) {
 //            v.ym2612Clk = v.ym2413Clk;
         }
-        v.dataOffset=  getIntValue(data, DATA_OFFSET);
+        v.dataOffset = getIntValue(data, DATA_OFFSET);
         v.dataOffset = v.dataOffset == 0 ? DEFAULT_DATA_OFFSET : v.dataOffset + DATA_OFFSET.getPosition();
         if (v.gd3Offset > 0) {
             v.gd3 = Gd3Tag.parseTag(data, v.gd3Offset + 0x14);
@@ -119,13 +133,13 @@ public class VgmHeader {
     public static String toVersionString(int version) {
         String major = Integer.toString((version >> 8) & 0xFF, 16);
         int minorVal = version & 0xFF;
-        String minor = (minorVal < 10 ? "0" : "" ) + Integer.toString(minorVal, 16);
+        String minor = (minorVal < 10 ? "0" : "") + Integer.toString(minorVal, 16);
         return major + "." + minor;
     }
 
-    private static int getIntValue(byte[] data, Field field){
-        if(field.size == 4) {
-            return  Util.getUInt32LE(data, field.getPosition());
+    private static int getIntValue(byte[] data, Field field) {
+        if (field.size == 4) {
+            return Util.getUInt32LE(data, field.getPosition());
         }
         return -1;
     }

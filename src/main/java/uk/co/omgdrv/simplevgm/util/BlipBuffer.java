@@ -1,68 +1,71 @@
-package uk.co.omgdrv.simplevgm.util;// Band-limited sound synthesis buffer
-// http://www.slack.net/~ant/
+/*
+ * Copyright (C) 2003-2007 Shay Green.
+ *
+ * This module is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This module is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this module; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
-/* Copyright (C) 2003-2007 Shay Green. This module is free software; you
-can redistribute it and/or modify it under the terms of the GNU Lesser
-General Public License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version. This
-module is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
-details. You should have received a copy of the GNU Lesser General Public
-License along with this module; if not, write to the Free Software Foundation,
-Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA */
+package uk.co.omgdrv.simplevgm.util;
 
-public final class BlipBuffer
-{
+/**
+ * Band-limited sound synthesis buffer
+ *
+ * @see "https://www.slack.net/~ant/"
+ */
+public final class BlipBuffer {
+
     static final boolean muchFaster = true; //false; // speeds synthesis at a cost of quality
 
-    public BlipBuffer()
-    {
+    public BlipBuffer() {
         setVolume(1.0);
     }
 
     // Sets sample rate of output and changes buffer length to msec
-    public void setSampleRate(int rate, int msec)
-    {
+    public void setSampleRate(int rate, int msec) {
         sampleRate = rate;
         buf = new int[(int) ((long) msec * rate / 1000) + 1024];
     }
 
     // Sets input clock rate. Must be set after sample rate.
-    public void setClockRate(int rate)
-    {
+    public void setClockRate(int rate) {
         clockRate_ = rate;
         factor = (int) (sampleRate / (float) clockRate_ * (1 << timeBits) + 0.5);
     }
 
     // Current clock rate
-    public int clockRate()
-    {
+    public int clockRate() {
         return clockRate_;
     }
 
     // Removes all samples from buffer
-    public void clear()
-    {
+    public void clear() {
         offset = 0;
         accum = 0;
         java.util.Arrays.fill(buf, 0, buf.length, 0);
     }
 
     // Sets overall volume, where 1.0 is normal
-    public void setVolume(double v)
-    {
+    public void setVolume(double v) {
         final int shift = 15;
         final int round = 1 << (shift - 1);
 
         volume = (int) ((1 << shift) * v + 0.5) & ~1;
 
-        if (!muchFaster)
-        {
+        if (!muchFaster) {
             // build new set of kernels
             int[][] nk = new int[phaseCount + 1][];
-            for (int i = nk.length; --i >= 0; )
-            {
+            for (int i = nk.length; --i >= 0; ) {
                 nk[i] = new int[halfWidth];
             }
 
@@ -71,11 +74,9 @@ public final class BlipBuffer
             final int mul = volume;
 
             final int pc = phaseCount;
-            for (int p = 17; --p >= 0; )
-            {
+            for (int p = 17; --p >= 0; ) {
                 int remain = mul;
-                for (int i = 8; --i >= 0; )
-                {
+                for (int i = 8; --i >= 0; ) {
                     remain -= (nk[p][i] = (baseKernel[p * halfWidth + i] * mul + round) >> shift);
                     remain -= (nk[pc - p][i] = (baseKernel[(pc - p) * halfWidth + i] * mul + round) >> shift);
                 }
@@ -100,22 +101,18 @@ public final class BlipBuffer
     }
 
     // Adds delta at given time
-    public void addDelta(int time, int delta)
-    {
+    public void addDelta(int time, int delta) {
         final int[] buf = this.buf;
         time = time * factor + offset;
         final int phase = (time) >>
                 (timeBits - phaseBits) & (phaseCount - 1);
         time >>= timeBits;
-        if (muchFaster)
-        {
+        if (muchFaster) {
             delta *= volume;
             int right = (delta >> phaseBits) * phase;
             buf[time] += delta - right;
             buf[time + 1] += right;
-        }
-        else
-        {
+        } else {
             // TODO: use smaller kernel
 
             // left half
@@ -144,23 +141,20 @@ public final class BlipBuffer
     }
 
     // Number of samples that would be available at time
-    public int countSamples(int time)
-    {
+    public int countSamples(int time) {
         int last_sample = (time * factor + offset) >> timeBits;
         int first_sample = offset >> timeBits;
         return last_sample - first_sample;
     }
 
     // Ends current time frame and makes samples available for reading
-    public void endFrame(int time)
-    {
+    public void endFrame(int time) {
         offset += time * factor;
         assert samplesAvail() < buf.length;
     }
 
     // Number of samples available to be read
-    public int samplesAvail()
-    {
+    public int samplesAvail() {
         return offset >> timeBits;
     }
 
@@ -244,14 +238,12 @@ public final class BlipBuffer
     int clockRate_;
     int volume;
 
-    void removeSilence(int count)
-    {
+    void removeSilence(int count) {
         offset -= count << timeBits;
         assert samplesAvail() >= 0;
     }
 
-    void removeSamples(int count)
-    {
+    void removeSamples(int count) {
         int remain = samplesAvail() - count + stepWidth;
         System.arraycopy(buf, count, buf, 0, remain);
         java.util.Arrays.fill(buf, remain, remain + count, 0);

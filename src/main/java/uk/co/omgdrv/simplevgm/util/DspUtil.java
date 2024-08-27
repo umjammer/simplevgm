@@ -5,12 +5,12 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+
 /**
- * ${FILE}
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2019
+ * DspUtil.
+ *
+ * @author Federico Berti
+ * @version Copyright 2019
  */
 public class DspUtil {
 

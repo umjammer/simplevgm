@@ -3,10 +3,11 @@ package uk.co.omgdrv.simplevgm.util;
 /**
  * StereoBuffer
  *
- * @Copyright Shay Greeen
- * @Copyright Federico Berti
+ * @author Shay Greeen
+ * @author Federico Berti
  */
 public final class StereoBuffer {
+
     private final BlipBuffer[] bufs = new BlipBuffer[3];
     private final String name;
 

@@ -1,23 +1,21 @@
 package uk.co.omgdrv.simplevgm.psg.nuked;
 
+import java.util.Arrays;
+
 import uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.PsgCompare;
 import uk.co.omgdrv.simplevgm.util.BlipBuffer;
 import uk.co.omgdrv.simplevgm.util.DspUtil;
 
-import java.util.Arrays;
 
 /**
- * ${FILE}
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2019
- * <p>
- * https://forums.nesdev.com/viewtopic.php?f=23&t=15562
+ * BlipNukedPsgProvider.
+ *
+ * @author Federico Berti
+ * @version Copyright 2019
+ * @see "https://forums.nesdev.com/viewtopic.php?f=23&t=15562"
  */
 public class BlipNukedPsgProvider extends NukedPsgProvider {
-
 
     private static int BLIP_BUFFER_SAMPLES_MS = 100;
     private static int BLIP_FACTOR = CLOCK_HZ / NUKED_PSG_SAMPLING_HZ;
@@ -67,7 +65,6 @@ public class BlipNukedPsgProvider extends NukedPsgProvider {
 //        return res;
         return false;
     }
-
 
     private void updateBlipSampleBuffer(double sample) {
         byte scaledDelta = DspUtil.scaleClamp8bit(sample - lastSample, DspUtil.PSG_MAX_VOLUME_8_BIT);

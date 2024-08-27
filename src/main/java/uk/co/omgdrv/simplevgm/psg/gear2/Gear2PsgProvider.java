@@ -4,12 +4,12 @@ import uk.co.omgdrv.simplevgm.psg.PsgCompare;
 import uk.co.omgdrv.simplevgm.psg.gear.GearPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.nuked.NukedPsgProvider;
 
+
 /**
- * ${FILE}
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2019
+ * Gear2PsgProvider.
+ *
+ * @author Federico Berti
+ * @version Copyright 2019
  */
 public class Gear2PsgProvider extends GearPsgProvider {
 

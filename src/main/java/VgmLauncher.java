@@ -1,11 +1,11 @@
 import uk.co.omgdrv.simplevgm.Runner;
 
+
 /**
  * VgmLauncher
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2020
+ *
+ * @author Federico Berti
+ * @version Copyright 2020
  */
 public class VgmLauncher {
 

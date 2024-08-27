@@ -1,16 +1,21 @@
+/*
+ * Port of emu2413.c v0.61 -- YM2413 emulator
+ *
+ * written by Mitsutaka Okazaki
+ *
+ * zlib license
+ */
+
 package uk.co.omgdrv.simplevgm.fm.ym2413;
 
 import java.io.Serializable;
 
-// Port of emu2413.c v0.61 -- YM2413 emulator written by Mitsutaka Okazaki
-// zlib license
 
 /**
  * Ported by the nintaco team: https://nintaco.com
  * Original C implementation: https://github.com/digital-sound-antiques/emu2413
- * <p>
- * ---
- * 2019-10-01 Federico Berti
+ *
+ * @version 2019-10-01 Federico Berti
  * - back-ported 0.63 changes: Support per-channel output
  * - update 2413 instruments
  * - adaptation work
@@ -134,6 +139,7 @@ public class OPLL implements Serializable {
 
     // Definition of envelope mode
     public interface OPLL_EG_STATE {
+
         int READY = 0;
         int ATTACK = 1;
         int DECAY = 2;

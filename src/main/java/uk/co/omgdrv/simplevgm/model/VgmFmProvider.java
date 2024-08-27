@@ -2,12 +2,12 @@ package uk.co.omgdrv.simplevgm.model;
 
 import uk.co.omgdrv.simplevgm.VgmEmu;
 
+
 /**
- * ${FILE}
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2019
+ * VgmFmProvider.
+ *
+ * @author Federico Berti
+ * @version Copyright 2019
  */
 public interface VgmFmProvider {
 

@@ -1,21 +1,27 @@
 package uk.co.omgdrv.simplevgm.model;
 
-import uk.co.omgdrv.simplevgm.util.Util;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static uk.co.omgdrv.simplevgm.model.Gd3Tag.Gd3String.*;
+import uk.co.omgdrv.simplevgm.util.Util;
+
+import static uk.co.omgdrv.simplevgm.model.Gd3Tag.Gd3String.AUTHOR_NAME;
+import static uk.co.omgdrv.simplevgm.model.Gd3Tag.Gd3String.GAME_NAME;
+import static uk.co.omgdrv.simplevgm.model.Gd3Tag.Gd3String.NOTES;
+import static uk.co.omgdrv.simplevgm.model.Gd3Tag.Gd3String.RELEASE_DATE;
+import static uk.co.omgdrv.simplevgm.model.Gd3Tag.Gd3String.SYSTEM_NAME;
+import static uk.co.omgdrv.simplevgm.model.Gd3Tag.Gd3String.TRACK_NAME;
+import static uk.co.omgdrv.simplevgm.model.Gd3Tag.Gd3String.VGM_CREATED_BY;
+
 
 /**
- * ${FILE}
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2019
+ * Gd3Tag.
+ *
+ * @author Federico Berti
+ * @version Copyright 2019
  */
 public class Gd3Tag {
 

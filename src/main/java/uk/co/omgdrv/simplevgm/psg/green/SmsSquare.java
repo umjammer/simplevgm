@@ -2,20 +2,19 @@ package uk.co.omgdrv.simplevgm.psg.green;
 
 import uk.co.omgdrv.simplevgm.util.BlipBuffer;
 
-public final class SmsSquare extends SmsOsc
-{
+
+public final class SmsSquare extends SmsOsc {
+
     int period;
     int phase;
 
-    void reset()
-    {
+    void reset() {
         period = 0;
         phase = 0;
         super.reset();
     }
 
-    void run(int time, int endTime)
-    {
+    void run(int time, int endTime) {
         final int period = this.period;
 
         int amp = volume;
@@ -24,8 +23,7 @@ public final class SmsSquare extends SmsOsc
 
         {
             int delta = amp - lastAmp;
-            if (delta != 0)
-            {
+            if (delta != 0) {
                 lastAmp = amp;
                 output.addDelta(time, delta * masterVolume);
             }
@@ -33,23 +31,18 @@ public final class SmsSquare extends SmsOsc
 
         time += delay;
         delay = 0;
-        if (period != 0)
-        {
-            if (time < endTime)
-            {
+        if (period != 0) {
+            if (time < endTime) {
                 if (volume == 0 || period <= 128) // ignore 16kHz and higher
                 {
                     // keep calculating phase
                     int count = (endTime - time + period - 1) / period;
                     phase = (phase + count) & 1;
                     time += count * period;
-                }
-                else
-                {
+                } else {
                     final BlipBuffer output = this.output;
                     int delta = (amp - volume) * (2 * masterVolume);
-                    do
-                    {
+                    do {
                         output.addDelta(time, delta = -delta);
                     }
                     while ((time += period) < endTime);

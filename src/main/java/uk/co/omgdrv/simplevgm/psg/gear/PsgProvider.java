@@ -2,12 +2,12 @@ package uk.co.omgdrv.simplevgm.psg.gear;
 
 import uk.co.omgdrv.simplevgm.psg.nuked.NukedPsgProvider;
 
+
 /**
- * ${FILE}
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2018
+ * PsgProvider.
+ *
+ * @author Federico Berti
+ * @version Copyright 2018
  */
 public interface PsgProvider {
 

@@ -1,12 +1,3 @@
-package uk.co.omgdrv.simplevgm.psg.nuked;
-
-/**
- * ${FILE}
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2019
- */
 //
 // Copyright (C) 2018 Alexey Khokholov (Nuke.YKT)
 //
@@ -27,6 +18,15 @@ package uk.co.omgdrv.simplevgm.psg.nuked;
 //
 // version: 1.0.1
 //
+
+package uk.co.omgdrv.simplevgm.psg.nuked;
+
+/**
+ * PsgYm7101Impl.
+ *
+ * @author Federico Berti
+ * @version Copyright 2019
+ */
 public class PsgYm7101Impl implements PsgYm7101 {
 
     //TODO change this from [1;0] to [1;-1] or something
@@ -38,7 +38,6 @@ public class PsgYm7101Impl implements PsgYm7101 {
     static int[] psg_debug_chan = {
             0, 2, 1, 3
     };
-
 
     @Override
     public void PSG_Reset(PsgYm7101.PsgContext chip) {

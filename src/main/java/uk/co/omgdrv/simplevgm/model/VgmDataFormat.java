@@ -1,13 +1,13 @@
 package uk.co.omgdrv.simplevgm.model;
 
 /**
- * ${FILE}
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2019
+ * VgmDataFormat.
+ *
+ * @author Federico Berti
+ * @version Copyright 2019
  */
 public class VgmDataFormat {
+
     public static final int CMD_GG_STEREO = 0x4F;
     public static final int CMD_PSG = 0x50;
     public static final int CMD_YM2413_PORT = 0x51;

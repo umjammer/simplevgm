@@ -3,12 +3,12 @@ package uk.co.omgdrv.simplevgm.psg.gear;
 import uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.PsgCompare;
 
+
 /**
- * ${FILE}
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2019
+ * GearPsgProvider.
+ *
+ * @author Federico Berti
+ * @version Copyright 2019
  */
 public class GearPsgProvider extends BaseVgmPsgProvider {
 

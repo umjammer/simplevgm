@@ -1,18 +1,22 @@
+/*
+ * Copyright (C) 2003-2007 Shay Green.
+ *
+ * This module is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This module is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this module; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package uk.co.omgdrv.simplevgm;
-
-// Sega Master System, BBC Micro VGM music file emulator
-// http://www.slack.net/~ant/
-
-/* Copyright (C) 2003-2007 Shay Green. This module is free software; you
-can redistribute it and/or modify it under the terms of the GNU Lesser
-General Public License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version. This
-module is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
-details. You should have received a copy of the GNU Lesser General Public
-License along with this module; if not, write to the Free Software Foundation,
-Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA */
 
 import uk.co.omgdrv.simplevgm.fm.MdFmProvider;
 import uk.co.omgdrv.simplevgm.fm.YM2612;
@@ -23,8 +27,28 @@ import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.green.SmsApu;
 import uk.co.omgdrv.simplevgm.util.Util;
 
-import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.*;
+import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_DATA_BLOCK;
+import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_DELAY;
+import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_DELAY_735;
+import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_DELAY_882;
+import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_END;
+import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_GG_STEREO;
+import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_PCM_DELAY;
+import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_PCM_SEEK;
+import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_PSG;
+import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_SHORT_DELAY;
+import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_YM2413_PORT;
+import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_YM2612_PORT0;
+import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_YM2612_PORT1;
+import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.PCM_BLOCK_TYPE;
+import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.YM2612_DAC_PORT;
 
+
+/**
+ * Sega Master System, BBC Micro VGM music file emulator
+ *
+ * @see "https://www.slack.net/~ant/"
+ */
 public final class VgmEmu extends ClassicEmu {
 
     public static final int VGM_SAMPLE_RATE_HZ = 44100;
@@ -32,7 +56,7 @@ public final class VgmEmu extends ClassicEmu {
 
     public static VgmEmu createInstance(VgmPsgProvider apu, VgmFmProvider fm) {
         VgmEmu emu = new VgmEmu();
-        if(apu != null) {
+        if (apu != null) {
             emu.psg = apu;
         }
         if (fm != null) {
@@ -42,14 +66,13 @@ public final class VgmEmu extends ClassicEmu {
     }
 
     // TODO: use custom noise taps if present
-    protected int parseHeader(byte[] data)
-    {
+    protected int parseHeader(byte[] data) {
         vgmHeader = VgmHeader.loadHeader(data);
-        if(!VgmHeader.VGM_MAGIC_WORD.equals(vgmHeader.getIdent())) {
+        if (!VgmHeader.VGM_MAGIC_WORD.equals(vgmHeader.getIdent())) {
             throw new IllegalArgumentException("Unexpected magic word: " + vgmHeader.getIdent());
         }
-        if(vgmHeader.getVersion() > VgmHeader.VGM_VERSION){
-            System.out.println("VGM version "+vgmHeader.getVersionString()+" ( > 1.50) not supported, " +
+        if (vgmHeader.getVersion() > VgmHeader.VGM_VERSION) {
+            System.out.println("VGM version " + vgmHeader.getVersionString() + " ( > 1.50) not supported, " +
                     "cant guarantee correct playback");
         }
 
@@ -69,14 +92,11 @@ public final class VgmEmu extends ClassicEmu {
 
         // FM clock rate
         fm_clock_rate = vgmHeader.getYm2612Clk();
-        if (fm_clock_rate > 0)
-        {
+        if (fm_clock_rate > 0) {
             fm = fm == VgmFmProvider.NO_SOUND ? new YM2612() : fm;
             buf.setVolume(0.7);
             fm.init(fm_clock_rate, sampleRate());
-        }
-        else
-        {
+        } else {
             fm_clock_rate = vgmHeader.getYm2413Clk();
             if (fm_clock_rate > 0) {
                 fm = new Ym2413Provider();
@@ -97,7 +117,7 @@ public final class VgmEmu extends ClassicEmu {
 // private
 
     static final int vgmRate = VGM_SAMPLE_RATE_HZ;
-    static final double vgmSamplesPerMs = vgmRate/1000d;
+    static final double vgmSamplesPerMs = vgmRate / 1000d;
     static final int psgTimeBits = 12;
     static final int psgTimeUnit = 1 << psgTimeBits;
 
@@ -118,8 +138,7 @@ public final class VgmEmu extends ClassicEmu {
     int dac_amp;
     boolean loopFlag;
 
-    public void startTrack(int track)
-    {
+    public void startTrack(int track) {
         super.startTrack(track);
         setFade();
         delay = 0;
@@ -138,8 +157,7 @@ public final class VgmEmu extends ClassicEmu {
         setFade(lengthSec - FADE_LENGTH_SEC, FADE_LENGTH_SEC);
     }
 
-    private int toPSGTime(int vgmTime)
-    {
+    private int toPSGTime(int vgmTime) {
         if (psg instanceof SmsApu) {
             return toPSGTimeGreen(vgmTime);
         }
@@ -151,23 +169,19 @@ public final class VgmEmu extends ClassicEmu {
         return (vgmTime * psgFactor + psgTimeUnit / 2) >> psgTimeBits;
     }
 
-    private int toFMTime(int vgmTime)
-    {
+    private int toFMTime(int vgmTime) {
         return countSamples(toPSGTimeGreen(vgmTime));
     }
 
-    private void runFM(int vgmTime)
-    {
+    private void runFM(int vgmTime) {
         int count = toFMTime(vgmTime) - fm_pos;
-        if (count > 0)
-        {
+        if (count > 0) {
             fm.update(fm_buf_lr, fm_pos, count);
             fm_pos += count;
         }
     }
 
-    private void write_pcm(int vgmTime, int amp)
-    {
+    private void write_pcm(int vgmTime, int amp) {
         int blip_time = toPSGTime(vgmTime);
         int old = dac_amp;
         int delta = amp - old;
@@ -181,8 +195,7 @@ public final class VgmEmu extends ClassicEmu {
     private static boolean endlessLoopFlag = true;
     private long sampleCounter = 0;
 
-    protected int runMsec(int msec)
-    {
+    protected int runMsec(int msec) {
 
         final int duration = (int) (vgmSamplesPerMs * msec);
 
@@ -195,13 +208,11 @@ public final class VgmEmu extends ClassicEmu {
 
         int time = delay;
         boolean endOfStream = false;
-        while (time < duration && !endOfStream)
-        {
+        while (time < duration && !endOfStream) {
             int cmd = CMD_END;
             if (pos < data.length)
                 cmd = data[pos++] & 0xFF;
-            switch (cmd)
-            {
+            switch (cmd) {
                 case CMD_END:
                     //TODO fix sample counting
 //                    System.out.println("End command after samples: " + sampleCounter);
@@ -301,11 +312,9 @@ public final class VgmEmu extends ClassicEmu {
         int endTime = toPSGTime(duration);
         delay = time - duration;
         psg.endFrame(endTime);
-        if (pos >= data.length || endOfStream)
-        {
+        if (pos >= data.length || endOfStream) {
             setTrackEnded();
-            if (pos > data.length)
-            {
+            if (pos > data.length) {
                 pos = data.length;
                 logError(); // went past end
             }
@@ -356,13 +365,11 @@ public final class VgmEmu extends ClassicEmu {
     }
 
 
-    protected void mixSamples(byte[] out, int out_off, int count)
-    {
+    protected void mixSamples(byte[] out, int out_off, int count) {
         out_off *= 2;
         int in_off = fm_pos;
 
-        while (--count >= 0)
-        {
+        while (--count >= 0) {
             int s = (out[out_off] << 8) + (out[out_off + 1] & 0xFF);
             s = (s >> 2) + fm_buf_lr[in_off];
             in_off++;

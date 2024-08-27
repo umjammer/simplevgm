@@ -2,12 +2,12 @@ package uk.co.omgdrv.simplevgm.model;
 
 import uk.co.omgdrv.simplevgm.util.BlipBuffer;
 
+
 /**
- * ${FILE}
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2019
+ * VgmPsgProvider.
+ *
+ * @author Federico Berti
+ * @version Copyright 2019
  */
 public interface VgmPsgProvider {
 

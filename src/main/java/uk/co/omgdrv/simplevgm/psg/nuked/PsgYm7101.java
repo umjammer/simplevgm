@@ -1,15 +1,15 @@
 package uk.co.omgdrv.simplevgm.psg.nuked;
 
 /**
- * ${FILE}
- * <p>
- * Federico Berti
- * <p>
- * Copyright 2019
+ * PsgYm7101.
+ *
+ * @author Federico Berti
+ * @version Copyright 2019
  */
 public interface PsgYm7101 {
 
     class PsgContext {
+
         int latch;
         int[] volume = new int[4];
         int[] output = new int[4];
