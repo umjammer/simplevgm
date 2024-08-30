@@ -1,12 +1,16 @@
 package uk.co.omgdrv.simplevgm.util;
 
 import java.io.IOException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.lang.System.getLogger;
 
 
 /**
@@ -17,8 +21,10 @@ import java.util.List;
  */
 public class BlipHelper {
 
-    static Path file = Paths.get(".", System.currentTimeMillis() + ".raw");
-    static boolean writeToFile = true;
+    private static final Logger logger = getLogger(BlipHelper.class.getName());
+
+    static final Path file = Paths.get(".", System.currentTimeMillis() + ".raw");
+    static final boolean writeToFile = true;
 
     /**
      * out[0] = MSB LEFT
@@ -44,7 +50,7 @@ public class BlipHelper {
             try {
                 Files.write(file, lines, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.log(Level.ERROR, e.getMessage(), e);
             }
         }
     }

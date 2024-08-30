@@ -30,12 +30,12 @@ package uk.co.omgdrv.simplevgm.psg.nuked;
 public class PsgYm7101Impl implements PsgYm7101 {
 
     //TODO change this from [1;0] to [1;-1] or something
-    static double[] psg_vol = {
+    static final double[] psg_vol = {
             1.0, 0.772, 0.622, 0.485, 0.382, 0.29, 0.229, 0.174,
             0.132, 0.096, 0.072, 0.051, 0.034, 0.019, 0.009, 0.0, -1.059
     };
 
-    static int[] psg_debug_chan = {
+    static final int[] psg_debug_chan = {
             0, 2, 1, 3
     };
 
@@ -106,7 +106,7 @@ public class PsgYm7101Impl implements PsgYm7101 {
         }
     }
 
-    private void PSG_UpdateSample(PsgContext chip) {
+    private static void PSG_UpdateSample(PsgContext chip) {
         int i;
         if ((chip.debug & 0x01) > 0) {
             chip.output[0] = chip.volume[0];

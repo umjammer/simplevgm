@@ -51,8 +51,8 @@ public class VgmHeader {
         DATA_OFFSET(52),
         ;
 
-        private int position;
-        private int size;
+        private final int position;
+        private final int size;
 
         Field(int pos) {
             this(pos, 4); //4bytes

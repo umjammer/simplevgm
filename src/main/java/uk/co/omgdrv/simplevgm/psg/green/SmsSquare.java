@@ -8,6 +8,7 @@ public final class SmsSquare extends SmsOsc {
     int period;
     int phase;
 
+    @Override
     void reset() {
         period = 0;
         phase = 0;
@@ -15,7 +16,7 @@ public final class SmsSquare extends SmsOsc {
     }
 
     void run(int time, int endTime) {
-        final int period = this.period;
+        int period = this.period;
 
         int amp = volume;
         if (period > 128)
@@ -40,7 +41,7 @@ public final class SmsSquare extends SmsOsc {
                     phase = (phase + count) & 1;
                     time += count * period;
                 } else {
-                    final BlipBuffer output = this.output;
+                    BlipBuffer output = this.output;
                     int delta = (amp - volume) * (2 * masterVolume);
                     do {
                         output.addDelta(time, delta = -delta);

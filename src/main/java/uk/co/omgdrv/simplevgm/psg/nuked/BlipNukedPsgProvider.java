@@ -17,18 +17,18 @@ import uk.co.omgdrv.simplevgm.util.DspUtil;
  */
 public class BlipNukedPsgProvider extends NukedPsgProvider {
 
-    private static int BLIP_BUFFER_SAMPLES_MS = 100;
-    private static int BLIP_FACTOR = CLOCK_HZ / NUKED_PSG_SAMPLING_HZ;
-    private static int BLIP_BUFFER_SAMPLES_CLOCKS = (int) (CLOCK_HZ * (BLIP_BUFFER_SAMPLES_MS / 1000d));
-    private static int BLIP_BUFFER_SAMPLES_END_FRAME = BLIP_BUFFER_SAMPLES_CLOCKS / BLIP_FACTOR;
-    private static int BLIP_BUFFER_SIZE = BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ / (1000 / BLIP_BUFFER_SAMPLES_MS);
+    private static final int BLIP_BUFFER_SAMPLES_MS = 100;
+    private static final int BLIP_FACTOR = CLOCK_HZ / NUKED_PSG_SAMPLING_HZ;
+    private static final int BLIP_BUFFER_SAMPLES_CLOCKS = (int) (CLOCK_HZ * (BLIP_BUFFER_SAMPLES_MS / 1000d));
+    private static final int BLIP_BUFFER_SAMPLES_END_FRAME = BLIP_BUFFER_SAMPLES_CLOCKS / BLIP_FACTOR;
+    private static final int BLIP_BUFFER_SIZE = BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ / (1000 / BLIP_BUFFER_SAMPLES_MS);
 
 
-    private BlipBuffer blipBuffer;
+    private final BlipBuffer blipBuffer;
     private int blipSampleCounter;
     private double lastSample;
-    private byte[] bufferSamples = new byte[BLIP_BUFFER_SIZE];
-    private byte[] bufferSamples16 = new byte[BLIP_BUFFER_SIZE * 2];
+    private final byte[] bufferSamples = new byte[BLIP_BUFFER_SIZE];
+    private final byte[] bufferSamples16 = new byte[BLIP_BUFFER_SIZE * 2];
 
     protected PsgCompare psgCompare;
 
@@ -57,7 +57,7 @@ public class BlipNukedPsgProvider extends NukedPsgProvider {
 
     @Override
     protected boolean updateSampleBuffer() {
-//        //TODO wrong??
+//        // TODO wrong??
 //        boolean res = super.updateSampleBuffer();
 //        if (res) {
 //            updateBlipSampleBuffer(rawSample);

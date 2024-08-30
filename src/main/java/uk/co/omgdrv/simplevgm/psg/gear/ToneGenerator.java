@@ -57,7 +57,7 @@ public final class ToneGenerator {
     /**
      * PSG cycles per sample.
      */
-    private double psgCycles;
+    private final double psgCycles;
 
     /**
      * Channel enabled.

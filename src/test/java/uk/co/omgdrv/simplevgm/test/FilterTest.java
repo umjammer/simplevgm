@@ -25,11 +25,11 @@ public class FilterTest {
     static double[] filterBuffer = new double[0];
     static double[] filterBuffer2 = new double[0];
     static float[] outFloat = new float[BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ];
-    static double[] outBuffer = new double[BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ];
+    static final double[] outBuffer = new double[BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ];
     static int[] outInt = new int[BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ];
     static double RATIO = 0;
 
-    static String rawDataNameDouble = "data.raw";
+    static final String rawDataNameDouble = "data.raw";
 
     public static void main(String[] args) throws IOException {
         double[] rawBuffer = getFileContents();

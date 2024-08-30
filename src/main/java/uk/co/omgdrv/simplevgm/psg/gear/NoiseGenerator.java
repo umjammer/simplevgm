@@ -74,7 +74,7 @@ public final class NoiseGenerator {
     /**
      * PSG Cycles Per Sample.
      */
-    private double psgCycles;
+    private final double psgCycles;
 
     /**
      * Channel Enabled.
@@ -96,7 +96,7 @@ public final class NoiseGenerator {
     /**
      * Pointer to Channel 2 / Tone Generator 3.
      */
-    private ToneGenerator chan2;
+    private final ToneGenerator chan2;
 
     /**
      * Use Channel 2's Frequency.

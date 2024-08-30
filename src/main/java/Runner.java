@@ -1,5 +1,3 @@
-package uk.co.omgdrv.simplevgm;
-
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
@@ -13,8 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
+import uk.co.omgdrv.simplevgm.VGMPlayer;
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.PsgCompare;
 import uk.co.omgdrv.simplevgm.util.Util;
@@ -39,8 +37,8 @@ public class Runner {
     public static void main(String[] args) throws Exception {
         Path path = getPathToPlay(args);
         boolean isFolder = path.toFile().isDirectory();
-        System.out.println(String.format("Playing %s: %s",
-                (isFolder ? "folder" : "file"), path.toAbsolutePath()));
+        System.out.printf("Playing %s: %s%n",
+                (isFolder ? "folder" : "file"), path.toAbsolutePath());
         VgmPsgProvider psgProvider = runPsgCompare ? PsgCompare.createInstance() : null;
         VGMPlayer v = VGMPlayer.createInstance(psgProvider);
         if (isFolder) {
@@ -68,19 +66,19 @@ public class Runner {
         return list;
     }
 
-    private void playAll(VGMPlayer v, String folderName) throws Exception {
+    private static void playAll(VGMPlayer v, String folderName) throws Exception {
         Path folder = Paths.get(".", folderName);
-        List<Path> files = Files.list(folder).filter(vgmFilesPredicate).sorted().collect(Collectors.toList());
-        files.stream().forEach(f -> playOne(v, f));
+        List<Path> files = Files.list(folder).filter(vgmFilesPredicate).sorted().toList();
+        files.forEach(f -> playOne(v, f));
     }
 
     public static void playRecursive(VGMPlayer v, Path folder) throws Exception {
-        getRecursiveVgmFiles(folder).stream().forEach(f -> playOne(v, f));
+        getRecursiveVgmFiles(folder).forEach(f -> playOne(v, f));
     }
 
     private static void playOne(VGMPlayer v, Path file) {
         try {
-            System.out.println("Playing: " + file.toAbsolutePath().toString());
+            System.out.println("Playing: " + file.toAbsolutePath());
             v.loadFile(file.toAbsolutePath().toString());
             v.startTrack(0);
             waitForCompletion(v);
@@ -97,7 +95,7 @@ public class Runner {
     }
 
     private static FileVisitor<Path> createFileVisitor(Set<Path> fileSet) {
-        return new FileVisitor<Path>() {
+        return new FileVisitor<>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
                 return FileVisitResult.CONTINUE;

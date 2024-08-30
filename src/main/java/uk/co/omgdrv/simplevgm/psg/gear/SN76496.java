@@ -39,22 +39,22 @@ public final class SN76496 implements PsgProvider {
     /**
      * Tone Generator 1.
      */
-    private ToneGenerator chan0;
+    private final ToneGenerator chan0;
 
     /**
      * Tone Generator 2.
      */
-    private ToneGenerator chan1;
+    private final ToneGenerator chan1;
 
     /**
      * Tone Generator 3.
      */
-    private ToneGenerator chan2;
+    private final ToneGenerator chan2;
 
     /**
      * Noise Generator.
      */
-    private NoiseGenerator chan3;
+    private final NoiseGenerator chan3;
 
     /**
      * Pointer to current Tone Generator.
@@ -69,12 +69,12 @@ public final class SN76496 implements PsgProvider {
     /**
      * PSG Clock Speed.
      */
-    private double clockSpeed;
+    private final double clockSpeed;
 
     /**
      * Output Sample Rate.
      */
-    private int sampleRate;
+    private final int sampleRate;
 
     /**
      * Samples to Generate per video frame.
@@ -91,7 +91,7 @@ public final class SN76496 implements PsgProvider {
      */
     private boolean recording;
 
-    private AudioFormat audioFormat;
+    private final AudioFormat audioFormat;
 
     /**
      * SN76496 Constructor.
@@ -122,6 +122,7 @@ public final class SN76496 implements PsgProvider {
     /**
      * Reset SN76496 to Default Values.
      */
+    @Override
     public void reset() {
         currentGenerator = chan0;
         chan0.reset();
@@ -186,6 +187,7 @@ public final class SN76496 implements PsgProvider {
      *
      * @param value Value to write (0-0xFF)
      */
+    @Override
     public void write(int value) {
         if ((!enabled) && (!isRecording())) {
             return;
@@ -276,6 +278,7 @@ public final class SN76496 implements PsgProvider {
     /**
      * Convert PSG settings to Java Sound.
      */
+    @Override
     public void output(byte[] buffer) {
         output(buffer, 0, buffer.length);
     }

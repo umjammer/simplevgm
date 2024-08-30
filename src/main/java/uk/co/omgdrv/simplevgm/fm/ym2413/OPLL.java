@@ -8,6 +8,7 @@
 
 package uk.co.omgdrv.simplevgm.fm.ym2413;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 
@@ -22,6 +23,7 @@ import java.io.Serializable;
  */
 public class OPLL implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 0;
 
     public int adr;
@@ -30,11 +32,11 @@ public class OPLL implements Serializable {
     public int realstep;
     public int oplltime;
     public int opllstep;
-    public int[] pan = new int[16];
+    public final int[] pan = new int[16];
 
     // Register
-    public int[] reg = new int[0x40];
-    public boolean[] slot_on_flag = new boolean[18];
+    public final int[] reg = new int[0x40];
+    public final boolean[] slot_on_flag = new boolean[18];
 
     // Pitch Modulator
     public int pm_phase;
@@ -48,18 +50,18 @@ public class OPLL implements Serializable {
     public int noise_seed;
 
     // Channel Data
-    public int[] patch_number = new int[9];
-    public boolean[] key_status = new boolean[9];
+    public final int[] patch_number = new int[9];
+    public final boolean[] key_status = new boolean[9];
 
     // Slot
-    public OPLL_SLOT[] slot = new OPLL_SLOT[18];
+    public final OPLL_SLOT[] slot = new OPLL_SLOT[18];
 
     // Voice Data
-    public OPLL_PATCH[] patch = new OPLL_PATCH[19 * 2];
+    public final OPLL_PATCH[] patch = new OPLL_PATCH[19 * 2];
     public int[] patch_update = new int[2]; // flag for check patch update
 
     /* Output of each channels / 0-8:TONE, 9:BD 10:HH 11:SD, 12:TOM, 13:CYM */
-    int[] ch_out = new int[14];
+    final int[] ch_out = new int[14];
 
 
     public OPLL() {
@@ -73,6 +75,7 @@ public class OPLL implements Serializable {
 
     public static class OPLL_SLOT implements Serializable {
 
+        @Serial
         private static final long serialVersionUID = 0;
 
         public OPLL_PATCH patch;
@@ -81,7 +84,7 @@ public class OPLL implements Serializable {
 
         // OUTPUT
         public int feedback;
-        public int[] output = new int[2];   // Output value of slot
+        public final int[] output = new int[2];   // Output value of slot
 
         // for Phase Generator (PG)
         public int[] sintbl;     // Wavetable
@@ -104,6 +107,7 @@ public class OPLL implements Serializable {
 
     public static final class OPLL_PATCH implements Serializable {
 
+        @Serial
         private static final long serialVersionUID = 0;
 
         public int TL;
@@ -120,7 +124,7 @@ public class OPLL implements Serializable {
         public int PM;
         public int WF;
 
-        public static final void copy(OPLL_PATCH source, OPLL_PATCH destination) {
+        public static void copy(OPLL_PATCH source, OPLL_PATCH destination) {
             destination.TL = source.TL;
             destination.FB = source.FB;
             destination.EG = source.EG;

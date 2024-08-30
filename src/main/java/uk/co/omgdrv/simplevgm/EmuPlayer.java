@@ -1,5 +1,6 @@
 package uk.co.omgdrv.simplevgm;
 
+import java.io.IOException;
 import java.time.Duration;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -34,6 +35,10 @@ public class EmuPlayer implements Runnable {
         play();
     }
 
+    public void setTrack(int track) throws IOException {
+        emu.startTrack(track);
+    }
+
     // Currently playing track
     public int getCurrentTrack() {
         return emu.currentTrack();
@@ -47,7 +52,7 @@ public class EmuPlayer implements Runnable {
     // Sets playback volume, where 1.0 is normal, 2.0 is twice as loud.
     // Can be changed while track is playing.
     public void setVolume(double v) {
-        volume_ = v;
+        volume = v;
 
         if (line != null) {
             FloatControl mg = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
@@ -58,13 +63,13 @@ public class EmuPlayer implements Runnable {
 
     // Current playback volume
     public double getVolume() {
-        return volume_;
+        return volume;
     }
 
     // Pauses if track was playing.
     public void pause() throws Exception {
         if (thread != null) {
-            playing_ = false;
+            playing = false;
             thread.join();
             thread = null;
         }
@@ -72,7 +77,7 @@ public class EmuPlayer implements Runnable {
 
     // True if track is currently playing
     public boolean isPlaying() {
-        return playing_;
+        return playing;
     }
 
     // Resumes playback where it was paused
@@ -80,12 +85,12 @@ public class EmuPlayer implements Runnable {
         if (line == null) {
             line = (SourceDataLine) AudioSystem.getLine(lineInfo);
             line.open(audioFormat);
-            setVolume(volume_);
+            setVolume(volume);
         }
         thread = new Thread(this);
         thread.setName("simplevgm");
         thread.setPriority(Thread.MAX_PRIORITY - 1);
-        playing_ = true;
+        playing = true;
         thread.start();
     }
 
@@ -106,7 +111,7 @@ public class EmuPlayer implements Runnable {
 //        LockSupport.parkNanos(SLEEP_NS);
     }
 
-// private
+    // private
 
     // Sets music emulator to get samples from
     void setEmu(VgmEmu emu, int sampleRate) throws Exception {
@@ -125,22 +130,23 @@ public class EmuPlayer implements Runnable {
     DataLine.Info lineInfo;
     VgmEmu emu;
     Thread thread;
-    volatile boolean playing_;
+    volatile boolean playing;
     SourceDataLine line;
-    double volume_ = 1.0;
+    double volume = 1.0;
 
+    @Override
     public void run() {
         line.start();
 
         // play track until stop signal
         byte[] buf = new byte[8192];
-        while (playing_ && !emu.trackEnded()) {
+        while (playing && !emu.trackEnded()) {
             int count = emu.play(buf, buf.length / 2);
             line.write(buf, 0, count * 2);
             this.idle();
         }
 
-        playing_ = false;
+        playing = false;
         line.stop();
     }
 }

@@ -1,5 +1,7 @@
 package uk.co.omgdrv.simplevgm.psg;
 
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,6 +20,7 @@ import uk.co.omgdrv.simplevgm.psg.nuked.NukedPsgProvider;
 import uk.co.omgdrv.simplevgm.util.BlipBuffer;
 import uk.co.omgdrv.simplevgm.util.Util;
 
+import static java.lang.System.getLogger;
 import static uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ;
 
 
@@ -28,6 +31,8 @@ import static uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ;
  * @version Copyright 2019
  */
 public class PsgCompare implements VgmPsgProvider {
+
+    private static final Logger logger = getLogger(PsgCompare.class.getName());
 
     private static final int RUN_FOR_SECONDS = 30;
     private static final boolean WRITE_FILE = false;
@@ -42,17 +47,17 @@ public class PsgCompare implements VgmPsgProvider {
     }
 
     private static final boolean SIGNED = true;
-    public static AudioFormat audioFormat8bit =
+    public static final AudioFormat audioFormat8bit =
             new AudioFormat(VGM_SAMPLE_RATE_HZ, 8, 1, SIGNED, false);
-    private static AudioFormat audioFormat16bit =
+    private static final AudioFormat audioFormat16bit =
             new AudioFormat(VGM_SAMPLE_RATE_HZ, 16, 1, SIGNED, false);
 
-    private static Path nukeFile = Paths.get("Nuke_" + System.currentTimeMillis() + ".raw");
-    private static Path nukeFilterFile = Paths.get("NukeFilter_" + System.currentTimeMillis() + ".raw");
-    private static Path nukeBlipFile = Paths.get("NukeBlip_" + System.currentTimeMillis() + ".raw");
-    private static Path gearFile = Paths.get("Gear_" + System.currentTimeMillis() + ".raw");
-    private static Path gearFile2 = Paths.get("Gear2_" + System.currentTimeMillis() + ".raw");
-    private static Path greenFile = Paths.get("Green_" + System.currentTimeMillis() + ".raw");
+    private static final Path nukeFile = Paths.get("Nuke_" + System.currentTimeMillis() + ".raw");
+    private static final Path nukeFilterFile = Paths.get("NukeFilter_" + System.currentTimeMillis() + ".raw");
+    private static final Path nukeBlipFile = Paths.get("NukeBlip_" + System.currentTimeMillis() + ".raw");
+    private static final Path gearFile = Paths.get("Gear_" + System.currentTimeMillis() + ".raw");
+    private static final Path gearFile2 = Paths.get("Gear2_" + System.currentTimeMillis() + ".raw");
+    private static final Path greenFile = Paths.get("Green_" + System.currentTimeMillis() + ".raw");
 
     private GearPsgProvider gearPsg;
     private Gear2PsgProvider gear2Psg;
@@ -128,10 +133,10 @@ public class PsgCompare implements VgmPsgProvider {
     public static void main(String[] args) {
         try {
             List<Path> files = Files.list(Paths.get(".")).
-                    filter(f -> f.toString().endsWith(".raw")).collect(Collectors.toList());
-            files.stream().forEach(f -> Util.convertToWav(f.getFileName().toString(), audioFormat8bit));
+                    filter(f -> f.toString().endsWith(".raw")).toList();
+            files.forEach(f -> Util.convertToWav(f.getFileName().toString(), audioFormat8bit));
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.ERROR, e.getMessage(), e);
         }
     }
 
@@ -145,7 +150,7 @@ public class PsgCompare implements VgmPsgProvider {
 //                Util.writeToFile(gearFile2, buffer);
                     break;
                 case GREEN:
-                    //TODO this is 16bit
+                    // TODO this is 16bit
 //                Util.writeToFile(greenFile, buffer);
                     break;
                 case NUKED:
@@ -161,5 +166,4 @@ public class PsgCompare implements VgmPsgProvider {
         }
         checkIntervalDone();
     }
-
 }

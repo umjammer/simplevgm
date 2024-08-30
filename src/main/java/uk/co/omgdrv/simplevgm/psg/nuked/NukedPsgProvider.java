@@ -25,19 +25,19 @@ import static uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ;
 public class NukedPsgProvider implements VgmPsgProvider {
 
     public static final int PSG_MAX_VOLUME = 0x80;
-    public static int CLOCK_HZ = 3579545;
-    public static int NUKED_PSG_SAMPLING_HZ = CLOCK_HZ / 16;
+    public static final int CLOCK_HZ = 3579545;
+    public static final int NUKED_PSG_SAMPLING_HZ = CLOCK_HZ / 16;
 
     private static final double NANOS_TO_SEC = 1_000_000_000;
     private static final double NANOS_PER_SAMPLE = NANOS_TO_SEC / NUKED_PSG_SAMPLING_HZ;
     private static final double NANOS_PER_CYCLE = NANOS_TO_SEC / CLOCK_HZ;
 
-    private PsgYm7101 psg;
-    private PsgYm7101.PsgContext context;
+    private final PsgYm7101 psg;
+    private final PsgYm7101.PsgContext context;
 
-    private double[] rawBuffer = new double[NUKED_PSG_SAMPLING_HZ];
-    private double[] resampleBuffer = new double[VGM_SAMPLE_RATE_HZ];
-    public byte[] nukedBuffer = new byte[VGM_SAMPLE_RATE_HZ];
+    private final double[] rawBuffer = new double[NUKED_PSG_SAMPLING_HZ];
+    private final double[] resampleBuffer = new double[VGM_SAMPLE_RATE_HZ];
+    public final byte[] nukedBuffer = new byte[VGM_SAMPLE_RATE_HZ];
 
     private double nanosToNextSample = NANOS_PER_SAMPLE;
     private int currentCycle;
@@ -88,7 +88,7 @@ public class NukedPsgProvider implements VgmPsgProvider {
         if (delayCycles > currentCycle) {
             runUntil(vgmDelayCycles);
         }
-        currentCycle -= delayCycles;
+        currentCycle -= (int) delayCycles;
     }
 
     private static int toPsgClockCycles(long vgmDelayCycles) {
@@ -131,7 +131,7 @@ public class NukedPsgProvider implements VgmPsgProvider {
         return hasSample;
     }
 
-    Path rawFile = Paths.get(".", "NUKED_RAW_" + System.currentTimeMillis() + ".raw");
+    final Path rawFile = Paths.get(".", "NUKED_RAW_" + System.currentTimeMillis() + ".raw");
 
     private void writeRawData(double[] rawBuffer) {
         List<String> l = Arrays.stream(rawBuffer).mapToObj(Double::toString).collect(Collectors.toList());

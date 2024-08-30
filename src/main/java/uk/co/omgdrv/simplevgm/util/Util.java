@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -15,6 +17,8 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
+import static java.lang.System.getLogger;
+
 
 /**
  * Util.
@@ -24,7 +28,9 @@ import javax.sound.sampled.AudioSystem;
  */
 public class Util {
 
-    static Predicate<String> compressedVgm = n -> n.endsWith(".GZ") || n.endsWith(".VGZ");
+    private static final Logger logger = getLogger(Util.class.getName());
+
+    static final Predicate<String> compressedVgm = n -> n.endsWith(".GZ") || n.endsWith(".VGZ");
 
     // Loads given URL and file within archive, and caches archive for future access
     public static byte[] readFile(String path) throws Exception {
@@ -79,7 +85,6 @@ public class Util {
         }
     }
 
-
     public static void waitOnObject(Object object, long ms) {
         synchronized (object) {
             try {
@@ -90,11 +95,10 @@ public class Util {
         }
     }
 
-    //bit 1 -> true
+    // bit 1 -> true
     public static boolean bitSetTest(long number, int position) {
-        return ((number & (1 << position)) != 0);
+        return ((number & (1L << position)) != 0);
     }
-
 
     public static void arrayDataCopy(int[][] src, int[][] dest) {
         for (int i = 0; i < src.length; i++) {
@@ -177,27 +181,26 @@ public class Util {
     }
 
     public static String toStringValue(int... data) {
-        String value = "";
-        for (int i = 0; i < data.length; i++) {
-            value += (char) (data[i] & 0xFF);
+        StringBuilder value = new StringBuilder();
+        for (int datum : data) {
+            value.append((char) (datum & 0xFF));
         }
-        return value;
+        return value.toString();
     }
 
-    public static final String pad4(long reg) {
-        String s = Long.toHexString(reg).toUpperCase();
+    public static String pad4(long reg) {
+        StringBuilder s = new StringBuilder(Long.toHexString(reg).toUpperCase());
         while (s.length() < 4) {
-            s = "0" + s;
+            s.insert(0, "0");
         }
-        return s;
+        return s.toString();
     }
-
 
     public static void writeToFile(Path file, byte[] buffer) {
         try {
             Files.write(file, buffer, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.ERROR, e.getMessage(), e);
         }
     }
 
@@ -205,7 +208,7 @@ public class Util {
         try {
             Files.write(file, lines, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.ERROR, e.getMessage(), e);
         }
     }
 
@@ -221,8 +224,7 @@ public class Util {
             audioInputStream.close();
             System.out.println(fileName + ".wav recorded");
         } catch (IOException ioe) {
-            ioe.printStackTrace();
-            System.out.println("Error writing WAV file");
+            logger.log(Level.ERROR, "Error writing WAV file", ioe);
         }
     }
 }

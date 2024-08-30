@@ -17,7 +17,7 @@ public class GearPsgProvider extends BaseVgmPsgProvider {
     protected PsgProvider psg;
     private double nanosToNextSample = NANOS_PER_SAMPLE;
     public int sampleCounter = 0;
-    public byte[] gearBuffer = new byte[VGM_SAMPLE_RATE_HZ];
+    public final byte[] gearBuffer = new byte[VGM_SAMPLE_RATE_HZ];
     protected PsgCompare psgCompare;
     protected PsgCompare.PsgType type = PsgCompare.PsgType.GEAR;
 

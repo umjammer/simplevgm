@@ -29,7 +29,7 @@ import uk.co.omgdrv.simplevgm.util.StereoBuffer;
 public abstract class ClassicEmu extends MusicEmu {
 
     public static final int bufLength = 32;
-    protected StereoBuffer buf = new StereoBuffer("SmsApu");
+    protected final StereoBuffer buf = new StereoBuffer("SmsApu");
 
     // derived class can override and mix its own samples here
     protected abstract void mixSamples(byte[] out, int offset, int count);
@@ -37,16 +37,19 @@ public abstract class ClassicEmu extends MusicEmu {
     // Subclass can also get number of msec to run, and return number of clocks emulated
     protected abstract int runMsec(int msec);
 
+    @Override
     protected int setSampleRate_(int rate) {
         buf.setSampleRate(rate, 1000 / bufLength);
         return rate;
     }
 
+    @Override
     public void startTrack(int track) {
         super.startTrack(track);
         buf.clear();
     }
 
+    @Override
     protected int play_(byte[] out, int count) {
         int pos = 0;
         while (true) {
@@ -58,7 +61,7 @@ public abstract class ClassicEmu extends MusicEmu {
             if (count <= 0)
                 break;
 
-            if (trackEnded_) {
+            if (trackEnded) {
                 java.util.Arrays.fill(out, pos, pos + count, (byte) 0);
                 break;
             }

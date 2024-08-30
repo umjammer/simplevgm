@@ -41,7 +41,7 @@ import uk.co.omgdrv.simplevgm.util.Util;
  */
 public class VGMPlayer extends EmuPlayer {
 
-    int sampleRate;
+    final int sampleRate;
     VgmPsgProvider psgProvider;
     VgmFmProvider fmProvider;
 
@@ -99,7 +99,7 @@ public class VGMPlayer extends EmuPlayer {
         loadedPath = "";
     }
 
-// private
+    // private
 
     String loadedUrl = ""; // URL and path of file loaded into emulator
     String loadedPath = "";

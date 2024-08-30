@@ -18,6 +18,9 @@
 
 package uk.co.omgdrv.simplevgm;
 
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
+
 import uk.co.omgdrv.simplevgm.fm.MdFmProvider;
 import uk.co.omgdrv.simplevgm.fm.YM2612;
 import uk.co.omgdrv.simplevgm.fm.ym2413.Ym2413Provider;
@@ -27,6 +30,7 @@ import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.green.SmsApu;
 import uk.co.omgdrv.simplevgm.util.Util;
 
+import static java.lang.System.getLogger;
 import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_DATA_BLOCK;
 import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_DELAY;
 import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_DELAY_735;
@@ -51,6 +55,8 @@ import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.YM2612_DAC_PORT;
  */
 public final class VgmEmu extends ClassicEmu {
 
+    private static final Logger logger = getLogger(VgmEmu.class.getName());
+
     public static final int VGM_SAMPLE_RATE_HZ = 44100;
     public static final int FADE_LENGTH_SEC = 5;
 
@@ -66,6 +72,7 @@ public final class VgmEmu extends ClassicEmu {
     }
 
     // TODO: use custom noise taps if present
+    @Override
     protected int parseHeader(byte[] data) {
         vgmHeader = VgmHeader.loadHeader(data);
         if (!VgmHeader.VGM_MAGIC_WORD.equals(vgmHeader.getIdent())) {
@@ -113,14 +120,12 @@ public final class VgmEmu extends ClassicEmu {
         return 1;
     }
 
-
-// private
+    // private
 
     static final int vgmRate = VGM_SAMPLE_RATE_HZ;
     static final double vgmSamplesPerMs = vgmRate / 1000d;
     static final int psgTimeBits = 12;
     static final int psgTimeUnit = 1 << psgTimeBits;
-
 
     VgmPsgProvider psg = VgmPsgProvider.NO_SOUND;
     VgmFmProvider fm = VgmFmProvider.NO_SOUND;
@@ -138,6 +143,7 @@ public final class VgmEmu extends ClassicEmu {
     int dac_amp;
     boolean loopFlag;
 
+    @Override
     public void startTrack(int track) {
         super.startTrack(track);
         setFade();
@@ -163,7 +169,6 @@ public final class VgmEmu extends ClassicEmu {
         }
         return vgmTime;
     }
-
 
     public static int toPSGTimeGreen(int vgmTime) {
         return (vgmTime * psgFactor + psgTimeUnit / 2) >> psgTimeBits;
@@ -192,12 +197,13 @@ public final class VgmEmu extends ClassicEmu {
             dac_amp |= dac_disabled;
     }
 
-    private static boolean endlessLoopFlag = true;
+    private static final boolean endlessLoopFlag = true;
     private long sampleCounter = 0;
 
+    @Override
     protected int runMsec(int msec) {
 
-        final int duration = (int) (vgmSamplesPerMs * msec);
+        int duration = (int) (vgmSamplesPerMs * msec);
 
         {
             int sampleCount = toFMTime(duration);
@@ -277,13 +283,13 @@ public final class VgmEmu extends ClassicEmu {
                     break;
                 case CMD_DATA_BLOCK:
                     if (data[pos++] != CMD_END)
-                        logError();
+                        logger.log(Level.ERROR, "emulation error");
                     int type = data[pos++];
                     long size = Util.getUInt32LE(data, pos);
                     pos += 4;
                     if (type == PCM_BLOCK_TYPE)
                         pcm_data = pos;
-                    pos += size;
+                    pos += (int) size;
                     break;
 
                 case CMD_PCM_SEEK:
@@ -316,7 +322,7 @@ public final class VgmEmu extends ClassicEmu {
             setTrackEnded();
             if (pos > data.length) {
                 pos = data.length;
-                logError(); // went past end
+                logger.log(Level.ERROR, "went past end");
             }
         }
 
@@ -328,23 +334,23 @@ public final class VgmEmu extends ClassicEmu {
     private void handleUnsupportedCommand(int cmd) {
         System.out.println(vgmHeader.getIdent() + vgmHeader.getVersionString() + ", unsupported command: " + Integer.toHexString(cmd));
         switch (cmd & 0xF0) {
-            //unsupported one operand
+            // unsupported one operand
             case 0x30:
             case 0x40:
                 pos += 1;
                 break;
-            //unsupported two operands
+            // unsupported two operands
             case 0x50:
             case 0xA0:
             case 0xB0:
                 pos += 2;
                 break;
-            //unsupported three operands
+            // unsupported three operands
             case 0xC0:
             case 0xD0:
                 pos += 3;
                 break;
-            //unsupported four operands
+            // unsupported four operands
             case 0xE0:
             case 0xF0:
                 pos += 4;
@@ -357,14 +363,12 @@ public final class VgmEmu extends ClassicEmu {
                 pos += diff;
                 break;
             default:
-                System.out.println(String.format("Unexpected command: %s, at position: %s",
-                        Integer.toHexString(cmd), Integer.toHexString(pos)));
-                logError();
+                logger.log(Level.ERROR, String.format("Unexpected command: %02x, at position: %02x", cmd, pos));
                 break;
         }
     }
 
-
+    @Override
     protected void mixSamples(byte[] out, int out_off, int count) {
         out_off *= 2;
         int in_off = fm_pos;

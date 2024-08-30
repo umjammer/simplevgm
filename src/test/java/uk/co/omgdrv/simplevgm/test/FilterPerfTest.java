@@ -17,12 +17,12 @@ import uk.co.omgdrv.simplevgm.util.DspUtil;
  */
 public class FilterPerfTest {
 
-    public static int WARM_UP = 50;
-    public static int TEST = 1000;
+    public static final int WARM_UP = 50;
+    public static final int TEST = 1000;
 
     static final double NANOS_PER_SECOND = 1000_000_000;
 
-    static double[] outBuffer = new double[BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ];
+    static final double[] outBuffer = new double[BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ];
 
     public static void main(String[] args) throws IOException {
         testFastHpfResamplePerf();

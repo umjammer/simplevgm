@@ -20,7 +20,7 @@ public class Ym2413Provider implements VgmFmProvider {
     private static final int CLOCK_HZ = 3579545;
     public static final double FM_RATE = 49716.0;
 
-    static double ymRatePerMs = FM_RATE / 1000.0;
+    static final double ymRatePerMs = FM_RATE / 1000.0;
     final static double rateRatio = FM_CALCS_PER_MS / ymRatePerMs;
     double rateRatioAcc = 0;
     double sampleRateCalcAcc = 0;
@@ -43,7 +43,7 @@ public class Ym2413Provider implements VgmFmProvider {
         opll = Emu2413.OPLL_new();
     }
 
-    static int AUDIO_SCALE_BITS = 3;
+    static final int AUDIO_SCALE_BITS = 3;
 
     @Override
     public void update(int[] buf_lr, int offset, int samples441) {

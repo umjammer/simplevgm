@@ -1,5 +1,3 @@
-package uk.co.omgdrv.simplevgm;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -15,11 +13,11 @@ import uk.co.omgdrv.simplevgm.util.Util;
  */
 public class Scanner {
 
-    private static String VGM_FOLDER = "/data/emu/vgm"; //"vgm";
+    private static final String VGM_FOLDER = "/data/emu/vgm"; //"vgm";
 
     public static void main(String[] args) throws Exception {
         Path p = Paths.get(VGM_FOLDER);
-        Runner.getRecursiveVgmFiles(p).stream().forEach(Scanner::printVgmHeader);
+        Runner.getRecursiveVgmFiles(p).forEach(Scanner::printVgmHeader);
     }
 
     private static void printVgmHeader(Path p) {

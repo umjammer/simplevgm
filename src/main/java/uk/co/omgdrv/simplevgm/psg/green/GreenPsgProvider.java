@@ -25,10 +25,10 @@ public class GreenPsgProvider extends BaseVgmPsgProvider {
     private double nanosToNextSample = NANOS_PER_SAMPLE;
     public int sampleCounter = 0;
 
-    public byte[] greenBuffer = new byte[VGM_SAMPLE_RATE_HZ];
+    public final byte[] greenBuffer = new byte[VGM_SAMPLE_RATE_HZ];
 
     protected PsgCompare psgCompare;
-    protected PsgCompare.PsgType type = PsgCompare.PsgType.GREEN;
+    protected final PsgCompare.PsgType type = PsgCompare.PsgType.GREEN;
     protected StereoBuffer stereoBuffer;
 
     public static GreenPsgProvider createInstance(PsgCompare compare) {

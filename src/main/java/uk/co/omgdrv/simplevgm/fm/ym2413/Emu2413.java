@@ -127,23 +127,23 @@ public final class Emu2413 {
     // Dynamic range of sustine level
     private static final double SL_STEP = 3.0;
 
-    private static int EG2DB(final int d) {
+    private static int EG2DB(int d) {
         return d * (int) (EG_STEP / DB_STEP);
     }
 
-    private static int TL2EG(final int d) {
+    private static int TL2EG(int d) {
         return d * (int) (TL_STEP / EG_STEP);
     }
 
-    private static int SL2EG(final int d) {
+    private static int SL2EG(int d) {
         return d * (int) (SL_STEP / EG_STEP);
     }
 
-    private static int DB_POS(final double x) {
+    private static int DB_POS(double x) {
         return (int) (x / DB_STEP);
     }
 
-    private static int DB_NEG(final double x) {
+    private static int DB_NEG(double x) {
         return (int) (DB_MUTE + DB_MUTE + x / DB_STEP);
     }
 
@@ -178,24 +178,24 @@ public final class Emu2413 {
     private static final double AM_DEPTH = 4.875;
 
     // Cut the lower b bit(s) off.
-    private static int HIGHBITS(final int c, final int b) {
+    private static int HIGHBITS(int c, int b) {
         return c >> b;
     }
 
     // Expand x which is s bits to d bits.
-    private static int EXPAND_BITS(final int x, final int s, final int d) {
+    private static int EXPAND_BITS(int x, int s, int d) {
         return x << (d - s);
     }
 
-    private static OPLL_SLOT MOD(final OPLL o, final int x) {
+    private static OPLL_SLOT MOD(OPLL o, int x) {
         return o.slot[x << 1];
     }
 
-    private static OPLL_SLOT CAR(final OPLL o, final int x) {
+    private static OPLL_SLOT CAR(OPLL o, int x) {
         return o.slot[(x << 1) | 1];
     }
 
-    private static boolean BIT(final int s, final int b) {
+    private static boolean BIT(int s, int b) {
         return ((s >> b) & 1) != 0;
     }
 
@@ -272,7 +272,7 @@ public final class Emu2413 {
     }
 
     // Liner(+0.0 - +1.0) to dB((1<<DB_BITS) - 1 -- 0)
-    private static int lin2db(final double d) {
+    private static int lin2db(double d) {
         if (d == 0) {
             return (DB_MUTE - 1);
         } else {
@@ -298,7 +298,7 @@ public final class Emu2413 {
         }
     }
 
-    private static double saw(final double phase) {
+    private static double saw(double phase) {
         if (phase <= PI / 2) {
             return phase * 2 / PI;
         } else if (phase <= PI * 3 / 2) {
@@ -340,7 +340,7 @@ public final class Emu2413 {
         }
     }
 
-    private static double dB2(final double x) {
+    private static double dB2(double x) {
         return x * 2;
     }
 
@@ -432,8 +432,8 @@ public final class Emu2413 {
         }
     }
 
-    private static void OPLL_dump2patch(final short[] dump,
-                                        final OPLL_PATCH[] patch) {
+    private static void OPLL_dump2patch(short[] dump,
+                                        OPLL_PATCH[] patch) {
         patch[0].AM = (dump[0] >> 7) & 1;
         patch[1].AM = (dump[1] >> 7) & 1;
         patch[0].PM = (dump[0] >> 6) & 1;
@@ -481,7 +481,7 @@ public final class Emu2413 {
      Calc Parameters
      ************************************************************/
 
-    private static int calc_eg_dphase(final OPLL_SLOT slot) {
+    private static int calc_eg_dphase(OPLL_SLOT slot) {
 
         switch (slot.eg_mode) {
             case ATTACK:
@@ -527,11 +527,11 @@ public final class Emu2413 {
     private static final int SLOT_TOM = 16;
     private static final int SLOT_CYM = 17;
 
-    private static void UPDATE_PG(final OPLL_SLOT S) {
+    private static void UPDATE_PG(OPLL_SLOT S) {
         S.dphase = dphaseTable[S.fnum][S.block][S.patch.ML];
     }
 
-    private static void UPDATE_TLL(final OPLL_SLOT S) {
+    private static void UPDATE_TLL(OPLL_SLOT S) {
         if (S.type) {
             S.tll = tllTable[S.fnum >> 5][S.block][S.volume][S.patch.KL];
         } else {
@@ -539,19 +539,19 @@ public final class Emu2413 {
         }
     }
 
-    private static void UPDATE_RKS(final OPLL_SLOT S) {
+    private static void UPDATE_RKS(OPLL_SLOT S) {
         S.rks = rksTable[S.fnum >> 8][S.block][S.patch.KR];
     }
 
-    private static void UPDATE_WF(final OPLL_SLOT S) {
+    private static void UPDATE_WF(OPLL_SLOT S) {
         S.sintbl = waveform[S.patch.WF];
     }
 
-    private static void UPDATE_EG(final OPLL_SLOT S) {
+    private static void UPDATE_EG(OPLL_SLOT S) {
         S.eg_dphase = calc_eg_dphase(S);
     }
 
-    private static void UPDATE_ALL(final OPLL_SLOT S) {
+    private static void UPDATE_ALL(OPLL_SLOT S) {
         UPDATE_PG(S);
         UPDATE_TLL(S);
         UPDATE_RKS(S);
@@ -560,7 +560,7 @@ public final class Emu2413 {
     }
 
     // Slot key on
-    private static void slotOn(final OPLL_SLOT slot) {
+    private static void slotOn(OPLL_SLOT slot) {
         slot.eg_mode = ATTACK;
         slot.eg_phase = 0;
         slot.phase = 0;
@@ -568,14 +568,14 @@ public final class Emu2413 {
     }
 
     // Slot key on without reseting the phase
-    private static void slotOn2(final OPLL_SLOT slot) {
+    private static void slotOn2(OPLL_SLOT slot) {
         slot.eg_mode = ATTACK;
         slot.eg_phase = 0;
         UPDATE_EG(slot);
     }
 
     // Slot key off
-    private static void slotOff(final OPLL_SLOT slot) {
+    private static void slotOff(OPLL_SLOT slot) {
         if (slot.eg_mode == ATTACK) {
             slot.eg_phase = EXPAND_BITS(AR_ADJUST_TABLE[HIGHBITS(slot.eg_phase,
                     EG_DP_BITS - EG_BITS)], EG_BITS, EG_DP_BITS);
@@ -585,7 +585,7 @@ public final class Emu2413 {
     }
 
     // Channel key on
-    private static void keyOn(final OPLL opll, final int i) {
+    private static void keyOn(OPLL opll, int i) {
         if (!opll.slot_on_flag[i * 2]) {
             slotOn(MOD(opll, i));
         }
@@ -596,87 +596,87 @@ public final class Emu2413 {
     }
 
     // Channel key off
-    private static void keyOff(final OPLL opll, final int i) {
+    private static void keyOff(OPLL opll, int i) {
         if (opll.slot_on_flag[i * 2 + 1]) {
             slotOff(CAR(opll, i));
         }
         opll.key_status[i] = false;
     }
 
-    private static void keyOn_BD(final OPLL opll) {
+    private static void keyOn_BD(OPLL opll) {
         keyOn(opll, 6);
     }
 
-    private static void keyOn_SD(final OPLL opll) {
+    private static void keyOn_SD(OPLL opll) {
         if (!opll.slot_on_flag[SLOT_SD]) {
             slotOn(CAR(opll, 7));
         }
     }
 
-    private static void keyOn_TOM(final OPLL opll) {
+    private static void keyOn_TOM(OPLL opll) {
         if (!opll.slot_on_flag[SLOT_TOM]) {
             slotOn(MOD(opll, 8));
         }
     }
 
-    private static void keyOn_HH(final OPLL opll) {
+    private static void keyOn_HH(OPLL opll) {
         if (!opll.slot_on_flag[SLOT_HH]) {
             slotOn2(MOD(opll, 7));
         }
     }
 
-    private static void keyOn_CYM(final OPLL opll) {
+    private static void keyOn_CYM(OPLL opll) {
         if (!opll.slot_on_flag[SLOT_CYM]) {
             slotOn2(CAR(opll, 8));
         }
     }
 
     // Drum key off
-    private static void keyOff_BD(final OPLL opll) {
+    private static void keyOff_BD(OPLL opll) {
         keyOff(opll, 6);
     }
 
-    private static void keyOff_SD(final OPLL opll) {
+    private static void keyOff_SD(OPLL opll) {
         if (opll.slot_on_flag[SLOT_SD]) {
             slotOff(CAR(opll, 7));
         }
     }
 
-    private static void keyOff_TOM(final OPLL opll) {
+    private static void keyOff_TOM(OPLL opll) {
         if (opll.slot_on_flag[SLOT_TOM]) {
             slotOff(MOD(opll, 8));
         }
     }
 
-    private static void keyOff_HH(final OPLL opll) {
+    private static void keyOff_HH(OPLL opll) {
         if (opll.slot_on_flag[SLOT_HH]) {
             slotOff(MOD(opll, 7));
         }
     }
 
-    private static void keyOff_CYM(final OPLL opll) {
+    private static void keyOff_CYM(OPLL opll) {
         if (opll.slot_on_flag[SLOT_CYM]) {
             slotOff(CAR(opll, 8));
         }
     }
 
     // Change a voice
-    private static void setPatch(final OPLL opll, final int i,
-                                 final int num) {
+    private static void setPatch(OPLL opll, int i,
+                                 int num) {
         opll.patch_number[i] = num;
         MOD(opll, i).patch = opll.patch[num * 2 + 0];
         CAR(opll, i).patch = opll.patch[num * 2 + 1];
     }
 
     // Change a rhythm voice
-    private static void setSlotPatch(final OPLL_SLOT slot,
-                                     final OPLL_PATCH patch) {
+    private static void setSlotPatch(OPLL_SLOT slot,
+                                     OPLL_PATCH patch) {
         slot.patch = patch;
     }
 
     // Set sustine parameter
-    private static void setSustine(final OPLL opll, final int c,
-                                   final boolean sustine) {
+    private static void setSustine(OPLL opll, int c,
+                                   boolean sustine) {
         CAR(opll, c).sustine = sustine;
         if (MOD(opll, c).type) {
             MOD(opll, c).sustine = sustine;
@@ -684,32 +684,32 @@ public final class Emu2413 {
     }
 
     // Volume : 6bit ( Volume register << 2 )
-    private static void setVolume(final OPLL opll, final int c,
-                                  final int volume) {
+    private static void setVolume(OPLL opll, int c,
+                                  int volume) {
         CAR(opll, c).volume = volume;
     }
 
-    private static void setSlotVolume(final OPLL_SLOT slot,
-                                      final int volume) {
+    private static void setSlotVolume(OPLL_SLOT slot,
+                                      int volume) {
         slot.volume = volume;
     }
 
     // Set F-Number ( fnum : 9bit )
-    private static void setFnumber(final OPLL opll, final int c,
-                                   final int fnum) {
+    private static void setFnumber(OPLL opll, int c,
+                                   int fnum) {
         CAR(opll, c).fnum = fnum;
         MOD(opll, c).fnum = fnum;
     }
 
     // Set Block data (block : 3bit )
-    private static void setBlock(final OPLL opll, final int c,
-                                 final int block) {
+    private static void setBlock(OPLL opll, int c,
+                                 int block) {
         CAR(opll, c).block = block;
         MOD(opll, c).block = block;
     }
 
     // Change Rhythm Mode
-    private static void update_rhythm_mode(final OPLL opll) {
+    private static void update_rhythm_mode(OPLL opll) {
         if ((opll.patch_number[6] & 0x10) != 0) {
             if (!opll.slot_on_flag[SLOT_BD2] && (opll.reg[0x0e] & 32) == 0) {
                 opll.slot[SLOT_BD1].eg_mode = FINISH;
@@ -759,7 +759,7 @@ public final class Emu2413 {
         }
     }
 
-    private static void update_key_status(final OPLL opll) {
+    private static void update_key_status(OPLL opll) {
 
         for (int ch = 0; ch < 9; ch++) {
             opll.slot_on_flag[ch * 2] = opll.slot_on_flag[ch * 2 + 1]
@@ -776,8 +776,8 @@ public final class Emu2413 {
         }
     }
 
-    private static void OPLL_copyPatch(final OPLL opll, final int num,
-                                       final OPLL_PATCH patch) {
+    private static void OPLL_copyPatch(OPLL opll, int num,
+                                       OPLL_PATCH patch) {
         OPLL_PATCH.copy(patch, opll.patch[num]);
     }
 
@@ -786,8 +786,8 @@ public final class Emu2413 {
      Initializing
      ***********************************************************/
 
-    private static void OPLL_SLOT_reset(final OPLL_SLOT slot,
-                                        final boolean type) {
+    private static void OPLL_SLOT_reset(OPLL_SLOT slot,
+                                        boolean type) {
         slot.type = type;
         slot.sintbl = waveform[0];
         slot.phase = 0;
@@ -839,7 +839,7 @@ public final class Emu2413 {
         internal_refresh();
     }
 
-    public static final OPLL OPLL_new() {
+    public static OPLL OPLL_new() {
 
         OPLL opll = new OPLL();
 
@@ -854,14 +854,14 @@ public final class Emu2413 {
     }
 
     // Reset patch datas by system default.
-    public static final void OPLL_reset_patch(final OPLL opll) {
+    public static void OPLL_reset_patch(OPLL opll) {
         for (int i = 0; i < 19 * 2; i++) {
             OPLL_copyPatch(opll, i, default_patch[i]);
         }
     }
 
     // Reset whole of OPLL except patch datas.
-    public static final void OPLL_reset(final OPLL opll) {
+    public static void OPLL_reset(OPLL opll) {
 
         if (opll == null) {
             return;
@@ -902,17 +902,17 @@ public final class Emu2413 {
      *********************************************************/
 
     // Convert Amp(0 to EG_HEIGHT) to Phase(0 to 4PI).
-    private static int wave2_4pi(final int e) {
+    private static int wave2_4pi(int e) {
         return e << (1 + PG_BITS - SLOT_AMP_BITS);
     }
 
     // Convert Amp(0 to EG_HEIGHT) to Phase(0 to 8PI).
-    private static int wave2_8pi(final int e) {
+    private static int wave2_8pi(int e) {
         return e << (2 + PG_BITS - SLOT_AMP_BITS);
     }
 
     // Update AM, PM unit
-    private static void update_ampm(final OPLL opll) {
+    private static void update_ampm(OPLL opll) {
         opll.pm_phase = (opll.pm_phase + pm_dphase) & (PM_DP_WIDTH - 1);
         opll.am_phase = (opll.am_phase + am_dphase) & (AM_DP_WIDTH - 1);
         opll.lfo_am = amtable[HIGHBITS(opll.am_phase, AM_DP_BITS - AM_PG_BITS)];
@@ -920,7 +920,7 @@ public final class Emu2413 {
     }
 
     // PG
-    private static void calc_phase(final OPLL_SLOT slot, final int lfo) {
+    private static void calc_phase(OPLL_SLOT slot, int lfo) {
         if (slot.patch.PM != 0) {
             slot.phase += (slot.dphase * lfo) >> PM_AMP_BITS;
         } else {
@@ -933,14 +933,14 @@ public final class Emu2413 {
     }
 
     // Update Noise unit
-    private static void update_noise(final OPLL opll) {
+    private static void update_noise(OPLL opll) {
         if ((opll.noise_seed & 1) != 0) {
             opll.noise_seed ^= 0x8003020;
         }
         opll.noise_seed >>= 1;
     }
 
-    private static int S2E(final double x) {
+    private static int S2E(double x) {
         return SL2EG((int) (x / SL_STEP)) << (EG_DP_BITS - EG_BITS);
     }
 
@@ -951,7 +951,7 @@ public final class Emu2413 {
     };
 
     // EG
-    private static void calc_envelope(final OPLL_SLOT slot, final int lfo) {
+    private static void calc_envelope(OPLL_SLOT slot, int lfo) {
 
         int egout;
 
@@ -1034,7 +1034,7 @@ public final class Emu2413 {
     }
 
     // CARRIOR
-    private static int calc_slot_car(final OPLL_SLOT slot, final int fm) {
+    private static int calc_slot_car(OPLL_SLOT slot, int fm) {
         if (slot.egout >= (DB_MUTE - 1)) {
             slot.output[0] = 0;
         } else {
@@ -1047,14 +1047,14 @@ public final class Emu2413 {
     }
 
     // MODULATOR
-    private static int calc_slot_mod(final OPLL_SLOT slot) {
+    private static int calc_slot_mod(OPLL_SLOT slot) {
 
         slot.output[1] = slot.output[0];
 
         if (slot.egout >= (DB_MUTE - 1)) {
             slot.output[0] = 0;
         } else if (slot.patch.FB != 0) {
-            final int fm = wave2_4pi(slot.feedback) >> (7 - slot.patch.FB);
+            int fm = wave2_4pi(slot.feedback) >> (7 - slot.patch.FB);
             slot.output[0] = DB2LIN_TABLE[slot.sintbl[(slot.pgout + fm)
                     & (PG_WIDTH - 1)] + slot.egout];
         } else {
@@ -1067,7 +1067,7 @@ public final class Emu2413 {
     }
 
     // TOM
-    private static int calc_slot_tom(final OPLL_SLOT slot) {
+    private static int calc_slot_tom(OPLL_SLOT slot) {
         if (slot.egout >= (DB_MUTE - 1)) {
             return 0;
         }
@@ -1076,8 +1076,8 @@ public final class Emu2413 {
     }
 
     // SNARE
-    private static int calc_slot_snare(final OPLL_SLOT slot,
-                                       final boolean noise) {
+    private static int calc_slot_snare(OPLL_SLOT slot,
+                                       boolean noise) {
 
         if (slot.egout >= DB_MUTE - 1) {
             return 0;
@@ -1091,8 +1091,8 @@ public final class Emu2413 {
     }
 
     // TOP-CYM
-    private static int calc_slot_cym(final OPLL_SLOT slot, final int pgout_hh) {
-        final int dbout;
+    private static int calc_slot_cym(OPLL_SLOT slot, int pgout_hh) {
+        int dbout;
 
         if (slot.egout >= (DB_MUTE - 1)) {
             return 0;
@@ -1108,10 +1108,10 @@ public final class Emu2413 {
     }
 
     // HI-HAT
-    private static int calc_slot_hat(final OPLL_SLOT slot, final int pgout_cym,
-                                     final boolean noise) {
+    private static int calc_slot_hat(OPLL_SLOT slot, int pgout_cym,
+                                     boolean noise) {
 
-        final int dbout;
+        int dbout;
 
         if (slot.egout >= (DB_MUTE - 1)) {
             return 0;
@@ -1137,7 +1137,7 @@ public final class Emu2413 {
     static int INST_VOL_MULT = 8;
     static int RHYTHM_VOL_MULT = 16;
 
-    private static void update_output(final OPLL opll) {
+    private static void update_output(OPLL opll) {
 
         update_ampm(opll);
         update_noise(opll);
@@ -1209,7 +1209,7 @@ public final class Emu2413 {
         return opll.out;
     }
 
-    public static int OPLL_calc(final OPLL opll) {
+    public static int OPLL_calc(OPLL opll) {
 
         while (opll.realstep > opll.oplltime) {
             opll.oplltime += opll.opllstep;
@@ -1225,7 +1225,7 @@ public final class Emu2413 {
      I/O Ctrl
      *****************************************************/
 
-    private static void OPLL_writeReg(final OPLL opll, int reg, int data) {
+    private static void OPLL_writeReg(OPLL opll, int reg, int data) {
 
         data = data & 0xff;
         reg = reg & 0x3f;
@@ -1440,8 +1440,8 @@ public final class Emu2413 {
         }
     }
 
-    public static final void OPLL_writeIO(final OPLL opll, final int adr,
-                                          final int val) {
+    public static void OPLL_writeIO(OPLL opll, int adr,
+                                    int val) {
         if ((adr & 1) != 0) {
             OPLL_writeReg(opll, opll.adr, val);
         } else {

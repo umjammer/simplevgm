@@ -24,7 +24,7 @@ public class Ym3438 implements IYm3438 {
     // logsin table
 
     /** 16 bit unsigned - [256] */
-    static int[] logsinrom = {
+    static final int[] logsinrom = {
             0x859, 0x6c3, 0x607, 0x58b, 0x52e, 0x4e4, 0x4a6, 0x471,
             0x443, 0x41a, 0x3f5, 0x3d3, 0x3b5, 0x398, 0x37e, 0x365,
             0x34e, 0x339, 0x324, 0x311, 0x2ff, 0x2ed, 0x2dc, 0x2cd,
@@ -60,7 +60,7 @@ public class Ym3438 implements IYm3438 {
     };
 
     /* exp table */
-    static  /* 16 bit unsigned - [256]*/ int[] exprom = {
+    static final  /* 16 bit unsigned - [256]*/ int[] exprom = {
             0x000, 0x003, 0x006, 0x008, 0x00b, 0x00e, 0x011, 0x014,
             0x016, 0x019, 0x01c, 0x01f, 0x022, 0x025, 0x028, 0x02a,
             0x02d, 0x030, 0x033, 0x036, 0x039, 0x03c, 0x03f, 0x042,
@@ -96,26 +96,26 @@ public class Ym3438 implements IYm3438 {
     };
 
     /* Note table */
-    static  /* 32 bit unsigned - [16]*/ int[] fn_note = {
+    static final  /* 32 bit unsigned - [16]*/ int[] fn_note = {
             0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3
     };
 
     /* Envelope generator */
-    static  /* 32 bit unsigned  - [4][4]*/ int[][] eg_stephi = {
+    static final  /* 32 bit unsigned  - [4][4]*/ int[][] eg_stephi = {
             {0, 0, 0, 0},
             {1, 0, 0, 0},
             {1, 0, 1, 0},
             {1, 1, 1, 0}
     };
 
-    static  /* 8 bit unsigned - [4]*/ int[] eg_am_shift = {
+    static final  /* 8 bit unsigned - [4]*/ int[] eg_am_shift = {
             7, 3, 1, 0
     };
 
     /* Phase generator */
-    static /* 32 bit unsigned - [8] */ int[] pg_detune = {16, 17, 19, 20, 22, 24, 27, 29};
+    static final /* 32 bit unsigned - [8] */ int[] pg_detune = {16, 17, 19, 20, 22, 24, 27, 29};
 
-    static /* 32 bit unsigned - [8][8] */ int[][] pg_lfo_sh1 = {
+    static final /* 32 bit unsigned - [8][8] */ int[][] pg_lfo_sh1 = {
             {7, 7, 7, 7, 7, 7, 7, 7},
             {7, 7, 7, 7, 7, 7, 7, 7},
             {7, 7, 7, 7, 7, 7, 1, 1},
@@ -126,7 +126,7 @@ public class Ym3438 implements IYm3438 {
             {7, 7, 1, 1, 0, 0, 0, 0}
     };
 
-    static /* 32 bit unsigned - [8][8]*/ int[][] pg_lfo_sh2 = {
+    static final /* 32 bit unsigned - [8][8]*/ int[][] pg_lfo_sh2 = {
             {7, 7, 7, 7, 7, 7, 7, 7},
             {7, 7, 7, 7, 2, 2, 2, 2},
             {7, 7, 7, 2, 2, 2, 7, 7},
@@ -138,7 +138,7 @@ public class Ym3438 implements IYm3438 {
     };
 
     /* Address decoder */
-    static  /* 32 bit unsigned  - [12]*/ int[] op_offset = {
+    static final  /* 32 bit unsigned  - [12]*/ int[] op_offset = {
             0x000, /* Ch1 OP1/OP2 */
             0x001, /* Ch2 OP1/OP2 */
             0x002, /* Ch3 OP1/OP2 */
@@ -153,7 +153,7 @@ public class Ym3438 implements IYm3438 {
             0x106  /* Ch6 OP3/OP4 */
     };
 
-    static  /* 32 bit unsigned - [6]*/ int[] ch_offset = {
+    static final  /* 32 bit unsigned - [6]*/ int[] ch_offset = {
             0x000, /* Ch1 */
             0x001, /* Ch2 */
             0x002, /* Ch3 */
@@ -163,12 +163,12 @@ public class Ym3438 implements IYm3438 {
     };
 
     /* LFO */
-    static  /* 32 bit unsigned - [8]*/ int[] lfo_cycles = {
+    static final  /* 32 bit unsigned - [8]*/ int[] lfo_cycles = {
             108, 77, 71, 67, 62, 44, 8, 5
     };
 
     /* FM algorithm */
-    static  /* 32 bit unsigned - [4][6][8]  */ int[][][] fm_algorithm = {
+    static final  /* 32 bit unsigned - [4][6][8]  */ int[][][] fm_algorithm = {
             {
                     {1, 1, 1, 1, 1, 1, 1, 1}, /* OP1_0         */
                     {1, 1, 1, 1, 1, 1, 1, 1}, /* OP1_1         */

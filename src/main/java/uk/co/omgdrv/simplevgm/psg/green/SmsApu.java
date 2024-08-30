@@ -69,6 +69,7 @@ public final class SmsApu implements VgmPsgProvider {
         oscs[3] = noise;
     }
 
+    @Override
     public void setOutput(BlipBuffer center, BlipBuffer left, BlipBuffer right) {
         for (int i = 0; i < oscCount; i++) {
             SmsOsc osc = oscs[i];
@@ -97,10 +98,12 @@ public final class SmsApu implements VgmPsgProvider {
         noise.reset();
     }
 
+    @Override
     public void reset() {
         reset(0x0009, 16);
     }
 
+    @Override
     public void writeGG(int time, int data) {
         runUntil(time);
 
@@ -122,6 +125,7 @@ public final class SmsApu implements VgmPsgProvider {
             64, 50, 39, 31, 24, 19, 15, 12, 9, 7, 5, 4, 3, 2, 1, 0
     };
 
+    @Override
     public void writeData(int time, int data) {
         runUntil(time);
 
@@ -144,6 +148,7 @@ public final class SmsApu implements VgmPsgProvider {
         }
     }
 
+    @Override
     public void endFrame(int endTime) {
         if (endTime > lastTime)
             runUntil(endTime);

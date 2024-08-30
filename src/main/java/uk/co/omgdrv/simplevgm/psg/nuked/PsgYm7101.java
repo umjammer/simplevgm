@@ -11,10 +11,10 @@ public interface PsgYm7101 {
     class PsgContext {
 
         int latch;
-        int[] volume = new int[4];
-        int[] output = new int[4];
-        int[] freq = new int[4];
-        int[] counter = new int[4];
+        final int[] volume = new int[4];
+        final int[] output = new int[4];
+        final int[] freq = new int[4];
+        final int[] counter = new int[4];
         int sign;
         int noise_data;
         int noise_reset;
