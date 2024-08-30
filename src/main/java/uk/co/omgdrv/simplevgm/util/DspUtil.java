@@ -28,8 +28,8 @@ public class DspUtil {
             if (l % extraSamplePos == 0) {
                 continue;
             }
-            double sample = (in[i - sampleRatioHalf] + in[i + sampleRatioHalf]) / 2; //resample
-            out[k] = sample - out[k - 1] / 2; //hpf
+            double sample = (in[i - sampleRatioHalf] + in[i + sampleRatioHalf]) / 2; // resample
+            out[k] = sample - out[k - 1] / 2; // hpf
             k++;
         }
         //NOTE: no hpf here
@@ -49,8 +49,8 @@ public class DspUtil {
             if (l % extraSamplePos == 0) {
                 continue;
             }
-            int sample = (in[i - sampleRatioHalf] + in[i + sampleRatioHalf]) >> 1; //resample
-            out[k] = sample - (out[k - 1] >> 1); //hpf
+            int sample = (in[i - sampleRatioHalf] + in[i + sampleRatioHalf]) >> 1; // resample
+            out[k] = sample - (out[k - 1] >> 1); // hpf
             k++;
         }
         //NOTE: no hpf here

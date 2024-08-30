@@ -1,7 +1,7 @@
 package uk.co.omgdrv.simplevgm.psg;
 
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
-import uk.co.omgdrv.simplevgm.util.BlipBuffer;
+import libgme.util.BlipBuffer;
 
 
 /**

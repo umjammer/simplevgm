@@ -19,15 +19,17 @@
 package uk.co.omgdrv.simplevgm.psg.green;
 
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
-import uk.co.omgdrv.simplevgm.util.BlipBuffer;
+import libgme.util.BlipBuffer;
 
 
 /**
  * Sega Master System SN76489 PSG sound chip emulator
  *
+ * WARNING don't set this as service provider. just for internal use.
+ *
  * @see "https://www.slack.net/~ant/"
  */
-public final class SmsApu implements VgmPsgProvider {
+public final class SmsApu implements VgmPsgProvider  { // TODO gross
 
     int lastTime;
     int latch;
@@ -40,6 +42,12 @@ public final class SmsApu implements VgmPsgProvider {
     final SmsOsc[] oscs = new SmsOsc[oscCount];
 
     static final int[] noisePeriods = {0x100, 0x200, 0x400};
+
+    private static final SmsApu instance = new SmsApu();
+
+    public static SmsApu getInstance() {
+        return instance;
+    }
 
     private void runUntil(int endTime) {
         if (endTime > lastTime) {
@@ -62,7 +70,7 @@ public final class SmsApu implements VgmPsgProvider {
         }
     }
 
-    public SmsApu() {
+    private SmsApu() {
         for (int i = 0; i < 3; i++) {
             oscs[i] = squares[i] = new SmsSquare();
         }

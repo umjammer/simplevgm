@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import uk.co.omgdrv.simplevgm.VGMPlayer;
-import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
+import libgme.VGMPlayer;
+import uk.co.omgdrv.simplevgm.VgmEmu;
 import uk.co.omgdrv.simplevgm.psg.PsgCompare;
 import uk.co.omgdrv.simplevgm.util.Util;
 
@@ -25,6 +25,10 @@ import uk.co.omgdrv.simplevgm.util.Util;
  * @version Copyright 2019
  */
 public class Runner {
+
+    static {
+        System.setProperty("libgme.BlipBuffer.muchFaster", "true");
+    }
 
     private static final boolean DISABLE_PSG = false;
     private static final String VGM_FOLDER = "vgm";
@@ -39,8 +43,9 @@ public class Runner {
         boolean isFolder = path.toFile().isDirectory();
         System.out.printf("Playing %s: %s%n",
                 (isFolder ? "folder" : "file"), path.toAbsolutePath());
-        VgmPsgProvider psgProvider = runPsgCompare ? PsgCompare.createInstance() : null;
-        VGMPlayer v = VGMPlayer.createInstance(psgProvider);
+        if (runPsgCompare) System.setProperty("uk.co.omgdrv.simplevgm.psg", PsgCompare.class.getName());
+        VGMPlayer v = new VGMPlayer(VgmEmu.VGM_SAMPLE_RATE_HZ);
+//        ((ClassicEmu) v.getEmu()).getBuf().setObserver(new BlipHelper("SmsApu", false));
         if (isFolder) {
             playRecursive(v, path);
         } else {

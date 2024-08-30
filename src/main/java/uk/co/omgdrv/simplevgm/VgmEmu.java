@@ -21,9 +21,11 @@ package uk.co.omgdrv.simplevgm;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 
+import libgme.ClassicEmu;
 import uk.co.omgdrv.simplevgm.fm.MdFmProvider;
-import uk.co.omgdrv.simplevgm.fm.YM2612;
+import uk.co.omgdrv.simplevgm.fm.ym2621.YM2612Provider;
 import uk.co.omgdrv.simplevgm.fm.ym2413.Ym2413Provider;
+import uk.co.omgdrv.simplevgm.model.NullVgmFmProvider;
 import uk.co.omgdrv.simplevgm.model.VgmFmProvider;
 import uk.co.omgdrv.simplevgm.model.VgmHeader;
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
@@ -31,6 +33,7 @@ import uk.co.omgdrv.simplevgm.psg.green.SmsApu;
 import uk.co.omgdrv.simplevgm.util.Util;
 
 import static java.lang.System.getLogger;
+import static java.lang.System.getProperty;
 import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_DATA_BLOCK;
 import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_DELAY;
 import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_DELAY_735;
@@ -51,24 +54,24 @@ import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.YM2612_DAC_PORT;
 /**
  * Sega Master System, BBC Micro VGM music file emulator
  *
+ * system properties
+ * <ul>
+ *     <li>uk.co.omgdrv.simplevgm.psg ... a class name extends VgmPsgProvider</li>
+ *     <li>uk.co.omgdrv.simplevgm.fm ... a class name extends VgmFmProvider</li>
+ * </ul>
+ *
  * @see "https://www.slack.net/~ant/"
  */
-public final class VgmEmu extends ClassicEmu {
+public class VgmEmu extends ClassicEmu {
 
     private static final Logger logger = getLogger(VgmEmu.class.getName());
 
     public static final int VGM_SAMPLE_RATE_HZ = 44100;
     public static final int FADE_LENGTH_SEC = 5;
 
-    public static VgmEmu createInstance(VgmPsgProvider apu, VgmFmProvider fm) {
-        VgmEmu emu = new VgmEmu();
-        if (apu != null) {
-            emu.psg = apu;
-        }
-        if (fm != null) {
-            emu.fm = fm;
-        }
-        return emu;
+    public VgmEmu() {
+        this.psg = VgmPsgProvider.getProvider(getProperty("uk.co.omgdrv.simplevgm.psg"));
+        this.fm = VgmFmProvider.getProvider(getProperty("uk.co.omgdrv.simplevgm.fm"));
     }
 
     // TODO: use custom noise taps if present
@@ -79,7 +82,7 @@ public final class VgmEmu extends ClassicEmu {
             throw new IllegalArgumentException("Unexpected magic word: " + vgmHeader.getIdent());
         }
         if (vgmHeader.getVersion() > VgmHeader.VGM_VERSION) {
-            System.out.println("VGM version " + vgmHeader.getVersionString() + " ( > 1.50) not supported, " +
+            logger.log(Level.WARNING, "VGM version " + vgmHeader.getVersionString() + " ( > 1.50) not supported, " +
                     "cant guarantee correct playback");
         }
 
@@ -94,30 +97,37 @@ public final class VgmEmu extends ClassicEmu {
         int clockRate = vgmHeader.getSn76489Clk();
         //this needs to be set even if there is no psg
         clockRate = clockRate > 0 ? clockRate : 3579545;
-        psg = new SmsApu(); //this needs to be created even if there is no psg
+        psg = SmsApu.getInstance(); // this needs to be created even if there is no psg
         psgFactor = (int) ((float) psgTimeUnit / vgmRate * clockRate + 0.5);
 
         // FM clock rate
         fm_clock_rate = vgmHeader.getYm2612Clk();
         if (fm_clock_rate > 0) {
-            fm = fm == VgmFmProvider.NO_SOUND ? new YM2612() : fm;
+            fm = fm.getClass() == NullVgmFmProvider.class ? VgmFmProvider.getProvider(YM2612Provider.class.getName()) : fm;
             buf.setVolume(0.7);
             fm.init(fm_clock_rate, sampleRate());
         } else {
             fm_clock_rate = vgmHeader.getYm2413Clk();
             if (fm_clock_rate > 0) {
-                fm = new Ym2413Provider();
+                fm = VgmFmProvider.getProvider(YM2612Provider.class.getName());
                 fm.init(fm_clock_rate, sampleRate());
             }
             buf.setVolume(1.0);
         }
+logger.log(Level.DEBUG, "psg: " + psg.getClass());
+logger.log(Level.DEBUG, "fm: " + fm.getClass());
 
         setClockRate(clockRate);
         psg.setOutput(buf.center(), buf.left(), buf.right());
         pos = vgmHeader.getDataOffset();
 
-        System.out.println(vgmHeader.toString());
+        logger.log(Level.DEBUG, vgmHeader.toString());
         return 1;
+    }
+
+    @Override
+    public boolean isSupportedByName(String s) {
+        return Util.compressedVgm.test(s);
     }
 
     // private
@@ -127,8 +137,8 @@ public final class VgmEmu extends ClassicEmu {
     static final int psgTimeBits = 12;
     static final int psgTimeUnit = 1 << psgTimeBits;
 
-    VgmPsgProvider psg = VgmPsgProvider.NO_SOUND;
-    VgmFmProvider fm = VgmFmProvider.NO_SOUND;
+    VgmPsgProvider psg;
+    VgmFmProvider fm;
     VgmHeader vgmHeader;
     int fm_clock_rate;
     int pos;

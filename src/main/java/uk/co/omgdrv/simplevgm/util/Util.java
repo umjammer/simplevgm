@@ -17,6 +17,8 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
+import libgme.util.DataReader;
+
 import static java.lang.System.getLogger;
 
 
@@ -30,7 +32,7 @@ public class Util {
 
     private static final Logger logger = getLogger(Util.class.getName());
 
-    static final Predicate<String> compressedVgm = n -> n.endsWith(".GZ") || n.endsWith(".VGZ");
+    public static final Predicate<String> compressedVgm = n -> n.endsWith(".GZ") || n.endsWith(".VGZ");
 
     // Loads given URL and file within archive, and caches archive for future access
     public static byte[] readFile(String path) throws Exception {

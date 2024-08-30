@@ -10,6 +10,8 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
+import libgme.util.StereoBuffer;
+
 import static java.lang.System.getLogger;
 
 
@@ -19,12 +21,20 @@ import static java.lang.System.getLogger;
  * @author Federico Berti
  * @version Copyright 2019
  */
-public class BlipHelper {
+public class BlipHelper implements StereoBuffer.Observer {
 
     private static final Logger logger = getLogger(BlipHelper.class.getName());
 
     static final Path file = Paths.get(".", System.currentTimeMillis() + ".raw");
     static final boolean writeToFile = true;
+
+    String name;
+    boolean bit8;
+
+    public BlipHelper(String name, boolean bit8) {
+        this.name = name;
+        this.bit8 = bit8;
+    }
 
     /**
      * out[0] = MSB LEFT
@@ -32,7 +42,8 @@ public class BlipHelper {
      * out[2] = MSB RIGHT
      * out[3] = LSB RIGHT
      */
-    public static void printStereoData(String name, byte[] out, int start, int end, boolean bit8) {
+    @Override
+    public void observe(byte[] out, int start, int end) {
         List<String> lines = new ArrayList<>();
         for (int i = start; i < end; i += 4) {
             int left = Util.getSigned16BE(out[i], out[i + 1]);

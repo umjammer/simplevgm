@@ -1,6 +1,6 @@
 package uk.co.omgdrv.simplevgm.psg.green;
 
-import uk.co.omgdrv.simplevgm.util.BlipBuffer;
+import libgme.util.BlipBuffer;
 
 
 public final class SmsNoise extends SmsOsc {

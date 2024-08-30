@@ -1,5 +1,6 @@
 package uk.co.omgdrv.simplevgm.psg.gear;
 
+import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.PsgCompare;
 
@@ -26,7 +27,7 @@ public class GearPsgProvider extends BaseVgmPsgProvider {
     }
 
     public static GearPsgProvider createInstance(PsgCompare compare) {
-        GearPsgProvider g = new GearPsgProvider();
+        GearPsgProvider g = (GearPsgProvider) VgmPsgProvider.getProvider(GearPsgProvider.class.getName());
         g.psg = PsgProvider.createInstance(VGM_SAMPLE_RATE_HZ);
         g.psgCompare = compare;
         return g;

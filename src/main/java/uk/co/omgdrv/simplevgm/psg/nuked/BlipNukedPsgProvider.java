@@ -2,9 +2,10 @@ package uk.co.omgdrv.simplevgm.psg.nuked;
 
 import java.util.Arrays;
 
+import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.PsgCompare;
-import uk.co.omgdrv.simplevgm.util.BlipBuffer;
+import libgme.util.BlipBuffer;
 import uk.co.omgdrv.simplevgm.util.DspUtil;
 
 
@@ -32,17 +33,13 @@ public class BlipNukedPsgProvider extends NukedPsgProvider {
 
     protected PsgCompare psgCompare;
 
-    public static BlipNukedPsgProvider createInstance() {
-        return createInstance(null);
-    }
-
     public static BlipNukedPsgProvider createInstance(PsgCompare psgCompare) {
-        BlipNukedPsgProvider n = new BlipNukedPsgProvider();
+        BlipNukedPsgProvider n = (BlipNukedPsgProvider) VgmPsgProvider.getProvider(BlipNukedPsgProvider.class.getName());
         n.psgCompare = psgCompare;
         return n;
     }
 
-    BlipNukedPsgProvider() {
+    public BlipNukedPsgProvider() {
         super();
         blipBuffer = new BlipBuffer();
         blipBuffer.setSampleRate(BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ, BLIP_BUFFER_SAMPLES_MS);

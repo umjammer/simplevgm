@@ -1,6 +1,12 @@
 package uk.co.omgdrv.simplevgm.model;
 
-import uk.co.omgdrv.simplevgm.util.BlipBuffer;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
+import java.util.ServiceLoader;
+
+import libgme.util.BlipBuffer;
+
+import static java.lang.System.getLogger;
 
 
 /**
@@ -10,6 +16,8 @@ import uk.co.omgdrv.simplevgm.util.BlipBuffer;
  * @version Copyright 2019
  */
 public interface VgmPsgProvider {
+
+    Logger logger = getLogger(VgmPsgProvider.class.getName());
 
     void writeData(int time, int data);
 
@@ -21,30 +29,21 @@ public interface VgmPsgProvider {
 
     void endFrame(int endTime);
 
-    VgmPsgProvider NO_SOUND = new VgmPsgProvider() {
-        @Override
-        public void writeData(int time, int data) {
-
+    static VgmPsgProvider getProvider(String className) {
+        VgmPsgProvider nullProvider = null;
+        for (VgmPsgProvider provider : ServiceLoader.load(VgmPsgProvider.class)) {
+            if (provider.getClass() == NullVgmPsgProvider.class) {
+                nullProvider = provider;
+            }
+            if (provider.getClass().getName().equals(className)) {
+                logger.log(Level.TRACE, "psg: " + provider.getClass());
+                return provider;
+            }
         }
-
-        @Override
-        public void setOutput(BlipBuffer center, BlipBuffer left, BlipBuffer right) {
-
+        if (nullProvider == null) {
+            throw new IllegalStateException("no null provider is found");
         }
-
-        @Override
-        public void reset() {
-
-        }
-
-        @Override
-        public void writeGG(int time, int data) {
-
-        }
-
-        @Override
-        public void endFrame(int endTime) {
-
-        }
-    };
+        logger.log(Level.WARNING, "no such a class: " + className);
+        return nullProvider;
+    }
 }

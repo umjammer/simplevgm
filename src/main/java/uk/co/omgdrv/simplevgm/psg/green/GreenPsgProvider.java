@@ -1,10 +1,10 @@
 package uk.co.omgdrv.simplevgm.psg.green;
 
+import libgme.util.StereoBuffer;
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.PsgCompare;
 import uk.co.omgdrv.simplevgm.psg.gear.PsgProvider;
-import uk.co.omgdrv.simplevgm.util.StereoBuffer;
 
 
 /**
@@ -32,10 +32,11 @@ public class GreenPsgProvider extends BaseVgmPsgProvider {
     protected StereoBuffer stereoBuffer;
 
     public static GreenPsgProvider createInstance(PsgCompare compare) {
-        GreenPsgProvider g = new GreenPsgProvider();
-        g.psg = new SmsApu();
+        GreenPsgProvider g = (GreenPsgProvider) VgmPsgProvider.getProvider(GreenPsgProvider.class.getName());
+        g.psg = SmsApu.getInstance();
         g.psgCompare = compare;
-        g.stereoBuffer = new StereoBuffer("GreenPsg");
+        g.stereoBuffer = new StereoBuffer();
+//        g.stereoBuffer.setObserver(new BlipHelper("GreenPsg", false));
         g.init();
         return g;
     }

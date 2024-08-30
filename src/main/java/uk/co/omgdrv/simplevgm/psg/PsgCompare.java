@@ -6,9 +6,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.sound.sampled.AudioFormat;
 
+import libgme.util.BlipBuffer;
 import uk.co.omgdrv.simplevgm.VgmEmu;
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.gear.GearPsgProvider;
@@ -17,7 +17,6 @@ import uk.co.omgdrv.simplevgm.psg.green.GreenPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.green.SmsApu;
 import uk.co.omgdrv.simplevgm.psg.nuked.BlipNukedPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.nuked.NukedPsgProvider;
-import uk.co.omgdrv.simplevgm.util.BlipBuffer;
 import uk.co.omgdrv.simplevgm.util.Util;
 
 import static java.lang.System.getLogger;
@@ -59,24 +58,22 @@ public class PsgCompare implements VgmPsgProvider {
     private static final Path gearFile2 = Paths.get("Gear2_" + System.currentTimeMillis() + ".raw");
     private static final Path greenFile = Paths.get("Green_" + System.currentTimeMillis() + ".raw");
 
-    private GearPsgProvider gearPsg;
-    private Gear2PsgProvider gear2Psg;
-    private NukedPsgProvider nukePsg;
-    private GreenPsgProvider greenPsg;
-    private BlipNukedPsgProvider blipNukedPsg;
+    private final GearPsgProvider gearPsg;
+    private final Gear2PsgProvider gear2Psg;
+    private final NukedPsgProvider nukePsg;
+    private final GreenPsgProvider greenPsg;
+    private final BlipNukedPsgProvider blipNukedPsg;
 
-    private SmsApu vgmEmuPsg;
+    private final SmsApu vgmEmuPsg;
 
-    public static PsgCompare createInstance() {
-        PsgCompare p = new PsgCompare();
-        p.gearPsg = GearPsgProvider.createInstance(p);
-        p.gear2Psg = Gear2PsgProvider.createInstance(p);
-        p.nukePsg = NukedPsgProvider.createInstance(p);
-        p.blipNukedPsg = BlipNukedPsgProvider.createInstance(p);
-        p.greenPsg = GreenPsgProvider.createInstance(p);
+    public PsgCompare() {
+        this.gearPsg = GearPsgProvider.createInstance(this);
+        this.gear2Psg = Gear2PsgProvider.createInstance(this);
+        this.nukePsg = NukedPsgProvider.createInstance(this);
+        this.blipNukedPsg = BlipNukedPsgProvider.createInstance(this);
+        this.greenPsg = GreenPsgProvider.createInstance(this);
 
-        p.vgmEmuPsg = new SmsApu();
-        return p;
+        this.vgmEmuPsg = SmsApu.getInstance();
     }
 
     @Override
@@ -127,7 +124,6 @@ public class PsgCompare implements VgmPsgProvider {
             main(null);
             System.exit(0);
         }
-
     }
 
     public static void main(String[] args) {

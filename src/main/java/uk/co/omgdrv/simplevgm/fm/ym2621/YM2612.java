@@ -1,4 +1,8 @@
-package uk.co.omgdrv.simplevgm.fm;
+package uk.co.omgdrv.simplevgm.fm.ym2621;
+
+import static uk.co.omgdrv.simplevgm.fm.MdFmProvider.FM_ADDRESS_PORT0;
+import static uk.co.omgdrv.simplevgm.fm.MdFmProvider.FM_ADDRESS_PORT1;
+
 
 /**
  * Test port of Gens YM2612 core.
@@ -6,7 +10,7 @@ package uk.co.omgdrv.simplevgm.fm;
  * @author Stephan Dittrich
  * @version 2005
  */
-public final class YM2612 implements MdFmProvider {
+public final class YM2612 {
 
     static final int NULL_RATE_SIZE = 32;
 
@@ -41,7 +45,7 @@ public final class YM2612 implements MdFmProvider {
         int AMSon;
     }
 
-    private final class cChannel {
+    private static final class cChannel {
 
         final int[] S0_OUT = new int[4];
         int Old_OUTd;
@@ -63,7 +67,7 @@ public final class YM2612 implements MdFmProvider {
         }
     }
 
-    private final class cYM2612 {
+    private static final class cYM2612 {
 
         int Clock;
         int Rate;
@@ -204,7 +208,7 @@ public final class YM2612 implements MdFmProvider {
     private int en0, en1, en2, en3;
     private int int_cnt;
 
-    // Emultaion State
+    // Emulation State
     private final boolean EnableSSGEG = false;
 
     private static final int MAIN_SHIFT = FINAL_SHFT;
@@ -238,19 +242,14 @@ public final class YM2612 implements MdFmProvider {
 
     // YM2612 Emulation Methods
 
-    /**
-     * ********************************************
-     * <p/>
-     * Public Access
-     * <p/>
-     * *********************************************
-     */
+    //
+    // Public Access
+    //
 
     static private double log10(double x) {
         return Math.log(x) / Math.log(10.0);
     }
 
-    @Override
     public void init(int Clock, int Rate) {
         int i, j;
         double x;
@@ -415,7 +414,6 @@ public final class YM2612 implements MdFmProvider {
         reset();
     }
 
-    @Override
     public void reset() {
         int i, j;
 
@@ -477,13 +475,11 @@ public final class YM2612 implements MdFmProvider {
         write0(0x2A, 0x80);
     }
 
-    @Override
     public int readRegister(int type, int regNumber) {
         return YM2612_REG[type][regNumber];
     }
 
 
-    @Override
     public int read() {
         return (YM2612_Status);
     }
@@ -491,7 +487,6 @@ public final class YM2612 implements MdFmProvider {
 
     int addressLatch;
 
-    @Override
     public void writePort(int addr, int data) {
         addr = addr & 0x3;
         switch (addr) {
@@ -556,7 +551,6 @@ public final class YM2612 implements MdFmProvider {
         }
     }
 
-    @Override
     public void update(int[] buf_lr, int offset, int end) {
         offset *= 2;
         end = end * 2 + offset;
@@ -628,13 +622,9 @@ public final class YM2612 implements MdFmProvider {
         }
     }
 
-    /**
-     * ********************************************
-     * <p/>
-     * Parameter Calculation
-     * <p/>
-     * *********************************************
-     */
+    //
+    // Parameter Calculation
+    //
 
     private void calc_FINC_SL(cSlot SL, int finc, int kc) {
         int ksr;
@@ -665,13 +655,9 @@ public final class YM2612 implements MdFmProvider {
         calc_FINC_SL(CH.SLOT[3], finc, kc);
     }
 
-    /**
-     * ********************************************
-     * <p/>
-     * Settings
-     * <p/>
-     * *********************************************
-     */
+    //
+    // Settings
+    //
 
     private void KEY_ON(cChannel CH, int nsl) {
         cSlot SL = CH.SLOT[nsl];
@@ -679,7 +665,7 @@ public final class YM2612 implements MdFmProvider {
             SL.Fcnt = 0;
             // Fix Ecco 2 splash sound
             SL.Ecnt = (DECAY_TO_ATTACK[ENV_TAB[SL.Ecnt >> ENV_LBITS]] + ENV_ATTACK) & SL.ChgEnM;
-            SL.ChgEnM = 0xFFFFFFFF;
+            SL.ChgEnM = 0xFFFF_FFFF;
             SL.Einc = SL.EincA;
             SL.Ecmp = ENV_DECAY;
             SL.Ecurp = ATTACK;
@@ -849,7 +835,6 @@ public final class YM2612 implements MdFmProvider {
         return 0;
     }
 
-
     private int setYM(int address, int data) {       // INT, UCHAR
         cChannel CH;
         int nch;
@@ -916,26 +901,21 @@ public final class YM2612 implements MdFmProvider {
         return 0;
     }
 
-
-    /**
-     * ********************************************
-     * <p/>
-     * Generation Methods
-     * <p/>
-     * *********************************************
-     */
+    //
+    // Generation Methods
+    //
 
     private void Env_NULL_Next(cSlot SL) {
     }
 
-    private void Env_Attack_Next(cSlot SL) {
+    private static void Env_Attack_Next(cSlot SL) {
         SL.Ecnt = ENV_DECAY;
         SL.Einc = SL.EincD;
         SL.Ecmp = SL.SLL;
         SL.Ecurp = DECAY;
     }
 
-    private void Env_Decay_Next(cSlot SL) {
+    private static void Env_Decay_Next(cSlot SL) {
         SL.Ecnt = SL.SLL;
         SL.Einc = SL.EincS;
         SL.Ecmp = ENV_END;
@@ -968,7 +948,7 @@ public final class YM2612 implements MdFmProvider {
         }
     }
 
-    private void Env_Release_Next(cSlot SL) {
+    private static void Env_Release_Next(cSlot SL) {
         SL.Ecnt = ENV_END;
         SL.Einc = 0;
         SL.Ecmp = ENV_END + 1;

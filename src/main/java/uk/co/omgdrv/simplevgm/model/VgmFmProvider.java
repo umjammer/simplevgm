@@ -1,6 +1,12 @@
 package uk.co.omgdrv.simplevgm.model;
 
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
+import java.util.ServiceLoader;
+
 import uk.co.omgdrv.simplevgm.VgmEmu;
+
+import static java.lang.System.getLogger;
 
 
 /**
@@ -10,6 +16,8 @@ import uk.co.omgdrv.simplevgm.VgmEmu;
  * @version Copyright 2019
  */
 public interface VgmFmProvider {
+
+    Logger logger = getLogger(VgmFmProvider.class.getName());
 
     double FM_CALCS_PER_MS = VgmEmu.VGM_SAMPLE_RATE_HZ / 1000.0;
 
@@ -27,7 +35,7 @@ public interface VgmFmProvider {
         throw new RuntimeException("Invalid");
     }
 
-    //single port
+    // single port
     default void write(int addr, int data) {
         throw new RuntimeException("Invalid");
     }
@@ -36,30 +44,21 @@ public interface VgmFmProvider {
         throw new RuntimeException("Invalid");
     }
 
-    VgmFmProvider NO_SOUND = new VgmFmProvider() {
-        @Override
-        public void reset() {
-
+    static VgmFmProvider getProvider(String className) {
+        VgmFmProvider nullProvider = null;
+        for (VgmFmProvider provider : ServiceLoader.load(VgmFmProvider.class)) {
+            if (provider.getClass() == NullVgmFmProvider.class) {
+                nullProvider = provider;
+            }
+            if (provider.getClass().getName().equals(className)) {
+                logger.log(Level.TRACE, "fm: " + provider.getClass());
+                return provider;
+            }
         }
-
-        @Override
-        public void init(int Clock, int Rate) {
-
+        if (nullProvider == null) {
+            throw new IllegalStateException("no null provider is found");
         }
-
-        @Override
-        public void update(int[] buf_lr, int offset, int end) {
-
-        }
-
-        @Override
-        public void writePort(int addr, int data) {
-
-        }
-
-        @Override
-        public void write(int addr, int data) {
-
-        }
-    };
+        logger.log(Level.WARNING, "no such a class: " + className);
+        return nullProvider;
+    }
 }

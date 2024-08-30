@@ -6,9 +6,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import libgme.util.BlipBuffer;
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.PsgCompare;
-import uk.co.omgdrv.simplevgm.util.BlipBuffer;
 import uk.co.omgdrv.simplevgm.util.DspUtil;
 import uk.co.omgdrv.simplevgm.util.Util;
 
@@ -46,12 +46,8 @@ public class NukedPsgProvider implements VgmPsgProvider {
 
     protected PsgCompare psgCompare;
 
-    public static NukedPsgProvider createInstance() {
-        return createInstance(null);
-    }
-
     public static NukedPsgProvider createInstance(PsgCompare psgCompare) {
-        NukedPsgProvider n = new NukedPsgProvider();
+        NukedPsgProvider n = (NukedPsgProvider) VgmPsgProvider.getProvider(NukedPsgProvider.class.getName());
         n.psgCompare = psgCompare;
         return n;
     }
