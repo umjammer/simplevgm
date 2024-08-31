@@ -1,4 +1,14 @@
+[![Release](https://jitpack.io/v/umjammer/simplevgm.svg)](https://jitpack.io/#umjammer/simplevgm)
+[![Java CI](https://github.com/umjammer/simplevgm/actions/workflows/maven.yml/badge.svg)](https://github.com/umjammer/simplevgm/actions/workflows/maven.yml)
+[![CodeQL](https://github.com/umjammer/simplevgm/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/umjammer/simplevgm/actions/workflows/codeql-analysis.yml)
+![Java](https://img.shields.io/badge/Java-17-b07219)
+
 # Simple VGM
+
+ mavenized vgm player
+
+* made it be one of the [vavi-sound-emu](https://github.com/umjammer/vavi-sound-emu) spi
+* made psg, fm use service provider 
 
 ## References
 
@@ -6,6 +16,11 @@
  * https://vgmrips.net/packs/
  * https://github.com/vlcoo/P3synthVG
  * https://github.com/GhostSonic21/Java_VGMPlayer
+ * https://github.com/toyoshim/tss
+
+## TODO
+
+ * ~~merge simplevgm as extended to~~
 
 ---
 

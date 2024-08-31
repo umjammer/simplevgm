@@ -3,3 +3,4 @@ vgm/**
 /out/
 /.idea/
 tmp/
+local.properties
