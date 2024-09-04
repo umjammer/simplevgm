@@ -207,7 +207,6 @@ logger.log(Level.DEBUG, "fm: " + fm.getClass());
             dac_amp |= dac_disabled;
     }
 
-    private static final boolean endlessLoopFlag = true;
     private long sampleCounter = 0;
 
     @Override
@@ -230,10 +229,11 @@ logger.log(Level.DEBUG, "fm: " + fm.getClass());
                 cmd = data[pos++] & 0xFF;
             switch (cmd) {
                 case CMD_END:
-                    //TODO fix sample counting
+                    // TODO fix sample counting
 //                    System.out.println("End command after samples: " + sampleCounter);
                     boolean loopDone = sampleCounter >= vgmHeader.getNumSamples() + vgmHeader.getLoopSamples();
                     endOfStream = !endlessLoopFlag && loopDone;
+logger.log(Level.DEBUG, "LOOP: " + endlessLoopFlag);
                     if (vgmHeader.getLoopSamples() == 0 && sampleCounter < vgmHeader.getNumSamples()) {
                         pos = data.length;
                     } else {
