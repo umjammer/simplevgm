@@ -433,8 +433,8 @@ public final class YM2612 {
         for (i = 0; i < 6; i++) {
             YM2612_CHANNEL[i].Old_OUTd = 0;
             YM2612_CHANNEL[i].OUTd = 0;
-            YM2612_CHANNEL[i].LEFT = 0xFFFFFFFF;
-            YM2612_CHANNEL[i].RIGHT = 0xFFFFFFFF;
+            YM2612_CHANNEL[i].LEFT = 0xFFFF_FFFF;
+            YM2612_CHANNEL[i].RIGHT = 0xFFFF_FFFF;
             YM2612_CHANNEL[i].ALGO = 0;
             YM2612_CHANNEL[i].FB = 31;
             YM2612_CHANNEL[i].FMS = 0;
