@@ -13,7 +13,7 @@
 ## References
 
  * https://github.com/fedex81/simplevgm
- * https://vgmrips.net/packs/
+ * https://vgmrips.net/packs/ (vgm download)
  * https://github.com/vlcoo/P3synthVG
  * https://github.com/GhostSonic21/Java_VGMPlayer
  * https://github.com/toyoshim/tss
@@ -21,6 +21,7 @@
 ## TODO
 
  * ~~merge simplevgm as extended to~~
+ * psg providers other than sms doesn't work???
 
 ---
 

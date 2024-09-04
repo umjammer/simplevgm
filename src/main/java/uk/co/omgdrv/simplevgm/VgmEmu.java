@@ -23,8 +23,8 @@ import java.lang.System.Logger.Level;
 
 import libgme.ClassicEmu;
 import uk.co.omgdrv.simplevgm.fm.MdFmProvider;
-import uk.co.omgdrv.simplevgm.fm.ym2621.YM2612Provider;
 import uk.co.omgdrv.simplevgm.fm.ym2413.Ym2413Provider;
+import uk.co.omgdrv.simplevgm.fm.ym2621.YM2612Provider;
 import uk.co.omgdrv.simplevgm.model.NullVgmFmProvider;
 import uk.co.omgdrv.simplevgm.model.VgmFmProvider;
 import uk.co.omgdrv.simplevgm.model.VgmHeader;
@@ -70,7 +70,7 @@ public class VgmEmu extends ClassicEmu {
     public static final int FADE_LENGTH_SEC = 5;
 
     public VgmEmu() {
-        this.psg = VgmPsgProvider.getProvider(getProperty("uk.co.omgdrv.simplevgm.psg"));
+        this.psg = VgmPsgProvider.getProvider(getProperty("uk.co.omgdrv.simplevgm.psg")); // TODO no mean
         this.fm = VgmFmProvider.getProvider(getProperty("uk.co.omgdrv.simplevgm.fm"));
     }
 
@@ -109,7 +109,7 @@ public class VgmEmu extends ClassicEmu {
         } else {
             fm_clock_rate = vgmHeader.getYm2413Clk();
             if (fm_clock_rate > 0) {
-                fm = VgmFmProvider.getProvider(YM2612Provider.class.getName());
+                fm = VgmFmProvider.getProvider(Ym2413Provider.class.getName());
                 fm.init(fm_clock_rate, sampleRate());
             }
             buf.setVolume(1.0);
@@ -207,7 +207,6 @@ logger.log(Level.DEBUG, "fm: " + fm.getClass());
             dac_amp |= dac_disabled;
     }
 
-    private static final boolean endlessLoopFlag = true;
     private long sampleCounter = 0;
 
     @Override
@@ -230,10 +229,11 @@ logger.log(Level.DEBUG, "fm: " + fm.getClass());
                 cmd = data[pos++] & 0xFF;
             switch (cmd) {
                 case CMD_END:
-                    //TODO fix sample counting
+                    // TODO fix sample counting
 //                    System.out.println("End command after samples: " + sampleCounter);
                     boolean loopDone = sampleCounter >= vgmHeader.getNumSamples() + vgmHeader.getLoopSamples();
                     endOfStream = !endlessLoopFlag && loopDone;
+logger.log(Level.DEBUG, "LOOP: " + endlessLoopFlag);
                     if (vgmHeader.getLoopSamples() == 0 && sampleCounter < vgmHeader.getNumSamples()) {
                         pos = data.length;
                     } else {

@@ -55,7 +55,7 @@ public class VgmHeader {
         private final int size;
 
         Field(int pos) {
-            this(pos, 4); //4bytes
+            this(pos, 4); // 4bytes
         }
 
         Field(int pos, int size) {

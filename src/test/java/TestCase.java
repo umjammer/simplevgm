@@ -6,7 +6,10 @@
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.concurrent.CountDownLatch;
+import javax.sound.sampled.LineEvent.Type;
 
+import libgme.EmuPlayer.JavaEngine;
 import libgme.VGMPlayer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,11 +50,20 @@ Debug.println("volume: " + volume);
 
     @Test
     void test1() throws Exception {
+        System.setProperty("libgme.endless", "false");
+
         VGMPlayer player = new VGMPlayer(VgmEmu.VGM_SAMPLE_RATE_HZ);
+        CountDownLatch cdl = new CountDownLatch(1);
+
+        JavaEngine engine = new JavaEngine();
+        engine.addLineListener(e -> { if (e.getType() == Type.STOP) cdl.countDown(); });
+
 Debug.println(vgz);
         player.setVolume(volume);
+        player.setEngine(engine);
         player.loadFile(vgz);
         player.startTrack(1);
-        while (player.isPlaying()) Thread.yield(); // TODO add event system
+
+        cdl.await();
     }
 }
