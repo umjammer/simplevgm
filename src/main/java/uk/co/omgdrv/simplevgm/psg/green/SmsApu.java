@@ -29,7 +29,7 @@ import libgme.util.BlipBuffer;
  *
  * @see "https://www.slack.net/~ant/"
  */
-public final class SmsApu implements VgmPsgProvider  { // TODO gross
+public final class SmsApu implements VgmPsgProvider { // TODO gross
 
     int lastTime;
     int latch;

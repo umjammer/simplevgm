@@ -15,82 +15,55 @@ public final class YM2612 {
     static final int NULL_RATE_SIZE = 32;
 
     // YM2612 Hardware
-    private static final class cSlot {
+    private static final class Slot {
 
-        int[] DT;
-        int MUL;
-        int TL;
-        int TLL;
-        int SLL;
-        int KSR_S;
-        int KSR;
-        int SEG;
-        int AR;
-        int DR;
-        int SR;
-        int RR;
-        int Fcnt;
-        int Finc;
-        int Ecurp;
-        int Ecnt;
-        int Einc;
-        int Ecmp;
-        int EincA;
-        int EincD;
-        int EincS;
-        int EincR;
-        int INd;
-        int ChgEnM;
-        int AMS;
-        int AMSon;
+        int[] dt;
+        int mul;
+        int tl;
+        int tll;
+        int sll;
+        int ksrS;
+        int ksr;
+        int seg;
+        int ar;
+        int dr;
+        int sr;
+        int rr;
+        int fCnt;
+        int fInc;
+        int eCurp;
+        int eCnt;
+        int eInc;
+        int eCmp;
+        int eIncA;
+        int eIncD;
+        int eIncS;
+        int eIncR;
+        int inD;
+        int chgEnM;
+        int ams;
+        int amsOn;
     }
 
-    private static final class cChannel {
+    private static final class Channel {
 
-        final int[] S0_OUT = new int[4];
-        int Old_OUTd;
-        int OUTd;
-        int LEFT;
-        int RIGHT;
-        int ALGO;
-        int FB;
-        int FMS;
-        int AMS;
-        final int[] FNUM = new int[4];
-        final int[] FOCT = new int[4];
-        final int[] KC = new int[4];
-        final cSlot[] SLOT = new cSlot[4];
-        int FFlag;
+        final int[] s0Out = new int[4];
+        int oldOutD;
+        int outD;
+        int left;
+        int right;
+        int algo;
+        int fb;
+        int fms;
+        int ams;
+        final int[] fNum = new int[4];
+        final int[] fOct = new int[4];
+        final int[] kc = new int[4];
+        final Slot[] slots = new Slot[4];
+        int fFlag;
 
-        public cChannel() {
-            for (int i = 0; i < 4; i++) SLOT[i] = new cSlot();
-        }
-    }
-
-    private static final class cYM2612 {
-
-        int Clock;
-        int Rate;
-        int TimerBase;
-        int Status;
-        int LFOcnt;
-        int LFOinc;
-        int TimerA;
-        int TimerAL;
-        int TimerAcnt;
-        int TimerB;
-        int TimerBL;
-        int TimerBcnt;
-        int Mode;
-        int DAC;
-        double Frequency;
-        long Inter_Cnt;    // UINT
-        long Inter_Step;    // UINT
-        final cChannel[] CHANNEL = new cChannel[6];
-        final int[][] REG = new int[2][0x100];
-
-        public cYM2612() {
-            for (int i = 0; i < 6; i++) CHANNEL[i] = new cChannel();
+        public Channel() {
+            for (int i = 0; i < 4; i++) slots[i] = new Slot();
         }
     }
 
@@ -213,31 +186,31 @@ public final class YM2612 {
 
     private static final int MAIN_SHIFT = FINAL_SHFT;
 
-    int YM2612_Clock;
-    int YM2612_Rate;
-    int YM2612_TimerBase;
-    int YM2612_Status;
-    int YM2612_LFOcnt;
-    int YM2612_LFOinc;
-    int YM2612_TimerA;
-    int YM2612_TimerAL;
-    int YM2612_TimerAcnt;
-    int YM2612_TimerB;
-    int YM2612_TimerBL;
-    int YM2612_TimerBcnt;
-    int YM2612_Mode;
-    int YM2612_DAC;
-    double YM2612_Frequency;
-    long YM2612_Inter_Cnt;    // UINT
-    long YM2612_Inter_Step;    // UINT
-    final cChannel[] YM2612_CHANNEL = new cChannel[6];
-    final int[][] YM2612_REG = new int[2][0x100];
+    int clock;
+    int rate;
+    int timerBase;
+    int status;
+    int lfoCnt;
+    int lfoInc;
+    int timerA;
+    int timerAL;
+    int timerACnt;
+    int timerB;
+    int timerBL;
+    int timerBCnt;
+    int mode;
+    int dac;
+    double frequency;
+    long interCnt;    // UINT
+    long interStep;    // UINT
+    final Channel[] channels = new Channel[6];
+    final int[][] reg = new int[2][0x100];
 
     /**
      * Creates a new instance of YM2612
      */
     public YM2612() {
-        for (int i = 0; i < 6; i++) YM2612_CHANNEL[i] = new cChannel();
+        for (int i = 0; i < 6; i++) channels[i] = new Channel();
     }
 
     // YM2612 Emulation Methods
@@ -250,22 +223,22 @@ public final class YM2612 {
         return Math.log(x) / Math.log(10.0);
     }
 
-    public void init(int Clock, int Rate) {
+    public void init(int clock, int rate) {
         int i, j;
         double x;
 
-        if ((Rate == 0) || (Clock == 0)) return;
+        if ((rate == 0) || (clock == 0)) return;
 
-        YM2612_Clock = Clock;
-        YM2612_Rate = Rate;
+        this.clock = clock;
+        this.rate = rate;
 
-        YM2612_Frequency = ((double) YM2612_Clock / (double) YM2612_Rate) / 144.0;
-        YM2612_TimerBase = (int) (YM2612_Frequency * 4096.0);
+        frequency = ((double) this.clock / (double) this.rate) / 144.0;
+        timerBase = (int) (frequency * 4096.0);
 
-        YM2612_Inter_Step = 0x4000;
-        YM2612_Inter_Cnt = 0;
+        interStep = 0x4000;
+        interCnt = 0;
 
-        // TL Table :
+        // tl Table :
         // [0	  -	 4095] = +output  [4095	 - ...] = +output overflow (fill with 0)
         // [12288 - 16383] = -output  [16384 - ...] = -output overflow (fill with 0)
 
@@ -291,7 +264,7 @@ public final class YM2612 {
             x = Math.sin(2.0 * PI * (double) (i) / (double) (SINLEN));    // Sinus
             x = 20 * log10(1 / x);                       // convert to dB
 
-            j = (int) (x / ENV_STEP);             // Get TL range
+            j = (int) (x / ENV_STEP);             // Get tl range
 
             if (j > PG_CUT_OFF) j = PG_CUT_OFF;
 
@@ -351,18 +324,18 @@ public final class YM2612 {
         //Frequency Step Table
 
         for (i = 0; i < 2048; i++) {
-            x = (double) i * YM2612_Frequency;
+            x = (double) i * frequency;
 
             if ((SIN_LBITS + SIN_HBITS - (21 - 7)) < 0) {
                 x /= 1 << ((21 - 7) - SIN_LBITS - SIN_HBITS);
             } else {
                 x *= 1 << (SIN_LBITS + SIN_HBITS - (21 - 7));
             }
-            x /= 2.0;  // because MUL = value * 2
+            x /= 2.0;  // because mul = value * 2
             FINC_TAB[i] = (int) x;    // (unsigned int) x;
         }
 
-        // Attack & Decay Rate Table
+        // Attack & Decay rate Table
 
         for (i = 0; i < 4; i++) {
             AR_TAB[i] = 0;
@@ -370,8 +343,8 @@ public final class YM2612 {
         }
 
         for (i = 0; i < 60; i++) {
-            x = YM2612_Frequency;
-            x *= 1.0 + ((i & 3) * 0.25);          // bits 0-1 : x1.00, x1.25, x1.50, x1.75
+            x = frequency;
+            x *= 1.0 + ((i & 3) * 0.25); // bits 0-1 : x1.00, x1.25, x1.50, x1.75
             x *= 1 << ((i >> 2));        // bits 2-5 : shift bits (x2^0 - x2^15)
             x *= ENVLEN << ENV_LBITS;    // on ajuste pour le tableau ENV_TAB
 
@@ -390,9 +363,9 @@ public final class YM2612 {
         for (i = 0; i < 4; i++) {
             for (j = 0; j < 32; j++) {
                 if ((SIN_LBITS + SIN_HBITS - 21) < 0) {
-                    x = (double) DT_DEF_TAB[(i << 5) + j] * YM2612_Frequency / (double) (1 << (21 - SIN_LBITS - SIN_HBITS));
+                    x = (double) DT_DEF_TAB[(i << 5) + j] * frequency / (double) (1 << (21 - SIN_LBITS - SIN_HBITS));
                 } else {
-                    x = (double) DT_DEF_TAB[(i << 5) + j] * YM2612_Frequency * (double) (1 << (SIN_LBITS + SIN_HBITS - 21));
+                    x = (double) DT_DEF_TAB[(i << 5) + j] * frequency * (double) (1 << (SIN_LBITS + SIN_HBITS - 21));
                 }
                 DT_TAB[i + 0][j] = (int) x;
                 DT_TAB[i + 4][j] = (int) -x;
@@ -400,7 +373,7 @@ public final class YM2612 {
         }
 
         // LFO Table
-        j = (int) ((YM2612_Rate * YM2612_Inter_Step) / 0x4000);
+        j = (int) ((this.rate * interStep) / 0x4000);
 
         LFO_INC_TAB[0] = (int) (3.98 * (double) (1 << (LFO_HBITS + LFO_LBITS)) / j);
         LFO_INC_TAB[1] = (int) (5.56 * (double) (1 << (LFO_HBITS + LFO_LBITS)) / j);
@@ -417,73 +390,71 @@ public final class YM2612 {
     public void reset() {
         int i, j;
 
-        YM2612_LFOcnt = 0;
-        YM2612_TimerA = 0;
-        YM2612_TimerAL = 0;
-        YM2612_TimerAcnt = 0;
-        YM2612_TimerB = 0;
-        YM2612_TimerBL = 0;
-        YM2612_TimerBcnt = 0;
-        YM2612_DAC = 0;
+        lfoCnt = 0;
+        timerA = 0;
+        timerAL = 0;
+        timerACnt = 0;
+        timerB = 0;
+        timerBL = 0;
+        timerBCnt = 0;
+        dac = 0;
 
-        YM2612_Status = 0;
+        status = 0;
 
-        YM2612_Inter_Cnt = 0;
+        interCnt = 0;
 
         for (i = 0; i < 6; i++) {
-            YM2612_CHANNEL[i].Old_OUTd = 0;
-            YM2612_CHANNEL[i].OUTd = 0;
-            YM2612_CHANNEL[i].LEFT = 0xFFFF_FFFF;
-            YM2612_CHANNEL[i].RIGHT = 0xFFFF_FFFF;
-            YM2612_CHANNEL[i].ALGO = 0;
-            YM2612_CHANNEL[i].FB = 31;
-            YM2612_CHANNEL[i].FMS = 0;
-            YM2612_CHANNEL[i].AMS = 0;
+            channels[i].oldOutD = 0;
+            channels[i].outD = 0;
+            channels[i].left = 0xffff_ffff;
+            channels[i].right = 0xffff_ffff;
+            channels[i].algo = 0;
+            channels[i].fb = 31;
+            channels[i].fms = 0;
+            channels[i].ams = 0;
 
             for (j = 0; j < 4; j++) {
-                YM2612_CHANNEL[i].S0_OUT[j] = 0;
-                YM2612_CHANNEL[i].FNUM[j] = 0;
-                YM2612_CHANNEL[i].FOCT[j] = 0;
-                YM2612_CHANNEL[i].KC[j] = 0;
+                channels[i].s0Out[j] = 0;
+                channels[i].fNum[j] = 0;
+                channels[i].fOct[j] = 0;
+                channels[i].kc[j] = 0;
 
-                YM2612_CHANNEL[i].SLOT[j].Fcnt = 0;
-                YM2612_CHANNEL[i].SLOT[j].Finc = 0;
-                YM2612_CHANNEL[i].SLOT[j].Ecnt = ENV_END;     // Put it at the end of Decay phase...
-                YM2612_CHANNEL[i].SLOT[j].Einc = 0;
-                YM2612_CHANNEL[i].SLOT[j].Ecmp = 0;
-                YM2612_CHANNEL[i].SLOT[j].Ecurp = RELEASE;
+                channels[i].slots[j].fCnt = 0;
+                channels[i].slots[j].fInc = 0;
+                channels[i].slots[j].eCnt = ENV_END;     // Put it at the end of Decay phase...
+                channels[i].slots[j].eInc = 0;
+                channels[i].slots[j].eCmp = 0;
+                channels[i].slots[j].eCurp = RELEASE;
 
-                YM2612_CHANNEL[i].SLOT[j].ChgEnM = 0;
+                channels[i].slots[j].chgEnM = 0;
             }
         }
 
         for (i = 0; i < 0x100; i++) {
-            YM2612_REG[0][i] = -1;
-            YM2612_REG[1][i] = -1;
+            reg[0][i] = -1;
+            reg[1][i] = -1;
         }
 
-        for (i = 0xB6; i >= 0xB4; i--) {
+        for (i = 0xb6; i >= 0xb4; i--) {
             write0(i, 0xC0);
             write1(i, 0xC0);
         }
 
-        for (i = 0xB2; i >= 0x22; i--) {
+        for (i = 0xb2; i >= 0x22; i--) {
             write0(i, 0);
             write1(i, 0);
         }
 
-        write0(0x2A, 0x80);
+        write0(0x2a, 0x80);
     }
 
     public int readRegister(int type, int regNumber) {
-        return YM2612_REG[type][regNumber];
+        return reg[type][regNumber];
     }
-
 
     public int read() {
-        return (YM2612_Status);
+        return status;
     }
-
 
     int addressLatch;
 
@@ -508,7 +479,7 @@ public final class YM2612 {
         int realAddrReg = regPart > 0 ? realAddr - 0x100 : realAddr;
 
         if (realAddr < 0x30) {
-            YM2612_REG[regPart][realAddrReg] = data;
+            reg[regPart][realAddrReg] = data;
             setYM(realAddrReg, data);
         } else {
             if (realAddrReg < 0xA0) {
@@ -521,17 +492,17 @@ public final class YM2612 {
     }
 
     private void setBusyFlag() {
-//        YM2612_Status |= FM_STATUS_BUSY_BIT_MASK;
+//        status |= FM_STATUS_BUSY_BIT_MASK;
 //        busyCycles = BUSY_CYCLES;
-        //DO NOTHING
+        // DO NOTHING
     }
 
     private void write0(int addr, int data) {
         if (addr < 0x30) {
-            YM2612_REG[0][addr] = data;
+            reg[0][addr] = data;
             setYM(addr, data);
-        } else if (YM2612_REG[0][addr] != data) {
-            YM2612_REG[0][addr] = data;
+        } else if (reg[0][addr] != data) {
+            reg[0][addr] = data;
 
             if (addr < 0xA0)
                 setSlot(addr, data);
@@ -541,8 +512,8 @@ public final class YM2612 {
     }
 
     private void write1(int addr, int data) {
-        if (addr >= 0x30 && YM2612_REG[1][addr] != data) {
-            YM2612_REG[1][addr] = data;
+        if (addr >= 0x30 && reg[1][addr] != data) {
+            reg[1][addr] = data;
 
             if (addr < 0xA0)
                 setSlot(addr + 0x100, data);
@@ -555,31 +526,31 @@ public final class YM2612 {
         offset *= 2;
         end = end * 2 + offset;
 
-        if (YM2612_CHANNEL[0].SLOT[0].Finc == -1) calc_FINC_CH(YM2612_CHANNEL[0]);
-        if (YM2612_CHANNEL[1].SLOT[0].Finc == -1) calc_FINC_CH(YM2612_CHANNEL[1]);
-        if (YM2612_CHANNEL[2].SLOT[0].Finc == -1) {
-            if ((YM2612_Mode & 0x40) != 0) {
-                calc_FINC_SL((YM2612_CHANNEL[2].SLOT[S0]), FINC_TAB[YM2612_CHANNEL[2].FNUM[2]] >> (7 - YM2612_CHANNEL[2].FOCT[2]), YM2612_CHANNEL[2].KC[2]);
-                calc_FINC_SL((YM2612_CHANNEL[2].SLOT[S1]), FINC_TAB[YM2612_CHANNEL[2].FNUM[3]] >> (7 - YM2612_CHANNEL[2].FOCT[3]), YM2612_CHANNEL[2].KC[3]);
-                calc_FINC_SL((YM2612_CHANNEL[2].SLOT[S2]), FINC_TAB[YM2612_CHANNEL[2].FNUM[1]] >> (7 - YM2612_CHANNEL[2].FOCT[1]), YM2612_CHANNEL[2].KC[1]);
-                calc_FINC_SL((YM2612_CHANNEL[2].SLOT[S3]), FINC_TAB[YM2612_CHANNEL[2].FNUM[0]] >> (7 - YM2612_CHANNEL[2].FOCT[0]), YM2612_CHANNEL[2].KC[0]);
+        if (channels[0].slots[0].fInc == -1) calc_FINC_CH(channels[0]);
+        if (channels[1].slots[0].fInc == -1) calc_FINC_CH(channels[1]);
+        if (channels[2].slots[0].fInc == -1) {
+            if ((mode & 0x40) != 0) {
+                calc_FINC_SL((channels[2].slots[S0]), FINC_TAB[channels[2].fNum[2]] >> (7 - channels[2].fOct[2]), channels[2].kc[2]);
+                calc_FINC_SL((channels[2].slots[S1]), FINC_TAB[channels[2].fNum[3]] >> (7 - channels[2].fOct[3]), channels[2].kc[3]);
+                calc_FINC_SL((channels[2].slots[S2]), FINC_TAB[channels[2].fNum[1]] >> (7 - channels[2].fOct[1]), channels[2].kc[1]);
+                calc_FINC_SL((channels[2].slots[S3]), FINC_TAB[channels[2].fNum[0]] >> (7 - channels[2].fOct[0]), channels[2].kc[0]);
             } else {
-                calc_FINC_CH(YM2612_CHANNEL[2]);
+                calc_FINC_CH(channels[2]);
             }
         }
-        if (YM2612_CHANNEL[3].SLOT[0].Finc == -1) calc_FINC_CH(YM2612_CHANNEL[3]);
-        if (YM2612_CHANNEL[4].SLOT[0].Finc == -1) calc_FINC_CH(YM2612_CHANNEL[4]);
-        if (YM2612_CHANNEL[5].SLOT[0].Finc == -1) calc_FINC_CH(YM2612_CHANNEL[5]);
+        if (channels[3].slots[0].fInc == -1) calc_FINC_CH(channels[3]);
+        if (channels[4].slots[0].fInc == -1) calc_FINC_CH(channels[4]);
+        if (channels[5].slots[0].fInc == -1) calc_FINC_CH(channels[5]);
 
-//        if (YM2612_Inter_Step & 0x04000) algo_type = 0;
+//        if (interStep & 0x04000) algo_type = 0;
 //        else algo_type = 16;
         int algo_type = 0;
 
-        if ((YM2612_LFOinc) != 0) {
+        if ((lfoInc) != 0) {
             // Precalculate LFO wave
             for (int o = offset; o < end; o += 2) {
                 int i = o >> 1;
-                int j = ((YM2612_LFOcnt += YM2612_LFOinc) >> LFO_LBITS) & LFO_MSK;
+                int j = ((lfoCnt += lfoInc) >> LFO_LBITS) & LFO_MSK;
 
                 LFO_ENV_UP[i] = LFO_ENV_TAB[j];
                 LFO_FREQ_UP[i] = LFO_FREQ_TAB[j];
@@ -588,36 +559,36 @@ public final class YM2612 {
             algo_type |= 8;
         }
 
-        updateChannel((YM2612_CHANNEL[0].ALGO + algo_type), (YM2612_CHANNEL[0]), buf_lr, offset, end);
-        updateChannel((YM2612_CHANNEL[1].ALGO + algo_type), (YM2612_CHANNEL[1]), buf_lr, offset, end);
-        updateChannel((YM2612_CHANNEL[2].ALGO + algo_type), (YM2612_CHANNEL[2]), buf_lr, offset, end);
-        updateChannel((YM2612_CHANNEL[3].ALGO + algo_type), (YM2612_CHANNEL[3]), buf_lr, offset, end);
-        updateChannel((YM2612_CHANNEL[4].ALGO + algo_type), (YM2612_CHANNEL[4]), buf_lr, offset, end);
-        if (YM2612_DAC == 0)
-            updateChannel(YM2612_CHANNEL[5].ALGO + algo_type, YM2612_CHANNEL[5], buf_lr, offset, end);
+        updateChannel((channels[0].algo + algo_type), (channels[0]), buf_lr, offset, end);
+        updateChannel((channels[1].algo + algo_type), (channels[1]), buf_lr, offset, end);
+        updateChannel((channels[2].algo + algo_type), (channels[2]), buf_lr, offset, end);
+        updateChannel((channels[3].algo + algo_type), (channels[3]), buf_lr, offset, end);
+        updateChannel((channels[4].algo + algo_type), (channels[4]), buf_lr, offset, end);
+        if (dac == 0)
+            updateChannel(channels[5].algo + algo_type, channels[5], buf_lr, offset, end);
 
-        YM2612_Inter_Cnt = int_cnt;
+        interCnt = int_cnt;
     }
 
     public void synchronizeTimers(int length) {
         int i;
 
-        i = YM2612_TimerBase * length;
+        i = timerBase * length;
 
-        if ((YM2612_Mode & 1) != 0) {
-//			  if((YM2612_TimerAcnt -= 14073) <= 0){	   // 13879=NTSC (old: 14475=NTSC  14586=PAL)
-            if ((YM2612_TimerAcnt -= i) <= 0) {
-                YM2612_Status |= (YM2612_Mode & 0x04) >> 2;
-                YM2612_TimerAcnt += YM2612_TimerAL;
+        if ((mode & 1) != 0) {
+//			  if((timerACnt -= 14073) <= 0){	   // 13879=NTSC (old: 14475=NTSC  14586=PAL)
+            if ((timerACnt -= i) <= 0) {
+                status |= (mode & 0x04) >> 2;
+                timerACnt += timerAL;
 
-                if ((YM2612_Mode & 0x80) != 0) CSM_Key_Control();
+                if ((mode & 0x80) != 0) controlCsmKey();
             }
         }
-        if ((YM2612_Mode & 2) != 0) {
-//			  if((YM2612_TimerBcnt -= 14073) <= 0){	   // 13879=NTSC (old: 14475=NTSC  14586=PAL)
-            if ((YM2612_TimerBcnt -= i) <= 0) {
-                YM2612_Status |= (YM2612_Mode & 0x08) >> 2;
-                YM2612_TimerBcnt += YM2612_TimerBL;
+        if ((mode & 2) != 0) {
+//			  if((timerBCnt -= 14073) <= 0){	   // 13879=NTSC (old: 14475=NTSC  14586=PAL)
+            if ((timerBCnt -= i) <= 0) {
+                status |= (mode & 0x08) >> 2;
+                timerBCnt += timerBL;
             }
         }
     }
@@ -626,75 +597,75 @@ public final class YM2612 {
     // Parameter Calculation
     //
 
-    private void calc_FINC_SL(cSlot SL, int finc, int kc) {
+    private void calc_FINC_SL(Slot SL, int fInc, int kc) {
         int ksr;
-        SL.Finc = (finc + SL.DT[kc]) * SL.MUL;
-        ksr = kc >> SL.KSR_S;
-        if (SL.KSR != ksr) {
-            SL.KSR = ksr;
-            SL.EincA = AR_TAB[SL.AR + ksr];
-            SL.EincD = DR_TAB[SL.DR + ksr];
-            SL.EincS = DR_TAB[SL.SR + ksr];
-            SL.EincR = DR_TAB[SL.RR + ksr];
-            if (SL.Ecurp == ATTACK) SL.Einc = SL.EincA;
-            else if (SL.Ecurp == DECAY) SL.Einc = SL.EincD;
-            else if (SL.Ecnt < ENV_END) {
-                if (SL.Ecurp == SUSTAIN) SL.Einc = SL.EincS;
-                else if (SL.Ecurp == RELEASE) SL.Einc = SL.EincR;
+        SL.fInc = (fInc + SL.dt[kc]) * SL.mul;
+        ksr = kc >> SL.ksrS;
+        if (SL.ksr != ksr) {
+            SL.ksr = ksr;
+            SL.eIncA = AR_TAB[SL.ar + ksr];
+            SL.eIncD = DR_TAB[SL.dr + ksr];
+            SL.eIncS = DR_TAB[SL.sr + ksr];
+            SL.eIncR = DR_TAB[SL.rr + ksr];
+            if (SL.eCurp == ATTACK) SL.eInc = SL.eIncA;
+            else if (SL.eCurp == DECAY) SL.eInc = SL.eIncD;
+            else if (SL.eCnt < ENV_END) {
+                if (SL.eCurp == SUSTAIN) SL.eInc = SL.eIncS;
+                else if (SL.eCurp == RELEASE) SL.eInc = SL.eIncR;
             }
         }
     }
 
-    private void calc_FINC_CH(cChannel CH) {
+    private void calc_FINC_CH(Channel ch) {
         int finc, kc;
-        finc = FINC_TAB[CH.FNUM[0]] >> (7 - CH.FOCT[0]);
-        kc = CH.KC[0];
-        calc_FINC_SL(CH.SLOT[0], finc, kc);
-        calc_FINC_SL(CH.SLOT[1], finc, kc);
-        calc_FINC_SL(CH.SLOT[2], finc, kc);
-        calc_FINC_SL(CH.SLOT[3], finc, kc);
+        finc = FINC_TAB[ch.fNum[0]] >> (7 - ch.fOct[0]);
+        kc = ch.kc[0];
+        calc_FINC_SL(ch.slots[0], finc, kc);
+        calc_FINC_SL(ch.slots[1], finc, kc);
+        calc_FINC_SL(ch.slots[2], finc, kc);
+        calc_FINC_SL(ch.slots[3], finc, kc);
     }
 
     //
     // Settings
     //
 
-    private void KEY_ON(cChannel CH, int nsl) {
-        cSlot SL = CH.SLOT[nsl];
-        if (SL.Ecurp == RELEASE) {
-            SL.Fcnt = 0;
+    private void keyOn(Channel ch, int nsl) {
+        Slot sl = ch.slots[nsl];
+        if (sl.eCurp == RELEASE) {
+            sl.fCnt = 0;
             // Fix Ecco 2 splash sound
-            SL.Ecnt = (DECAY_TO_ATTACK[ENV_TAB[SL.Ecnt >> ENV_LBITS]] + ENV_ATTACK) & SL.ChgEnM;
-            SL.ChgEnM = 0xFFFF_FFFF;
-            SL.Einc = SL.EincA;
-            SL.Ecmp = ENV_DECAY;
-            SL.Ecurp = ATTACK;
+            sl.eCnt = (DECAY_TO_ATTACK[ENV_TAB[sl.eCnt >> ENV_LBITS]] + ENV_ATTACK) & sl.chgEnM;
+            sl.chgEnM = 0xffff_ffff;
+            sl.eInc = sl.eIncA;
+            sl.eCmp = ENV_DECAY;
+            sl.eCurp = ATTACK;
         }
     }
 
-    private void KEY_OFF(cChannel CH, int nsl) {
-        cSlot SL = CH.SLOT[nsl];
-        if (SL.Ecurp != RELEASE) {
-            if (SL.Ecnt < ENV_DECAY) {
-                SL.Ecnt = (ENV_TAB[SL.Ecnt >> ENV_LBITS] << ENV_LBITS) + ENV_DECAY;
+    private void keyOff(Channel ch, int nsl) {
+        Slot SL = ch.slots[nsl];
+        if (SL.eCurp != RELEASE) {
+            if (SL.eCnt < ENV_DECAY) {
+                SL.eCnt = (ENV_TAB[SL.eCnt >> ENV_LBITS] << ENV_LBITS) + ENV_DECAY;
             }
-            SL.Einc = SL.EincR;
-            SL.Ecmp = ENV_END;
-            SL.Ecurp = RELEASE;
+            SL.eInc = SL.eIncR;
+            SL.eCmp = ENV_END;
+            SL.eCurp = RELEASE;
         }
     }
 
-    private void CSM_Key_Control() {
-        KEY_ON(YM2612_CHANNEL[2], 0);
-        KEY_ON(YM2612_CHANNEL[2], 1);
-        KEY_ON(YM2612_CHANNEL[2], 2);
-        KEY_ON(YM2612_CHANNEL[2], 3);
+    private void controlCsmKey() {
+        keyOn(channels[2], 0);
+        keyOn(channels[2], 1);
+        keyOn(channels[2], 2);
+        keyOn(channels[2], 3);
     }
 
     private int setSlot(int address, int data) {  // INT, UCHAR
-        data &= 0xFF;    // unsign
-        cChannel CH;
-        cSlot SL;
+        data &= 0xff;    // unsign
+        Channel ch;
+        Slot sl;
         int nch, nsl;
 
         if ((nch = address & 3) == 3) return 1;
@@ -702,57 +673,57 @@ public final class YM2612 {
 
         if ((address & 0x100) != 0) nch += 3;
 
-        CH = YM2612_CHANNEL[nch];
-        SL = CH.SLOT[nsl];
+        ch = channels[nch];
+        sl = ch.slots[nsl];
 
-        switch (address & 0xF0) {
+        switch (address & 0xf0) {
             case 0x30:
-                if ((SL.MUL = (data & 0x0F)) != 0) SL.MUL <<= 1;
-                else SL.MUL = 1;
-                SL.DT = DT_TAB[(data >> 4) & 7];                    // = DT_TAB[(data >> 4) & 7];
-                CH.SLOT[0].Finc = -1;
+                if ((sl.mul = (data & 0x0f)) != 0) sl.mul <<= 1;
+                else sl.mul = 1;
+                sl.dt = DT_TAB[(data >> 4) & 7];                  // = DT_TAB[(data >> 4) & 7];
+                ch.slots[0].fInc = -1;
                 break;
             case 0x40:
-                SL.TL = data & 0x7F;
-                // SOR2 do a lot of TL adjustement and this fix R.Shinobi jump sound...
-                if ((ENV_HBITS - 7) < 0) SL.TLL = SL.TL >> (7 - ENV_HBITS);
-                else SL.TLL = SL.TL << (ENV_HBITS - 7);
+                sl.tl = data & 0x7f;
+                // SOR2 do a lot of tl adjustment and this fix R.Shinobi jump sound...
+                if ((ENV_HBITS - 7) < 0) sl.tll = sl.tl >> (7 - ENV_HBITS);
+                else sl.tll = sl.tl << (ENV_HBITS - 7);
                 break;
             case 0x50:
-                SL.KSR_S = 3 - (data >> 6);
-                CH.SLOT[0].Finc = -1;
-                if ((data &= 0x1F) != 0) SL.AR = data << 1;        // = &AR_TAB[data << 1];
-                else SL.AR = AR_NULL_RATE;                            // &NULL_RATE[0];
+                sl.ksrS = 3 - (data >> 6);
+                ch.slots[0].fInc = -1;
+                if ((data &= 0x1f) != 0) sl.ar = data << 1;        // = &AR_TAB[data << 1];
+                else sl.ar = AR_NULL_RATE;                         // &NULL_RATE[0];
 
-                SL.EincA = AR_TAB[SL.AR + SL.KSR];                            // SL.AR[SL.KSR];
-                if (SL.Ecurp == ATTACK) SL.Einc = SL.EincA;
+                sl.eIncA = AR_TAB[sl.ar + sl.ksr];                 // sl.ar[sl.ksr];
+                if (sl.eCurp == ATTACK) sl.eInc = sl.eIncA;
                 break;
             case 0x60:
-                if ((SL.AMSon = (data & 0x80)) != 0) SL.AMS = CH.AMS;
-                else SL.AMS = 31;
+                if ((sl.amsOn = (data & 0x80)) != 0) sl.ams = ch.ams;
+                else sl.ams = 31;
 
-                if ((data &= 0x1F) != 0) SL.DR = data << 1;        // = &DR_TAB[data << 1];
-                else SL.DR = DR_NULL_RATE;                            // = &NULL_RATE[0];
+                if ((data &= 0x1f) != 0) sl.dr = data << 1;        // = &DR_TAB[data << 1];
+                else sl.dr = DR_NULL_RATE;                         // = &NULL_RATE[0];
 
-                SL.EincD = DR_TAB[SL.DR + SL.KSR];                            // SL.DR[SL.KSR];
-                if (SL.Ecurp == DECAY) SL.Einc = SL.EincD;
+                sl.eIncD = DR_TAB[sl.dr + sl.ksr];                 // sl.dr[sl.ksr];
+                if (sl.eCurp == DECAY) sl.eInc = sl.eIncD;
                 break;
             case 0x70:
-                if ((data &= 0x1F) != 0) SL.SR = data << 1;        // = &DR_TAB[data << 1];
-                else SL.SR = DR_NULL_RATE;                            // = &NULL_RATE[0];
-                SL.EincS = DR_TAB[SL.SR + SL.KSR];
-                if ((SL.Ecurp == SUSTAIN) && (SL.Ecnt < ENV_END)) SL.Einc = SL.EincS;
+                if ((data &= 0x1f) != 0) sl.sr = data << 1;        // = &DR_TAB[data << 1];
+                else sl.sr = DR_NULL_RATE;                         // = &NULL_RATE[0];
+                sl.eIncS = DR_TAB[sl.sr + sl.ksr];
+                if ((sl.eCurp == SUSTAIN) && (sl.eCnt < ENV_END)) sl.eInc = sl.eIncS;
                 break;
             case 0x80:
-                SL.SLL = SL_TAB[data >> 4];
-                SL.RR = ((data & 0xF) << 2) + 2;                    // = &DR_TAB[((data & 0xF) << 2) + 2];
-                SL.EincR = DR_TAB[SL.RR + SL.KSR];                            // [SL.KSR];
-                if ((SL.Ecurp == RELEASE) && (SL.Ecnt < ENV_END)) SL.Einc = SL.EincR;
+                sl.sll = SL_TAB[data >> 4];
+                sl.rr = ((data & 0xf) << 2) + 2;                    // = &DR_TAB[((data & 0xF) << 2) + 2];
+                sl.eIncR = DR_TAB[sl.rr + sl.ksr];                  // [sl.ksr];
+                if ((sl.eCurp == RELEASE) && (sl.eCnt < ENV_END)) sl.eInc = sl.eIncR;
                 break;
             case 0x90:
                 if (EnableSSGEG) {
-                    if ((data & 0x08) != 0) SL.SEG = data & 0x0F;
-                    else SL.SEG = 0;
+                    if ((data & 0x08) != 0) sl.seg = data & 0x0f;
+                    else sl.seg = 0;
                 }
                 break;
         }
@@ -761,82 +732,82 @@ public final class YM2612 {
 
     private int setChannel(int address, int data) {   // INT,UCHAR
         data &= 0xFF;        // unsign
-        cChannel CH;
+        Channel ch;
         int num;
 
         if ((num = address & 3) == 3) return 1;
 
-        switch (address & 0xFC) {
-            case 0xA0:
+        switch (address & 0xfc) {
+            case 0xa0:
                 if ((address & 0x100) != 0) num += 3;
-                CH = YM2612_CHANNEL[num];
-                CH.FNUM[0] = (CH.FNUM[0] & 0x700) + data;
-                CH.KC[0] = (CH.FOCT[0] << 2) | FKEY_TAB[CH.FNUM[0] >> 7];
-                CH.SLOT[0].Finc = -1;
+                ch = channels[num];
+                ch.fNum[0] = (ch.fNum[0] & 0x700) + data;
+                ch.kc[0] = (ch.fOct[0] << 2) | FKEY_TAB[ch.fNum[0] >> 7];
+                ch.slots[0].fInc = -1;
                 break;
-            case 0xA4:
+            case 0xa4:
                 if ((address & 0x100) != 0) num += 3;
-                CH = YM2612_CHANNEL[num];
-                CH.FNUM[0] = (CH.FNUM[0] & 0x0FF) + ((data & 0x07) << 8);
-                CH.FOCT[0] = (data & 0x38) >> 3;
-                CH.KC[0] = (CH.FOCT[0] << 2) | FKEY_TAB[CH.FNUM[0] >> 7];
-                CH.SLOT[0].Finc = -1;
+                ch = channels[num];
+                ch.fNum[0] = (ch.fNum[0] & 0x0ff) + ((data & 0x07) << 8);
+                ch.fOct[0] = (data & 0x38) >> 3;
+                ch.kc[0] = (ch.fOct[0] << 2) | FKEY_TAB[ch.fNum[0] >> 7];
+                ch.slots[0].fInc = -1;
                 break;
-            case 0xA8:
+            case 0xa8:
                 if (address < 0x100) {
                     num++;
-                    YM2612_CHANNEL[2].FNUM[num] = (YM2612_CHANNEL[2].FNUM[num] & 0x700) + data;
-                    YM2612_CHANNEL[2].KC[num] = (YM2612_CHANNEL[2].FOCT[num] << 2) | FKEY_TAB[YM2612_CHANNEL[2].FNUM[num] >> 7];
-                    YM2612_CHANNEL[2].SLOT[0].Finc = -1;
+                    channels[2].fNum[num] = (channels[2].fNum[num] & 0x700) + data;
+                    channels[2].kc[num] = (channels[2].fOct[num] << 2) | FKEY_TAB[channels[2].fNum[num] >> 7];
+                    channels[2].slots[0].fInc = -1;
                 }
                 break;
-            case 0xAC:
+            case 0xac:
                 if (address < 0x100) {
                     num++;
-                    YM2612_CHANNEL[2].FNUM[num] = (YM2612_CHANNEL[2].FNUM[num] & 0x0FF) + ((data & 0x07) << 8);
-                    YM2612_CHANNEL[2].FOCT[num] = (data & 0x38) >> 3;
-                    YM2612_CHANNEL[2].KC[num] = (YM2612_CHANNEL[2].FOCT[num] << 2) | FKEY_TAB[YM2612_CHANNEL[2].FNUM[num] >> 7];
-                    YM2612_CHANNEL[2].SLOT[0].Finc = -1;
+                    channels[2].fNum[num] = (channels[2].fNum[num] & 0x0FF) + ((data & 0x07) << 8);
+                    channels[2].fOct[num] = (data & 0x38) >> 3;
+                    channels[2].kc[num] = (channels[2].fOct[num] << 2) | FKEY_TAB[channels[2].fNum[num] >> 7];
+                    channels[2].slots[0].fInc = -1;
                 }
                 break;
-            case 0xB0:
+            case 0xb0:
                 if ((address & 0x100) != 0) num += 3;
-                CH = YM2612_CHANNEL[num];
-                if (CH.ALGO != (data & 7)) {
-                    CH.ALGO = data & 7;
-                    CH.SLOT[0].ChgEnM = 0;
-                    CH.SLOT[1].ChgEnM = 0;
-                    CH.SLOT[2].ChgEnM = 0;
-                    CH.SLOT[3].ChgEnM = 0;
+                ch = channels[num];
+                if (ch.algo != (data & 7)) {
+                    ch.algo = data & 7;
+                    ch.slots[0].chgEnM = 0;
+                    ch.slots[1].chgEnM = 0;
+                    ch.slots[2].chgEnM = 0;
+                    ch.slots[3].chgEnM = 0;
                 }
-                CH.FB = 9 - ((data >> 3) & 7); // Real thing ?
-//                if (CH.FB = ((data >> 3) & 7)) CH.FB = 9 - CH.FB; // Thunder force 4 (music stage 8), Gynoug, Aladdin bug sound...
-//                else CH.FB = 31;
+                ch.fb = 9 - ((data >> 3) & 7); // Real thing ?
+//                if (ch.fb = ((data >> 3) & 7)) ch.fb = 9 - ch.fb; // Thunder force 4 (music stage 8), Gynoug, Aladdin bug sound...
+//                else ch.fb = 31;
                 break;
-            case 0xB4:
+            case 0xb4:
                 if ((address & 0x100) != 0) num += 3;
-                CH = YM2612_CHANNEL[num];
-                if ((data & 0x80) != 0) CH.LEFT = 0xFFFFFFFF;
-                else CH.LEFT = 0;
-                if ((data & 0x40) != 0) CH.RIGHT = 0xFFFFFFFF;
-                else CH.RIGHT = 0;
-                CH.AMS = LFO_AMS_TAB[(data >> 4) & 3];
-                CH.FMS = LFO_FMS_TAB[data & 7];
-                if (CH.SLOT[0].AMSon != 0) CH.SLOT[0].AMS = CH.AMS;
-                else CH.SLOT[0].AMS = 31;
-                if (CH.SLOT[1].AMSon != 0) CH.SLOT[1].AMS = CH.AMS;
-                else CH.SLOT[1].AMS = 31;
-                if (CH.SLOT[2].AMSon != 0) CH.SLOT[2].AMS = CH.AMS;
-                else CH.SLOT[2].AMS = 31;
-                if (CH.SLOT[3].AMSon != 0) CH.SLOT[3].AMS = CH.AMS;
-                else CH.SLOT[3].AMS = 31;
+                ch = channels[num];
+                if ((data & 0x80) != 0) ch.left = 0xffff_ffff;
+                else ch.left = 0;
+                if ((data & 0x40) != 0) ch.right = 0xffff_ffff;
+                else ch.right = 0;
+                ch.ams = LFO_AMS_TAB[(data >> 4) & 3];
+                ch.fms = LFO_FMS_TAB[data & 7];
+                if (ch.slots[0].amsOn != 0) ch.slots[0].ams = ch.ams;
+                else ch.slots[0].ams = 31;
+                if (ch.slots[1].amsOn != 0) ch.slots[1].ams = ch.ams;
+                else ch.slots[1].ams = 31;
+                if (ch.slots[2].amsOn != 0) ch.slots[2].ams = ch.ams;
+                else ch.slots[2].ams = 31;
+                if (ch.slots[3].amsOn != 0) ch.slots[3].ams = ch.ams;
+                else ch.slots[3].ams = 31;
                 break;
         }
         return 0;
     }
 
     private int setYM(int address, int data) {       // INT, UCHAR
-        cChannel CH;
+        Channel CH;
         int nch;
 
         switch (address) {
@@ -844,58 +815,58 @@ public final class YM2612 {
                 if ((data & 8) != 0) {
                     // Cool Spot music 1, LFO modified severals time which
                     // distorts the sound, have to check that on a real genesis...
-                    YM2612_LFOinc = LFO_INC_TAB[data & 7];
+                    lfoInc = LFO_INC_TAB[data & 7];
                 } else {
-                    YM2612_LFOinc = YM2612_LFOcnt = 0;
+                    lfoInc = lfoCnt = 0;
                 }
                 break;
             case 0x24:
-                YM2612_TimerA = (YM2612_TimerA & 0x003) | (data << 2);
-                if (YM2612_TimerAL != ((1024 - YM2612_TimerA) << 12)) {
-                    YM2612_TimerAcnt = YM2612_TimerAL = (1024 - YM2612_TimerA) << 12;
+                timerA = (timerA & 0x003) | (data << 2);
+                if (timerAL != ((1024 - timerA) << 12)) {
+                    timerACnt = timerAL = (1024 - timerA) << 12;
                 }
-//				  System.out.println("Timer AH: " + Integer.toHexString(YM2612_TimerA));
+//				  System.out.println("Timer AH: " + Integer.toHexString(timerA));
                 break;
             case 0x25:
-                YM2612_TimerA = (YM2612_TimerA & 0x3fc) | (data & 3);
-                if (YM2612_TimerAL != ((1024 - YM2612_TimerA) << 12)) {
-                    YM2612_TimerAcnt = YM2612_TimerAL = (1024 - YM2612_TimerA) << 12;
+                timerA = (timerA & 0x3fc) | (data & 3);
+                if (timerAL != ((1024 - timerA) << 12)) {
+                    timerACnt = timerAL = (1024 - timerA) << 12;
                 }
-//				  System.out.println("Timer AL: " + Integer.toHexString(YM2612_TimerA));
+//				  System.out.println("Timer AL: " + Integer.toHexString(timerA));
                 break;
             case 0x26:
-                YM2612_TimerB = data;
-                if (YM2612_TimerBL != ((256 - YM2612_TimerB) << (4 + 12))) {
-                    YM2612_TimerBcnt = YM2612_TimerBL = (256 - YM2612_TimerB) << (4 + 12);
+                timerB = data;
+                if (timerBL != ((256 - timerB) << (4 + 12))) {
+                    timerBCnt = timerBL = (256 - timerB) << (4 + 12);
                 }
-//				  System.out.println("Timer B : " + Integer.toHexString(YM2612_TimerB));
+//				  System.out.println("Timer B : " + Integer.toHexString(timerB));
                 break;
             case 0x27:
-                if (((data ^ YM2612_Mode) & 0x40) != 0) {
+                if (((data ^ mode) & 0x40) != 0) {
                     // We changed the channel 2 mode, so recalculate phase step
                     // This fix the punch sound in Street of Rage 2
-                    YM2612_CHANNEL[2].SLOT[0].Finc = -1;    // recalculate phase step
+                    channels[2].slots[0].fInc = -1;    // recalculate phase step
                 }
-                YM2612_Status &= (~data >> 4) & (data >> 2);  // Reset Status
-                YM2612_Mode = data;
+                status &= (~data >> 4) & (data >> 2);  // Reset Status
+                mode = data;
                 break;
             case 0x28:
                 if ((nch = data & 3) == 3) return 1;
                 if ((data & 4) != 0) nch += 3;
-                CH = YM2612_CHANNEL[nch];
-                if ((data & 0x10) != 0) KEY_ON(CH, S0);
-                else KEY_OFF(CH, S0);
-                if ((data & 0x20) != 0) KEY_ON(CH, S1);
-                else KEY_OFF(CH, S1);
-                if ((data & 0x40) != 0) KEY_ON(CH, S2);
-                else KEY_OFF(CH, S2);
-                if ((data & 0x80) != 0) KEY_ON(CH, S3);
-                else KEY_OFF(CH, S3);
+                CH = channels[nch];
+                if ((data & 0x10) != 0) keyOn(CH, S0);
+                else keyOff(CH, S0);
+                if ((data & 0x20) != 0) keyOn(CH, S1);
+                else keyOff(CH, S1);
+                if ((data & 0x40) != 0) keyOn(CH, S2);
+                else keyOff(CH, S2);
+                if ((data & 0x80) != 0) keyOn(CH, S3);
+                else keyOff(CH, S3);
                 break;
             case 0x2A:
                 break;
             case 0x2B:
-                YM2612_DAC = data & 0x80;
+                dac = data & 0x80;
                 break;
         }
         return 0;
@@ -905,284 +876,285 @@ public final class YM2612 {
     // Generation Methods
     //
 
-    private void Env_NULL_Next(cSlot SL) {
+    private void envNULLNext(Slot sl) {
     }
 
-    private static void Env_Attack_Next(cSlot SL) {
-        SL.Ecnt = ENV_DECAY;
-        SL.Einc = SL.EincD;
-        SL.Ecmp = SL.SLL;
-        SL.Ecurp = DECAY;
+    private static void envAttackNext(Slot sl) {
+        sl.eCnt = ENV_DECAY;
+        sl.eInc = sl.eIncD;
+        sl.eCmp = sl.sll;
+        sl.eCurp = DECAY;
     }
 
-    private static void Env_Decay_Next(cSlot SL) {
-        SL.Ecnt = SL.SLL;
-        SL.Einc = SL.EincS;
-        SL.Ecmp = ENV_END;
-        SL.Ecurp = SUSTAIN;
+    private static void envDecayNext(Slot sl) {
+        sl.eCnt = sl.sll;
+        sl.eInc = sl.eIncS;
+        sl.eCmp = ENV_END;
+        sl.eCurp = SUSTAIN;
     }
 
-    private void Env_Sustain_Next(cSlot SL) {
+    private void envSustainNext(Slot sl) {
         if (EnableSSGEG) {
-            if ((SL.SEG & 8) != 0) {
-                if ((SL.SEG & 1) != 0) {
-                    SL.Ecnt = ENV_END;
-                    SL.Einc = 0;
-                    SL.Ecmp = ENV_END + 1;
+            if ((sl.seg & 8) != 0) {
+                if ((sl.seg & 1) != 0) {
+                    sl.eCnt = ENV_END;
+                    sl.eInc = 0;
+                    sl.eCmp = ENV_END + 1;
                 } else {
-                    SL.Ecnt = 0;
-                    SL.Einc = SL.EincA;
-                    SL.Ecmp = ENV_DECAY;
-                    SL.Ecurp = ATTACK;
+                    sl.eCnt = 0;
+                    sl.eInc = sl.eIncA;
+                    sl.eCmp = ENV_DECAY;
+                    sl.eCurp = ATTACK;
                 }
-                SL.SEG ^= (SL.SEG & 2) << 1;
+                sl.seg ^= (sl.seg & 2) << 1;
             } else {
-                SL.Ecnt = ENV_END;
-                SL.Einc = 0;
-                SL.Ecmp = ENV_END + 1;
+                sl.eCnt = ENV_END;
+                sl.eInc = 0;
+                sl.eCmp = ENV_END + 1;
             }
         } else {
-            SL.Ecnt = ENV_END;
-            SL.Einc = 0;
-            SL.Ecmp = ENV_END + 1;
+            sl.eCnt = ENV_END;
+            sl.eInc = 0;
+            sl.eCmp = ENV_END + 1;
         }
     }
 
-    private static void Env_Release_Next(cSlot SL) {
-        SL.Ecnt = ENV_END;
-        SL.Einc = 0;
-        SL.Ecmp = ENV_END + 1;
+    private static void envReleaseNext(Slot sl) {
+        sl.eCnt = ENV_END;
+        sl.eInc = 0;
+        sl.eCmp = ENV_END + 1;
     }
 
-    private void ENV_NEXT_EVENT(int which, cSlot SL) {
+    private void envNextEvent(int which, Slot sl) {
         switch (which) {
             case 0:
-                Env_Attack_Next(SL);
+                envAttackNext(sl);
                 return;
             case 1:
-                Env_Decay_Next(SL);
+                envDecayNext(sl);
                 return;
             case 2:
-                Env_Sustain_Next(SL);
+                envSustainNext(sl);
                 return;
             case 3:
-                Env_Release_Next(SL);
-                //default: Env_NULL_Next(SL);		return;
+                envReleaseNext(sl);
+//            default: Env_NULL_Next(sl);
+//            return;
         }
     }
 
-    private void calcChannel(int ALGO, cChannel CH) {
+    private void calcChannel(int algo, Channel ch) {
         // DO_FEEDBACK
-        in0 += (CH.S0_OUT[0] + CH.S0_OUT[1]) >> CH.FB;
-        CH.S0_OUT[1] = CH.S0_OUT[0];
-        CH.S0_OUT[0] = TL_TAB[SIN_TAB[(in0 >> SIN_LBITS) & SIN_MSK] + en0];
-        switch (ALGO) {
+        in0 += (ch.s0Out[0] + ch.s0Out[1]) >> ch.fb;
+        ch.s0Out[1] = ch.s0Out[0];
+        ch.s0Out[0] = TL_TAB[SIN_TAB[(in0 >> SIN_LBITS) & SIN_MSK] + en0];
+        switch (algo) {
             case 0:
-                in1 += CH.S0_OUT[1];
+                in1 += ch.s0Out[1];
                 in2 += TL_TAB[SIN_TAB[(in1 >> SIN_LBITS) & SIN_MSK] + en1];
                 in3 += TL_TAB[SIN_TAB[(in2 >> SIN_LBITS) & SIN_MSK] + en2];
-                CH.OUTd = TL_TAB[SIN_TAB[(in3 >> SIN_LBITS) & SIN_MSK] + en3] >> MAIN_SHIFT;
+                ch.outD = TL_TAB[SIN_TAB[(in3 >> SIN_LBITS) & SIN_MSK] + en3] >> MAIN_SHIFT;
                 break;
             case 1:
-                in2 += CH.S0_OUT[1] + TL_TAB[SIN_TAB[(in1 >> SIN_LBITS) & SIN_MSK] + en1];
+                in2 += ch.s0Out[1] + TL_TAB[SIN_TAB[(in1 >> SIN_LBITS) & SIN_MSK] + en1];
                 in3 += TL_TAB[SIN_TAB[(in2 >> SIN_LBITS) & SIN_MSK] + en2];
-                CH.OUTd = TL_TAB[SIN_TAB[(in3 >> SIN_LBITS) & SIN_MSK] + en3] >> MAIN_SHIFT;
+                ch.outD = TL_TAB[SIN_TAB[(in3 >> SIN_LBITS) & SIN_MSK] + en3] >> MAIN_SHIFT;
                 break;
             case 2:
                 in2 += TL_TAB[SIN_TAB[(in1 >> SIN_LBITS) & SIN_MSK] + en1];
-                in3 += CH.S0_OUT[1] + TL_TAB[SIN_TAB[(in2 >> SIN_LBITS) & SIN_MSK] + en2];
-                CH.OUTd = TL_TAB[SIN_TAB[(in3 >> SIN_LBITS) & SIN_MSK] + en3] >> MAIN_SHIFT;
+                in3 += ch.s0Out[1] + TL_TAB[SIN_TAB[(in2 >> SIN_LBITS) & SIN_MSK] + en2];
+                ch.outD = TL_TAB[SIN_TAB[(in3 >> SIN_LBITS) & SIN_MSK] + en3] >> MAIN_SHIFT;
                 break;
             case 3:
-                in1 += CH.S0_OUT[1];
+                in1 += ch.s0Out[1];
                 in3 += TL_TAB[SIN_TAB[(in1 >> SIN_LBITS) & SIN_MSK] + en1] + TL_TAB[SIN_TAB[(in2 >> SIN_LBITS) & SIN_MSK] + en2];
-                CH.OUTd = TL_TAB[SIN_TAB[(in3 >> SIN_LBITS) & SIN_MSK] + en3] >> MAIN_SHIFT;
+                ch.outD = TL_TAB[SIN_TAB[(in3 >> SIN_LBITS) & SIN_MSK] + en3] >> MAIN_SHIFT;
                 break;
             case 4:
-                in1 += CH.S0_OUT[1];
+                in1 += ch.s0Out[1];
                 in3 += TL_TAB[SIN_TAB[(in2 >> SIN_LBITS) & SIN_MSK] + en2];
-                CH.OUTd = (TL_TAB[SIN_TAB[(in3 >> SIN_LBITS) & SIN_MSK] + en3] +
+                ch.outD = (TL_TAB[SIN_TAB[(in3 >> SIN_LBITS) & SIN_MSK] + en3] +
                         TL_TAB[SIN_TAB[(in1 >> SIN_LBITS) & SIN_MSK] + en1]) >> MAIN_SHIFT;
                 break;
             case 5:
-                in1 += CH.S0_OUT[1];
-                in2 += CH.S0_OUT[1];
-                in3 += CH.S0_OUT[1];
-                CH.OUTd = (TL_TAB[SIN_TAB[(in3 >> SIN_LBITS) & SIN_MSK] + en3] +
+                in1 += ch.s0Out[1];
+                in2 += ch.s0Out[1];
+                in3 += ch.s0Out[1];
+                ch.outD = (TL_TAB[SIN_TAB[(in3 >> SIN_LBITS) & SIN_MSK] + en3] +
                         TL_TAB[SIN_TAB[(in1 >> SIN_LBITS) & SIN_MSK] + en1] +
                         TL_TAB[SIN_TAB[(in2 >> SIN_LBITS) & SIN_MSK] + en2]) >> MAIN_SHIFT;
                 break;
             case 6:
-                in1 += CH.S0_OUT[1];
-                CH.OUTd = (TL_TAB[SIN_TAB[(in3 >> SIN_LBITS) & SIN_MSK] + en3] +
+                in1 += ch.s0Out[1];
+                ch.outD = (TL_TAB[SIN_TAB[(in3 >> SIN_LBITS) & SIN_MSK] + en3] +
                         TL_TAB[SIN_TAB[(in1 >> SIN_LBITS) & SIN_MSK] + en1] +
                         TL_TAB[SIN_TAB[(in2 >> SIN_LBITS) & SIN_MSK] + en2]) >> MAIN_SHIFT;
                 break;
             case 7:
-                CH.OUTd = (TL_TAB[SIN_TAB[(in3 >> SIN_LBITS) & SIN_MSK] + en3] +
+                ch.outD = (TL_TAB[SIN_TAB[(in3 >> SIN_LBITS) & SIN_MSK] + en3] +
                         TL_TAB[SIN_TAB[(in1 >> SIN_LBITS) & SIN_MSK] + en1] +
                         TL_TAB[SIN_TAB[(in2 >> SIN_LBITS) & SIN_MSK] + en2] +
-                        CH.S0_OUT[1]) >> MAIN_SHIFT;
+                        ch.s0Out[1]) >> MAIN_SHIFT;
                 break;
         }
         // DO_LIMIT
-        if (CH.OUTd > LIMIT_CH_OUT) CH.OUTd = LIMIT_CH_OUT;
-        else if (CH.OUTd < -LIMIT_CH_OUT) CH.OUTd = -LIMIT_CH_OUT;
+        if (ch.outD > LIMIT_CH_OUT) ch.outD = LIMIT_CH_OUT;
+        else if (ch.outD < -LIMIT_CH_OUT) ch.outD = -LIMIT_CH_OUT;
     }
 
-    private void processChannel(cChannel CH, int[] buf_lr, int OFFSET, int END, int ALGO) {
-        if (ALGO < 4) {
-            if (CH.SLOT[S3].Ecnt == ENV_END)
+    private void processChannel(Channel ch, int[] buf_lr, int offset, int end, int algo) {
+        if (algo < 4) {
+            if (ch.slots[S3].eCnt == ENV_END)
                 return;
-        } else if (ALGO == 4) {
-            if ((CH.SLOT[S1].Ecnt == ENV_END) && (CH.SLOT[S3].Ecnt == ENV_END))
+        } else if (algo == 4) {
+            if ((ch.slots[S1].eCnt == ENV_END) && (ch.slots[S3].eCnt == ENV_END))
                 return;
-        } else if (ALGO < 7) {
-            if ((CH.SLOT[S1].Ecnt == ENV_END) && (CH.SLOT[S2].Ecnt == ENV_END) && (CH.SLOT[S3].Ecnt == ENV_END))
+        } else if (algo < 7) {
+            if ((ch.slots[S1].eCnt == ENV_END) && (ch.slots[S2].eCnt == ENV_END) && (ch.slots[S3].eCnt == ENV_END))
                 return;
         } else {
-            if ((CH.SLOT[S0].Ecnt == ENV_END) && (CH.SLOT[S1].Ecnt == ENV_END) &&
-                    (CH.SLOT[S2].Ecnt == ENV_END) && (CH.SLOT[S3].Ecnt == ENV_END))
+            if ((ch.slots[S0].eCnt == ENV_END) && (ch.slots[S1].eCnt == ENV_END) &&
+                    (ch.slots[S2].eCnt == ENV_END) && (ch.slots[S3].eCnt == ENV_END))
                 return;
         }
 
         do {
             // GET_CURRENT_PHASE
-            in0 = CH.SLOT[S0].Fcnt;
-            in1 = CH.SLOT[S1].Fcnt;
-            in2 = CH.SLOT[S2].Fcnt;
-            in3 = CH.SLOT[S3].Fcnt;
+            in0 = ch.slots[S0].fCnt;
+            in1 = ch.slots[S1].fCnt;
+            in2 = ch.slots[S2].fCnt;
+            in3 = ch.slots[S3].fCnt;
             // UPDATE_PHASE
-            CH.SLOT[S0].Fcnt += CH.SLOT[S0].Finc;
-            CH.SLOT[S1].Fcnt += CH.SLOT[S1].Finc;
-            CH.SLOT[S2].Fcnt += CH.SLOT[S2].Finc;
-            CH.SLOT[S3].Fcnt += CH.SLOT[S3].Finc;
+            ch.slots[S0].fCnt += ch.slots[S0].fInc;
+            ch.slots[S1].fCnt += ch.slots[S1].fInc;
+            ch.slots[S2].fCnt += ch.slots[S2].fInc;
+            ch.slots[S3].fCnt += ch.slots[S3].fInc;
             // GET_CURRENT_ENV
-            if ((CH.SLOT[S0].SEG & 4) != 0) {
-                if ((en0 = ENV_TAB[(CH.SLOT[S0].Ecnt >> ENV_LBITS)] + CH.SLOT[S0].TLL) > ENV_MSK) en0 = 0;
+            if ((ch.slots[S0].seg & 4) != 0) {
+                if ((en0 = ENV_TAB[(ch.slots[S0].eCnt >> ENV_LBITS)] + ch.slots[S0].tll) > ENV_MSK) en0 = 0;
                 else en0 ^= ENV_MSK;
-            } else en0 = ENV_TAB[(CH.SLOT[S0].Ecnt >> ENV_LBITS)] + CH.SLOT[S0].TLL;
-            if ((CH.SLOT[S1].SEG & 4) != 0) {
-                if ((en1 = ENV_TAB[(CH.SLOT[S1].Ecnt >> ENV_LBITS)] + CH.SLOT[S1].TLL) > ENV_MSK) en1 = 0;
+            } else en0 = ENV_TAB[(ch.slots[S0].eCnt >> ENV_LBITS)] + ch.slots[S0].tll;
+            if ((ch.slots[S1].seg & 4) != 0) {
+                if ((en1 = ENV_TAB[(ch.slots[S1].eCnt >> ENV_LBITS)] + ch.slots[S1].tll) > ENV_MSK) en1 = 0;
                 else en1 ^= ENV_MSK;
-            } else en1 = ENV_TAB[(CH.SLOT[S1].Ecnt >> ENV_LBITS)] + CH.SLOT[S1].TLL;
-            if ((CH.SLOT[S2].SEG & 4) != 0) {
-                if ((en2 = ENV_TAB[(CH.SLOT[S2].Ecnt >> ENV_LBITS)] + CH.SLOT[S2].TLL) > ENV_MSK) en2 = 0;
+            } else en1 = ENV_TAB[(ch.slots[S1].eCnt >> ENV_LBITS)] + ch.slots[S1].tll;
+            if ((ch.slots[S2].seg & 4) != 0) {
+                if ((en2 = ENV_TAB[(ch.slots[S2].eCnt >> ENV_LBITS)] + ch.slots[S2].tll) > ENV_MSK) en2 = 0;
                 else en2 ^= ENV_MSK;
-            } else en2 = ENV_TAB[(CH.SLOT[S2].Ecnt >> ENV_LBITS)] + CH.SLOT[S2].TLL;
-            if ((CH.SLOT[S3].SEG & 4) != 0) {
-                if ((en3 = ENV_TAB[(CH.SLOT[S3].Ecnt >> ENV_LBITS)] + CH.SLOT[S3].TLL) > ENV_MSK) en3 = 0;
+            } else en2 = ENV_TAB[(ch.slots[S2].eCnt >> ENV_LBITS)] + ch.slots[S2].tll;
+            if ((ch.slots[S3].seg & 4) != 0) {
+                if ((en3 = ENV_TAB[(ch.slots[S3].eCnt >> ENV_LBITS)] + ch.slots[S3].tll) > ENV_MSK) en3 = 0;
                 else en3 ^= ENV_MSK;
-            } else en3 = ENV_TAB[(CH.SLOT[S3].Ecnt >> ENV_LBITS)] + CH.SLOT[S3].TLL;
+            } else en3 = ENV_TAB[(ch.slots[S3].eCnt >> ENV_LBITS)] + ch.slots[S3].tll;
             // UPDATE_ENV
-            if ((CH.SLOT[S0].Ecnt += CH.SLOT[S0].Einc) >= CH.SLOT[S0].Ecmp) {
-                ENV_NEXT_EVENT(CH.SLOT[S0].Ecurp, CH.SLOT[S0]);
+            if ((ch.slots[S0].eCnt += ch.slots[S0].eInc) >= ch.slots[S0].eCmp) {
+                envNextEvent(ch.slots[S0].eCurp, ch.slots[S0]);
             }
-            if ((CH.SLOT[S1].Ecnt += CH.SLOT[S1].Einc) >= CH.SLOT[S1].Ecmp) {
-                ENV_NEXT_EVENT(CH.SLOT[S1].Ecurp, CH.SLOT[S1]);
+            if ((ch.slots[S1].eCnt += ch.slots[S1].eInc) >= ch.slots[S1].eCmp) {
+                envNextEvent(ch.slots[S1].eCurp, ch.slots[S1]);
             }
-            if ((CH.SLOT[S2].Ecnt += CH.SLOT[S2].Einc) >= CH.SLOT[S2].Ecmp) {
-                ENV_NEXT_EVENT(CH.SLOT[S2].Ecurp, CH.SLOT[S2]);
+            if ((ch.slots[S2].eCnt += ch.slots[S2].eInc) >= ch.slots[S2].eCmp) {
+                envNextEvent(ch.slots[S2].eCurp, ch.slots[S2]);
             }
-            if ((CH.SLOT[S3].Ecnt += CH.SLOT[S3].Einc) >= CH.SLOT[S3].Ecmp) {
-                ENV_NEXT_EVENT(CH.SLOT[S3].Ecurp, CH.SLOT[S3]);
+            if ((ch.slots[S3].eCnt += ch.slots[S3].eInc) >= ch.slots[S3].eCmp) {
+                envNextEvent(ch.slots[S3].eCurp, ch.slots[S3]);
             }
-            calcChannel(ALGO, CH);
-            //DO_OUTPUT
-            buf_lr[OFFSET] += (CH.OUTd & CH.LEFT);
-            buf_lr[OFFSET + 1] += (CH.OUTd & CH.RIGHT);
-            OFFSET += 2;
+            calcChannel(algo, ch);
+            // DO_OUTPUT
+            buf_lr[offset] += (ch.outD & ch.left);
+            buf_lr[offset + 1] += (ch.outD & ch.right);
+            offset += 2;
         }
-        while (OFFSET < END);
+        while (offset < end);
     }
 
-    private void processChannel_LFO(cChannel CH, int[] buf_lr, int OFFSET, int END, int ALGO) {
-        if (ALGO < 4) {
-            if (CH.SLOT[S3].Ecnt == ENV_END)
+    private void processChannel_LFO(Channel ch, int[] buf_lr, int offset, int end, int algo) {
+        if (algo < 4) {
+            if (ch.slots[S3].eCnt == ENV_END)
                 return;
-        } else if (ALGO == 4) {
-            if ((CH.SLOT[S1].Ecnt == ENV_END) && (CH.SLOT[S3].Ecnt == ENV_END))
+        } else if (algo == 4) {
+            if ((ch.slots[S1].eCnt == ENV_END) && (ch.slots[S3].eCnt == ENV_END))
                 return;
-        } else if (ALGO < 7) {
-            if ((CH.SLOT[S1].Ecnt == ENV_END) && (CH.SLOT[S2].Ecnt == ENV_END) && (CH.SLOT[S3].Ecnt == ENV_END))
+        } else if (algo < 7) {
+            if ((ch.slots[S1].eCnt == ENV_END) && (ch.slots[S2].eCnt == ENV_END) && (ch.slots[S3].eCnt == ENV_END))
                 return;
         } else {
-            if ((CH.SLOT[S0].Ecnt == ENV_END) && (CH.SLOT[S1].Ecnt == ENV_END) &&
-                    (CH.SLOT[S2].Ecnt == ENV_END) && (CH.SLOT[S3].Ecnt == ENV_END))
+            if ((ch.slots[S0].eCnt == ENV_END) && (ch.slots[S1].eCnt == ENV_END) &&
+                    (ch.slots[S2].eCnt == ENV_END) && (ch.slots[S3].eCnt == ENV_END))
                 return;
         }
 
         do {
-            int i = OFFSET >> 1;
+            int i = offset >> 1;
 
             // GET_CURRENT_PHASE
-            in0 = CH.SLOT[S0].Fcnt;
-            in1 = CH.SLOT[S1].Fcnt;
-            in2 = CH.SLOT[S2].Fcnt;
-            in3 = CH.SLOT[S3].Fcnt;
+            in0 = ch.slots[S0].fCnt;
+            in1 = ch.slots[S1].fCnt;
+            in2 = ch.slots[S2].fCnt;
+            in3 = ch.slots[S3].fCnt;
             // UPDATE_PHASE_LFO
-            int freq_LFO = (CH.FMS * LFO_FREQ_UP[i]) >> (LFO_HBITS - 1);
+            int freq_LFO = (ch.fms * LFO_FREQ_UP[i]) >> (LFO_HBITS - 1);
             if (freq_LFO != 0) {
-                CH.SLOT[S0].Fcnt += CH.SLOT[S0].Finc + ((CH.SLOT[S0].Finc * freq_LFO) >> LFO_FMS_LBITS);
-                CH.SLOT[S1].Fcnt += CH.SLOT[S1].Finc + ((CH.SLOT[S1].Finc * freq_LFO) >> LFO_FMS_LBITS);
-                CH.SLOT[S2].Fcnt += CH.SLOT[S2].Finc + ((CH.SLOT[S2].Finc * freq_LFO) >> LFO_FMS_LBITS);
-                CH.SLOT[S3].Fcnt += CH.SLOT[S3].Finc + ((CH.SLOT[S3].Finc * freq_LFO) >> LFO_FMS_LBITS);
+                ch.slots[S0].fCnt += ch.slots[S0].fInc + ((ch.slots[S0].fInc * freq_LFO) >> LFO_FMS_LBITS);
+                ch.slots[S1].fCnt += ch.slots[S1].fInc + ((ch.slots[S1].fInc * freq_LFO) >> LFO_FMS_LBITS);
+                ch.slots[S2].fCnt += ch.slots[S2].fInc + ((ch.slots[S2].fInc * freq_LFO) >> LFO_FMS_LBITS);
+                ch.slots[S3].fCnt += ch.slots[S3].fInc + ((ch.slots[S3].fInc * freq_LFO) >> LFO_FMS_LBITS);
             } else {
-                CH.SLOT[S0].Fcnt += CH.SLOT[S0].Finc;
-                CH.SLOT[S1].Fcnt += CH.SLOT[S1].Finc;
-                CH.SLOT[S2].Fcnt += CH.SLOT[S2].Finc;
-                CH.SLOT[S3].Fcnt += CH.SLOT[S3].Finc;
+                ch.slots[S0].fCnt += ch.slots[S0].fInc;
+                ch.slots[S1].fCnt += ch.slots[S1].fInc;
+                ch.slots[S2].fCnt += ch.slots[S2].fInc;
+                ch.slots[S3].fCnt += ch.slots[S3].fInc;
             }
             // GET_CURRENT_ENV_LFO
             int env_LFO = LFO_ENV_UP[i];
-            if ((CH.SLOT[S0].SEG & 4) != 0) {
-                if ((en0 = ENV_TAB[(CH.SLOT[S0].Ecnt >> ENV_LBITS)] + CH.SLOT[S0].TLL) > ENV_MSK) en0 = 0;
-                else en0 = (en0 ^ ENV_MSK) + (env_LFO >> CH.SLOT[S0].AMS);
-            } else en0 = ENV_TAB[(CH.SLOT[S0].Ecnt >> ENV_LBITS)] + CH.SLOT[S0].TLL + (env_LFO >> CH.SLOT[S0].AMS);
-            if ((CH.SLOT[S1].SEG & 4) != 0) {
-                if ((en1 = ENV_TAB[(CH.SLOT[S1].Ecnt >> ENV_LBITS)] + CH.SLOT[S1].TLL) > ENV_MSK) en1 = 0;
-                else en1 = (en1 ^ ENV_MSK) + (env_LFO >> CH.SLOT[S1].AMS);
-            } else en1 = ENV_TAB[(CH.SLOT[S1].Ecnt >> ENV_LBITS)] + CH.SLOT[S1].TLL + (env_LFO >> CH.SLOT[S1].AMS);
-            if ((CH.SLOT[S2].SEG & 4) != 0) {
-                if ((en2 = ENV_TAB[(CH.SLOT[S2].Ecnt >> ENV_LBITS)] + CH.SLOT[S2].TLL) > ENV_MSK) en2 = 0;
-                else en2 = (en2 ^ ENV_MSK) + (env_LFO >> CH.SLOT[S2].AMS);
-            } else en2 = ENV_TAB[(CH.SLOT[S2].Ecnt >> ENV_LBITS)] + CH.SLOT[S2].TLL + (env_LFO >> CH.SLOT[S2].AMS);
-            if ((CH.SLOT[S3].SEG & 4) != 0) {
-                if ((en3 = ENV_TAB[(CH.SLOT[S3].Ecnt >> ENV_LBITS)] + CH.SLOT[S3].TLL) > ENV_MSK) en3 = 0;
-                else en3 = (en3 ^ ENV_MSK) + (env_LFO >> CH.SLOT[S3].AMS);
+            if ((ch.slots[S0].seg & 4) != 0) {
+                if ((en0 = ENV_TAB[(ch.slots[S0].eCnt >> ENV_LBITS)] + ch.slots[S0].tll) > ENV_MSK) en0 = 0;
+                else en0 = (en0 ^ ENV_MSK) + (env_LFO >> ch.slots[S0].ams);
+            } else en0 = ENV_TAB[(ch.slots[S0].eCnt >> ENV_LBITS)] + ch.slots[S0].tll + (env_LFO >> ch.slots[S0].ams);
+            if ((ch.slots[S1].seg & 4) != 0) {
+                if ((en1 = ENV_TAB[(ch.slots[S1].eCnt >> ENV_LBITS)] + ch.slots[S1].tll) > ENV_MSK) en1 = 0;
+                else en1 = (en1 ^ ENV_MSK) + (env_LFO >> ch.slots[S1].ams);
+            } else en1 = ENV_TAB[(ch.slots[S1].eCnt >> ENV_LBITS)] + ch.slots[S1].tll + (env_LFO >> ch.slots[S1].ams);
+            if ((ch.slots[S2].seg & 4) != 0) {
+                if ((en2 = ENV_TAB[(ch.slots[S2].eCnt >> ENV_LBITS)] + ch.slots[S2].tll) > ENV_MSK) en2 = 0;
+                else en2 = (en2 ^ ENV_MSK) + (env_LFO >> ch.slots[S2].ams);
+            } else en2 = ENV_TAB[(ch.slots[S2].eCnt >> ENV_LBITS)] + ch.slots[S2].tll + (env_LFO >> ch.slots[S2].ams);
+            if ((ch.slots[S3].seg & 4) != 0) {
+                if ((en3 = ENV_TAB[(ch.slots[S3].eCnt >> ENV_LBITS)] + ch.slots[S3].tll) > ENV_MSK) en3 = 0;
+                else en3 = (en3 ^ ENV_MSK) + (env_LFO >> ch.slots[S3].ams);
             } else
-                en3 = ENV_TAB[(CH.SLOT[S3].Ecnt >> ENV_LBITS)] + CH.SLOT[S3].TLL + (env_LFO >> CH.SLOT[S3].AMS);
+                en3 = ENV_TAB[(ch.slots[S3].eCnt >> ENV_LBITS)] + ch.slots[S3].tll + (env_LFO >> ch.slots[S3].ams);
 
             // UPDATE_ENV
-            if ((CH.SLOT[S0].Ecnt += CH.SLOT[S0].Einc) >= CH.SLOT[S0].Ecmp)
-                ENV_NEXT_EVENT(CH.SLOT[S0].Ecurp, CH.SLOT[S0]);
+            if ((ch.slots[S0].eCnt += ch.slots[S0].eInc) >= ch.slots[S0].eCmp)
+                envNextEvent(ch.slots[S0].eCurp, ch.slots[S0]);
 
-            if ((CH.SLOT[S1].Ecnt += CH.SLOT[S1].Einc) >= CH.SLOT[S1].Ecmp)
-                ENV_NEXT_EVENT(CH.SLOT[S1].Ecurp, CH.SLOT[S1]);
+            if ((ch.slots[S1].eCnt += ch.slots[S1].eInc) >= ch.slots[S1].eCmp)
+                envNextEvent(ch.slots[S1].eCurp, ch.slots[S1]);
 
-            if ((CH.SLOT[S2].Ecnt += CH.SLOT[S2].Einc) >= CH.SLOT[S2].Ecmp)
-                ENV_NEXT_EVENT(CH.SLOT[S2].Ecurp, CH.SLOT[S2]);
+            if ((ch.slots[S2].eCnt += ch.slots[S2].eInc) >= ch.slots[S2].eCmp)
+                envNextEvent(ch.slots[S2].eCurp, ch.slots[S2]);
 
-            if ((CH.SLOT[S3].Ecnt += CH.SLOT[S3].Einc) >= CH.SLOT[S3].Ecmp)
-                ENV_NEXT_EVENT(CH.SLOT[S3].Ecurp, CH.SLOT[S3]);
+            if ((ch.slots[S3].eCnt += ch.slots[S3].eInc) >= ch.slots[S3].eCmp)
+                envNextEvent(ch.slots[S3].eCurp, ch.slots[S3]);
 
-            calcChannel(ALGO, CH);
-            //DO_OUTPUT
-            int left = (CH.OUTd & CH.LEFT);
-            int right = (CH.OUTd & CH.RIGHT);
+            calcChannel(algo, ch);
+            // DO_OUTPUT
+            int left = (ch.outD & ch.left);
+            int right = (ch.outD & ch.right);
 
-            buf_lr[OFFSET] += left;
-            buf_lr[OFFSET + 1] += right;
-            OFFSET += 2;
+            buf_lr[offset] += left;
+            buf_lr[offset + 1] += right;
+            offset += 2;
         }
-        while (OFFSET < END);
+        while (offset < end);
     }
 
-    private void updateChannel(int ALGO, cChannel CH, int[] buf_lr, int OFFSET, int END) {
-        if (ALGO < 8) {
-            processChannel(CH, buf_lr, OFFSET, END, ALGO);
+    private void updateChannel(int algo, Channel ch, int[] buf_lr, int offset, int end) {
+        if (algo < 8) {
+            processChannel(ch, buf_lr, offset, end, algo);
         } else {
-            processChannel_LFO(CH, buf_lr, OFFSET, END, ALGO - 8);
+            processChannel_LFO(ch, buf_lr, offset, end, algo - 8);
         }
     }
 }

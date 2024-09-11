@@ -22,7 +22,11 @@ package uk.co.omgdrv.simplevgm.psg.gear;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import javax.sound.sampled.AudioFormat;
+
+import static java.lang.System.getLogger;
 
 
 /**
@@ -34,7 +38,7 @@ import javax.sound.sampled.AudioFormat;
  */
 public final class SN76496 implements PsgProvider {
 
-//    private static Logger LOG = LogManager.getLogger(SN76496.class.getSimpleName());
+    private static final Logger logger = getLogger(SN76496.class.getName());
 
     /**
      * Tone Generator 1.
@@ -118,7 +122,6 @@ public final class SN76496 implements PsgProvider {
         setEnabled(true);
     }
 
-
     /**
      * Reset SN76496 to Default Values.
      */
@@ -131,7 +134,6 @@ public final class SN76496 implements PsgProvider {
         chan3.reset();
     }
 
-
     /**
      * Returns <code>true</code> if this instance of <code>SN76496</code> is enabled and
      * <code>false</code> otherwise.
@@ -142,14 +144,12 @@ public final class SN76496 implements PsgProvider {
         return enabled;
     }
 
-
     /**
      * Toggle SN76496 On/Off.
      */
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
-
 
     /**
      * Toggle a particular channel On/Off.
@@ -175,7 +175,6 @@ public final class SN76496 implements PsgProvider {
                 throw new IllegalArgumentException("Invalid Channel: " + channel);
         }
     }
-
 
     @Override
     public void init() {
@@ -268,8 +267,7 @@ public final class SN76496 implements PsgProvider {
                 try {
                     fileWriter.write(join & 0xff); // output 8 bit signed mono
                 } catch (IOException ioe) {
-                    System.err.println("An error occurred while writing the"
-                            + " sound file.");
+                    logger.log(Level.ERROR, "An error occurred while writing the sound file.");
                 }
             }
         }
@@ -294,7 +292,6 @@ public final class SN76496 implements PsgProvider {
         }
     }
 
-
     /**
      * Start sound recording to WAV file.
      */
@@ -303,13 +300,11 @@ public final class SN76496 implements PsgProvider {
             try {
                 fileWriter = new FileWriter("output.raw");
             } catch (IOException ioe) {
-                System.err.println("Could not open file for recording.");
-                System.out.println("Could not open file for recording");
+                logger.log(Level.ERROR, "Could not open file for recording.");
             }
             setRecording(true);
         }
     }
-
 
     /**
      * Stop sound recording to WAV file.
@@ -320,8 +315,7 @@ public final class SN76496 implements PsgProvider {
                 fileWriter.close();
                 convertToWav();
             } catch (IOException ioe) {
-                System.err.println("Failed whilst closing output.raw");
-                System.out.println("Failed whilst closing output.raw");
+                logger.log(Level.ERROR, "Failed whilst closing output.raw");
             }
             setRecording(false);
         }
@@ -331,7 +325,6 @@ public final class SN76496 implements PsgProvider {
         return recording;
     }
 
-
     private void setRecording(boolean recording) {
         this.recording = recording;
     }
@@ -340,14 +333,11 @@ public final class SN76496 implements PsgProvider {
      * Convert RAW output to WAV file.
      */
     private void convertToWav() {
-
 //        SoundUtil.convertToWav(audioFormat, "ouput.raw");
     }
-
 
     public static void main(String[] args) {
         AudioFormat audioFormat = new AudioFormat(11025, 8, 1, true, false);
 //        SoundUtil.convertToWav(audioFormat, "ouput.raw");
     }
-
 }
