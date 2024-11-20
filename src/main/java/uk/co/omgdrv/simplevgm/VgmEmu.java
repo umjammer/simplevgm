@@ -82,8 +82,8 @@ public class VgmEmu extends ClassicEmu {
             throw new IllegalArgumentException("Unexpected magic word: " + vgmHeader.getIdent());
         }
         if (vgmHeader.getVersion() > VgmHeader.VGM_VERSION) {
-            logger.log(Level.WARNING, "VGM version " + vgmHeader.getVersionString() + " ( > 1.50) not supported, " +
-                    "cant guarantee correct playback");
+logger.log(Level.WARNING, "VGM version " + vgmHeader.getVersionString() + " ( > 1.50) not supported, " +
+        "cant guarantee correct playback");
         }
 
         // Data and loop
@@ -121,8 +121,13 @@ logger.log(Level.DEBUG, "fm: " + fm.getClass());
         psg.setOutput(buf.center(), buf.left(), buf.right());
         pos = vgmHeader.getDataOffset();
 
-        logger.log(Level.DEBUG, vgmHeader.toString());
+logger.log(Level.DEBUG, vgmHeader.toString());
         return 1;
+    }
+
+    @Override
+    public String getMagic() {
+        return VgmHeader.VGM_MAGIC_WORD;
     }
 
     @Override
@@ -255,7 +260,7 @@ logger.log(Level.DEBUG, "LOOP: " + endlessLoopFlag);
                 case CMD_PSG:
                     psg.writeData(toPSGTime(time), data[pos++] & 0xFF);
                     break;
-//                0x51	aa dd	YM2413, write value dd to register aa
+                // 0x51	aa dd	YM2413, write value dd to register aa
                 case CMD_YM2413_PORT:
                     runFM(time);
                     int reg1 = data[pos++] & 0xFF;
@@ -342,7 +347,7 @@ logger.log(Level.DEBUG, "LOOP: " + endlessLoopFlag);
     }
 
     private void handleUnsupportedCommand(int cmd) {
-        System.out.println(vgmHeader.getIdent() + vgmHeader.getVersionString() + ", unsupported command: " + Integer.toHexString(cmd));
+logger.log(Level.DEBUG, vgmHeader.getIdent() + vgmHeader.getVersionString() + ", unsupported command: " + Integer.toHexString(cmd));
         switch (cmd & 0xF0) {
             // unsupported one operand
             case 0x30:

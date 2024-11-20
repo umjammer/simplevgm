@@ -57,9 +57,9 @@ Debug.println("volume: " + volume);
 
         JavaEngine engine = new JavaEngine();
         engine.addLineListener(e -> { if (e.getType() == Type.STOP) cdl.countDown(); });
+        engine.setVolume(volume);
 
 Debug.println(vgz);
-        player.setVolume(volume);
         player.setEngine(engine);
         player.loadFile(vgz);
         player.startTrack(1);
