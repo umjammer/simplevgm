@@ -5,7 +5,7 @@
 
   <groupId>uk.co.omgdrv</groupId>
   <artifactId>simplevgm</artifactId>
-  <version>1.5.2v</version>
+  <version>1.5.3</version>
 
   <properties>
     <vavi.test.volume>0.02</vavi.test.volume>
