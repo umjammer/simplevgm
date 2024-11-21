@@ -7,8 +7,21 @@
 
  mavenized vgm player
 
-* made it be one of the [vavi-sound-emu](https://github.com/umjammer/vavi-sound-emu) spi
-* made psg, fm use service provider 
+* made it one of the [vavi-sound-emu](https://github.com/umjammer/vavi-sound-emu) spi
+* made psg and fm use service provider 
+
+## Install
+
+* [maven](https://jitpack.io/#umjammer/simplevgm)
+
+## Usage
+
+```java
+AudioInputStream ais = AudioSystem.getAudioInputStream(Paths.get(vgz).toFile());
+Clip clip = AudioSystem.getClip();
+clip.open(AudioSystem.getAudioInputStream(new AudioFormat(44100, 16, 2, true, true), ais));
+clip.loop(Clip.LOOP_CONTINUOUSLY);
+```
 
 ## References
 

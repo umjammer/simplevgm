@@ -9,7 +9,7 @@ import uk.co.omgdrv.simplevgm.psg.gear.PsgProvider;
  * @author Federico Berti
  * @version Copyright 2019
  */
-public class SN76489Psg implements PsgProvider {
+public class SN76489Psg implements PsgProvider { // TODO gross
 
     private SN76489 psg;
 

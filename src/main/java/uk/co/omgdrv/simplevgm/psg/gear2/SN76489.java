@@ -225,12 +225,12 @@ public class SN76489 {
             reg[regLatch] = (reg[regLatch] & 0x3F0) | (value & 0x0F);
         }
 
-        // ----------------------------------------------------------------------------------------
+        //
         // If bit 7 is 0 then the byte is a DATA byte.
         //    %0-DDDDDD
         //    |``````-- Data
         //    `-------- Unused
-        // ----------------------------------------------------------------------------------------
+        //
 
         else {
             // TONE REGISTERS
@@ -248,11 +248,11 @@ public class SN76489 {
         }
 
         switch (regLatch) {
-            // ------------------------------------------------------------------------------------
+            //
             // Tone register updated
             // If the register value is zero then the output is a constant value of +1.
             // This is often used for sample playback on the SN76489.
-            // ------------------------------------------------------------------------------------
+            //
             case 0:
             case 2:
             case 4:
@@ -260,7 +260,7 @@ public class SN76489 {
                     reg[regLatch] = 1;
                 break;
 
-            // ------------------------------------------------------------------------------------
+            //
             // Noise generator updated
             //
             // Noise register:      dddd(DDDDDD) = -trr(---trr)
@@ -269,7 +269,7 @@ public class SN76489 {
             // selects  the mode (white (1) or "periodic" (0)).
             // If a data byte is written, its low 3 bits update the shift rate and mode in the 
             // same way.
-            // ------------------------------------------------------------------------------------       
+            //
             case 6:
                 noiseFreq = 0x10 << (reg[6] & 3);
                 noiseShiftReg = SHIFT_RESET;
@@ -279,9 +279,9 @@ public class SN76489 {
 
     public final void update(byte[] buffer, int offset, int samplesToGenerate) {
         for (int sample = 0; sample < samplesToGenerate; sample++) {
-            // ------------------------------------------------------------------------------------
+            //
             // Generate Sound from Tone Channels
-            // ------------------------------------------------------------------------------------
+            //
             for (int i = 0; i < 3; i++) {
                 if (freqPos[i] != NO_ANTIALIAS)
                     outputChannel[i] = (PSG_VOLUME[reg[(i << 1) + 1]] * freqPos[i]) >> SCALE;
@@ -289,15 +289,15 @@ public class SN76489 {
                     outputChannel[i] = PSG_VOLUME[reg[(i << 1) + 1]] * freqPolarity[i];
             }
 
-            // ------------------------------------------------------------------------------------
+            //
             // Generate Sound from Noise Channel
-            // ------------------------------------------------------------------------------------
+            //
 
             outputChannel[3] = PSG_VOLUME[reg[7]] * (noiseShiftReg & 1) << 1; // Double output
 
-            // ------------------------------------------------------------------------------------
+            //
             // Output sound to buffer
-            // ------------------------------------------------------------------------------------
+            //
 
             int output = outputChannel[0] + outputChannel[1] + outputChannel[2] + outputChannel[3];
 
@@ -307,9 +307,9 @@ public class SN76489 {
 
             buffer[offset + sample] = (byte) output;
 
-            // ------------------------------------------------------------------------------------
+            //
             // Update Clock
-            // ------------------------------------------------------------------------------------
+            //
             clockFrac += clock;
 
             // Contains Main Integer Part (For General Counter Decrements)
@@ -320,9 +320,9 @@ public class SN76489 {
             // Clock Counter Updated with Fractional Part Only (For Accurate Stuff Later)
             clockFrac -= clockCyclesScaled;
 
-            // ------------------------------------------------------------------------------------
+            //
             // Decrement Counters
-            // ------------------------------------------------------------------------------------
+            //
 
             // Decrement Tone Counters
             freqCounter[0] -= clockCycles;
@@ -335,9 +335,9 @@ public class SN76489 {
             else
                 freqCounter[3] -= clockCycles;
 
-            // ------------------------------------------------------------------------------------
+            //
             // Update 3 x Tone Generators
-            // ------------------------------------------------------------------------------------
+            //
             for (int i = 0; i < 3; i++) {
                 int counter = freqCounter[i];
 
@@ -373,9 +373,9 @@ public class SN76489 {
                 }
             }
 
-            // ------------------------------------------------------------------------------------
+            //
             // Update Noise Generators
-            // ------------------------------------------------------------------------------------
+            //
             if (freqCounter[3] <= 0) {
                 // Flip Polarity
                 freqPolarity[3] = -freqPolarity[3];
@@ -404,6 +404,6 @@ public class SN76489 {
                     noiseShiftReg = (noiseShiftReg >> 1) | (feedback << 15);
                 }
             }
-        } // end for loop
+        }
     }
 }
