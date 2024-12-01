@@ -1,4 +1,33 @@
 /*
+ * Copyright (C) 2017-2022 Alexey Khokholov (Nuke.YKT)
+ *
+ * This file is part of Nuked OPN2.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ *
+ *  Nuked OPN2(Yamaha YM3438) emulator.
+ *  Thanks:
+ *      Silicon Pr0n:
+ *          Yamaha YM3438 decap and die shot(digshadow).
+ *      OPLx decapsulated(Matthew Gambrell, Olli Niemitalo):
+ *          OPL2 ROMs.
+ *
+ * version: 1.0.12
+ *
+ * ---
+ *
  * Ym3438
  * Copyright (c) 2018-2019 Federico Berti
  * Last modified: 07/04/19 16:01
@@ -19,12 +48,20 @@
 
 package uk.co.omgdrv.simplevgm.fm.nukeykt;
 
+
+/**
+ * Nuked OPN2(Yamaha YM3438) emulator.
+ *
+ * @version 1.0.12
+ * @see "Silicon Pr0n: Yamaha YM3438 decap and die shot(digshadow)."
+ * @see "OPLx decapsulated(Matthew Gambrell, Olli Niemitalo): OPL2 ROMs."
+ */
 public class Ym3438 implements IYm3438 {
 
-    // logsin table
+    // logSin table
 
     /** 16 bit unsigned - [256] */
-    static final int[] logsinrom = {
+    private static final int[] logSinRom = {
             0x859, 0x6c3, 0x607, 0x58b, 0x52e, 0x4e4, 0x4a6, 0x471,
             0x443, 0x41a, 0x3f5, 0x3d3, 0x3b5, 0x398, 0x37e, 0x365,
             0x34e, 0x339, 0x324, 0x311, 0x2ff, 0x2ed, 0x2dc, 0x2cd,
@@ -59,8 +96,8 @@ public class Ym3438 implements IYm3438 {
             0x000, 0x000, 0x000, 0x000, 0x000, 0x000, 0x000, 0x000
     };
 
-    /* exp table */
-    static final  /* 16 bit unsigned - [256]*/ int[] exprom = {
+    /** exp table */
+    private static final /* 16 bit unsigned - [256] */ int[] expRom = {
             0x000, 0x003, 0x006, 0x008, 0x00b, 0x00e, 0x011, 0x014,
             0x016, 0x019, 0x01c, 0x01f, 0x022, 0x025, 0x028, 0x02a,
             0x02d, 0x030, 0x033, 0x036, 0x039, 0x03c, 0x03f, 0x042,
@@ -95,27 +132,27 @@ public class Ym3438 implements IYm3438 {
             0x3d4, 0x3da, 0x3df, 0x3e4, 0x3ea, 0x3ef, 0x3f5, 0x3fa
     };
 
-    /* Note table */
-    static final  /* 32 bit unsigned - [16]*/ int[] fn_note = {
+    /** Note table */
+    private static final /* 32 bit unsigned - [16] */ int[] fn_note = {
             0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3
     };
 
-    /* Envelope generator */
-    static final  /* 32 bit unsigned  - [4][4]*/ int[][] eg_stephi = {
+    // Envelope generator
+    private static final /* 32 bit unsigned  - [4][4] */ int[][] eg_stephi = {
             {0, 0, 0, 0},
             {1, 0, 0, 0},
             {1, 0, 1, 0},
             {1, 1, 1, 0}
     };
 
-    static final  /* 8 bit unsigned - [4]*/ int[] eg_am_shift = {
+    private static final /* 8 bit unsigned - [4] */ int[] eg_am_shift = {
             7, 3, 1, 0
     };
 
-    /* Phase generator */
-    static final /* 32 bit unsigned - [8] */ int[] pg_detune = {16, 17, 19, 20, 22, 24, 27, 29};
+    // Phase generator
+    private static final /* 32 bit unsigned - [8] */ int[] pg_detune = {16, 17, 19, 20, 22, 24, 27, 29};
 
-    static final /* 32 bit unsigned - [8][8] */ int[][] pg_lfo_sh1 = {
+    private static final /* 32 bit unsigned - [8][8] */ int[][] pg_lfo_sh1 = {
             {7, 7, 7, 7, 7, 7, 7, 7},
             {7, 7, 7, 7, 7, 7, 7, 7},
             {7, 7, 7, 7, 7, 7, 1, 1},
@@ -126,7 +163,7 @@ public class Ym3438 implements IYm3438 {
             {7, 7, 1, 1, 0, 0, 0, 0}
     };
 
-    static final /* 32 bit unsigned - [8][8]*/ int[][] pg_lfo_sh2 = {
+    private static final /* 32 bit unsigned - [8][8] */ int[][] pg_lfo_sh2 = {
             {7, 7, 7, 7, 7, 7, 7, 7},
             {7, 7, 7, 7, 2, 2, 2, 2},
             {7, 7, 7, 2, 2, 2, 7, 7},
@@ -137,8 +174,8 @@ public class Ym3438 implements IYm3438 {
             {7, 7, 7, 2, 7, 7, 2, 1}
     };
 
-    /* Address decoder */
-    static final  /* 32 bit unsigned  - [12]*/ int[] op_offset = {
+    // Address decoder
+    private static final /* 32 bit unsigned  - [12] */ int[] op_offset = {
             0x000, /* Ch1 OP1/OP2 */
             0x001, /* Ch2 OP1/OP2 */
             0x002, /* Ch3 OP1/OP2 */
@@ -153,7 +190,7 @@ public class Ym3438 implements IYm3438 {
             0x106  /* Ch6 OP3/OP4 */
     };
 
-    static final  /* 32 bit unsigned - [6]*/ int[] ch_offset = {
+    private static final /* 32 bit unsigned - [6]*/ int[] ch_offset = {
             0x000, /* Ch1 */
             0x001, /* Ch2 */
             0x002, /* Ch3 */
@@ -162,13 +199,13 @@ public class Ym3438 implements IYm3438 {
             0x102  /* Ch6 */
     };
 
-    /* LFO */
-    static final  /* 32 bit unsigned - [8]*/ int[] lfo_cycles = {
+    /** LFO */
+    private static final /* 32 bit unsigned - [8] */ int[] lfo_cycles = {
             108, 77, 71, 67, 62, 44, 8, 5
     };
 
-    /* FM algorithm */
-    static final  /* 32 bit unsigned - [4][6][8]  */ int[][][] fm_algorithm = {
+    /** FM algorithm */
+    private static final /* 32 bit unsigned - [4][6][8]  */ int[][][] fm_algorithm = {
             {
                     {1, 1, 1, 1, 1, 1, 1, 1}, /* OP1_0         */
                     {1, 1, 1, 1, 1, 1, 1, 1}, /* OP1_1         */
@@ -203,7 +240,7 @@ public class Ym3438 implements IYm3438 {
             }
     };
 
-    static /* 32 bit unsigned */ int chip_type = ym3438_mode_readmode;
+    private static /* 32 bit unsigned */ int chip_type = ym3438_mode_readmode;
 
     // IYm3438.IYm3438_Type
     void OPN2_DoIO(IYm3438.IYm3438_Type chip) {
@@ -223,25 +260,25 @@ public class Ym3438 implements IYm3438 {
     }
 
     void OPN2_DoRegWrite(IYm3438.IYm3438_Type chip) {
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int i;
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int slot = chip.cycles % 12;
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int address;
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int channel = chip.channel;
-        /* Update registers */
+        // Update registers
         if (chip.write_fm_data > 0) {
-            /* Slot */
+            // Slot
             if (op_offset[slot] == (chip.address & 0x107)) {
                 if ((chip.address & 0x08) > 0) {
-                    /* OP2, OP4 */
+                    // OP2, OP4
                     slot += 12;
                 }
                 address = chip.address & 0xf0;
                 switch (address) {
-                    case 0x30: /* DT, MULTI */
+                    case 0x30: // DT, MULTI
                         chip.multi[slot] = chip.data & 0x0f;
                         if (chip.multi[slot] == 0) {
                             chip.multi[slot] = 1;
@@ -251,26 +288,26 @@ public class Ym3438 implements IYm3438 {
                         }
                         chip.dt[slot] = (chip.data >> 4) & 0x07;
                         break;
-                    case 0x40: /* TL */
+                    case 0x40: // TL
                         chip.tl[slot] = chip.data & 0x7f;
                         break;
-                    case 0x50: /* KS, AR */
+                    case 0x50: // KS, AR
                         chip.ar[slot] = chip.data & 0x1f;
                         chip.ks[slot] = (chip.data >> 6) & 0x03;
                         break;
-                    case 0x60: /* AM, DR */
+                    case 0x60: // AM, DR
                         chip.dr[slot] = chip.data & 0x1f;
                         chip.am[slot] = (chip.data >> 7) & 0x01;
                         break;
-                    case 0x70: /* SR */
+                    case 0x70: // SR
                         chip.sr[slot] = chip.data & 0x1f;
                         break;
-                    case 0x80: /* SL, RR */
+                    case 0x80: // SL, RR
                         chip.rr[slot] = chip.data & 0x0f;
                         chip.sl[slot] = (chip.data >> 4) & 0x0f;
                         chip.sl[slot] |= (chip.sl[slot] + 1) & 0x10;
                         break;
-                    case 0x90: /* SSG-EG */
+                    case 0x90: // SSG-EG
                         chip.ssg_eg[slot] = chip.data & 0x0f;
                         break;
                     default:
@@ -278,22 +315,22 @@ public class Ym3438 implements IYm3438 {
                 }
             }
 
-            /* Channel */
+            // Channel
             if (ch_offset[channel] == (chip.address & 0x103)) {
                 address = chip.address & 0xfc;
                 switch (address) {
                     case 0xa0:
-                        chip.fnum[channel] = (chip.data & 0xff) | ((chip.reg_a4 & 0x07) << 8);
+                        chip.fNum[channel] = (chip.data & 0xff) | ((chip.reg_a4 & 0x07) << 8);
                         chip.block[channel] = (chip.reg_a4 >> 3) & 0x07;
-                        chip.kcode[channel] = (chip.block[channel] << 2) | fn_note[chip.fnum[channel] >> 7];
+                        chip.kCode[channel] = (chip.block[channel] << 2) | fn_note[chip.fNum[channel] >> 7];
                         break;
                     case 0xa4:
                         chip.reg_a4 = chip.data & 0xff;
                         break;
                     case 0xa8:
-                        chip.fnum_3ch[channel] = (chip.data & 0xff) | ((chip.reg_ac & 0x07) << 8);
+                        chip.fNum_3ch[channel] = (chip.data & 0xff) | ((chip.reg_ac & 0x07) << 8);
                         chip.block_3ch[channel] = (chip.reg_ac >> 3) & 0x07;
-                        chip.kcode_3ch[channel] = (chip.block_3ch[channel] << 2) | fn_note[chip.fnum_3ch[channel] >> 7];
+                        chip.kCode_3ch[channel] = (chip.block_3ch[channel] << 2) | fn_note[chip.fNum_3ch[channel] >> 7];
                         break;
                     case 0xac:
                         chip.reg_ac = chip.data & 0xff;
@@ -315,7 +352,7 @@ public class Ym3438 implements IYm3438 {
         }
 
         if (chip.write_a_en || chip.write_d_en) {
-            /* Data */
+            // Data
             if (chip.write_a_en) {
                 chip.write_fm_data = 0;
             }
@@ -324,28 +361,28 @@ public class Ym3438 implements IYm3438 {
                 chip.write_fm_data = 1;
             }
 
-            /* Address */
+            // Address
             if (chip.write_a_en) {
                 if ((chip.write_data & 0xf0) != 0x00) {
-                    /* FM Write */
+                    // FM Write
                     chip.address = chip.write_data;
                     chip.write_fm_address = true;
                 } else {
-                    /* SSG write */
+                    // SSG write
                     chip.write_fm_address = false;
                 }
             }
 
-            /* FM Mode */
-            /* Data */
+            // FM Mode
+            // Data
             if (chip.write_d_en && (chip.write_data & 0x100) == 0) {
                 switch (chip.write_fm_mode_a) {
-                    case 0x21: /* LSI test 1 */
+                    case 0x21: // LSI test 1
                         for (i = 0; i < 8; i++) {
                             chip.mode_test_21[i] = (chip.write_data >> i) & 0x01;
                         }
                         break;
-                    case 0x22: /* LFO control */
+                    case 0x22: // LFO control
                         if (((chip.write_data >> 3) & 0x01) > 0) {
                             chip.lfo_en = 0x7f;
                         } else {
@@ -353,7 +390,7 @@ public class Ym3438 implements IYm3438 {
                         }
                         chip.lfo_freq = chip.write_data & 0x07;
                         break;
-                    case 0x24: /* Timer A */
+                    case 0x24: // Timer A
                         chip.timer_a_reg &= 0x03;
                         chip.timer_a_reg |= (chip.write_data & 0xff) << 2;
                         break;
@@ -361,10 +398,10 @@ public class Ym3438 implements IYm3438 {
                         chip.timer_a_reg &= 0x3fc;
                         chip.timer_a_reg |= chip.write_data & 0x03;
                         break;
-                    case 0x26: /* Timer B */
+                    case 0x26: // Timer B
                         chip.timer_b_reg = chip.write_data & 0xff;
                         break;
-                    case 0x27: /* CSM, Timer control */
+                    case 0x27: // CSM, Timer control
                         chip.mode_ch3 = (chip.write_data & 0xc0) >> 6;
                         chip.mode_csm = chip.mode_ch3 == 2;
                         chip.timer_a_load = (chip.write_data & 0x01) == 1;
@@ -374,30 +411,30 @@ public class Ym3438 implements IYm3438 {
                         chip.timer_b_enable = ((chip.write_data >> 3) & 0x01) == 1;
                         chip.timer_b_reset = ((chip.write_data >> 5) & 0x01) == 1;
                         break;
-                    case 0x28: /* Key on/off */
+                    case 0x28: // Key on/off
                         for (i = 0; i < 4; i++) {
                             chip.mode_kon_operator[i] = (chip.write_data >> (4 + i)) & 0x01;
                         }
                         if ((chip.write_data & 0x03) == 0x03) {
-                            /* Invalid address */
+                            // Invalid address
                             chip.mode_kon_channel = 0xff;
                         } else {
                             chip.mode_kon_channel = (chip.write_data & 0x03) + ((chip.write_data >> 2) & 1) * 3;
                         }
                         break;
-                    case 0x2a: /* DAC data */
-                        chip.dacdata &= 0x01;
-                        chip.dacdata |= (chip.write_data ^ 0x80) << 1;
+                    case 0x2a: // DAC data
+                        chip.dacData &= 0x01;
+                        chip.dacData |= (chip.write_data ^ 0x80) << 1;
                         break;
-                    case 0x2b: /* DAC enable */
-                        chip.dacen = chip.write_data >> 7;
+                    case 0x2b: // DAC enable
+                        chip.dacEn = chip.write_data >> 7;
                         break;
-                    case 0x2c: /* LSI test 2 */
+                    case 0x2c: // LSI test 2
                         for (i = 0; i < 8; i++) {
                             chip.mode_test_2c[i] = (chip.write_data >> i) & 0x01;
                         }
-                        chip.dacdata &= 0x1fe;
-                        chip.dacdata |= chip.mode_test_2c[3];
+                        chip.dacData &= 0x1fe;
+                        chip.dacData |= chip.mode_test_2c[3];
                         chip.eg_custom_timer = chip.mode_test_2c[7] == 0 && chip.mode_test_2c[6] > 0;
                         break;
                     default:
@@ -405,7 +442,7 @@ public class Ym3438 implements IYm3438 {
                 }
             }
 
-            /* Address */
+            // Address
             if (chip.write_a_en) {
                 chip.write_fm_mode_a = chip.write_data & 0x1ff;
             }
@@ -417,39 +454,39 @@ public class Ym3438 implements IYm3438 {
     }
 
     void OPN2_PhaseCalcIncrement(IYm3438.IYm3438_Type chip) {
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int chan = chip.channel;
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int slot = chip.cycles;
-        /* 32 bit unsigned */
-        int fnum = chip.pg_fnum;
-        /* 32 bit unsigned */
+        // 32 bit unsigned
+        int fnum = chip.pg_fNum;
+        // 32 bit unsigned
         int fnum_h = fnum >> 4;
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int fm;
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int basefreq;
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         int lfo = chip.lfo_pm;
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         int lfo_l = lfo & 0x0f;
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         int pms = chip.pms[chan];
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         int dt = chip.dt[slot];
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         int dt_l = dt & 0x03;
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         int detune = 0;
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         int block, note;
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         int sum, sum_h, sum_l;
-        /* 8 bit unsigned */
-        int kcode = chip.pg_kcode;
+        // 8 bit unsigned
+        int kcode = chip.pg_kCode;
 
         fnum <<= 1;
-        /* Apply LFO */
+        // Apply LFO
         if ((lfo_l & 0x08) > 0) {
             lfo_l ^= 0x0f;
         }
@@ -467,7 +504,7 @@ public class Ym3438 implements IYm3438 {
 
         basefreq = (fnum << chip.pg_block) >> 2;
 
-        /* Apply detune */
+        // Apply detune
         if (dt_l > 0) {
             if (kcode > 0x1c) {
                 kcode = 0x1c;
@@ -485,32 +522,32 @@ public class Ym3438 implements IYm3438 {
         } else {
             basefreq += detune;
         }
-        basefreq &= 0x1ffff;
+        basefreq &= 0x1_ffff;
         chip.pg_inc[slot] = (basefreq * chip.multi[slot]) >> 1;
-        chip.pg_inc[slot] &= 0xfffff;
+        chip.pg_inc[slot] &= 0xf_ffff;
     }
 
     void OPN2_PhaseGenerate(IYm3438.IYm3438_Type chip) {
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int slot;
-        /* Mask increment */
+        // Mask increment
         slot = (chip.cycles + 20) % 24;
         if (chip.pg_reset[slot]) {
             chip.pg_inc[slot] = 0;
         }
-        /* Phase step */
+        // Phase step
         slot = (chip.cycles + 19) % 24;
         chip.pg_phase[slot] += chip.pg_inc[slot];
-        chip.pg_phase[slot] &= 0xfffff;
+        chip.pg_phase[slot] &= 0xf_ffff;
         if (chip.pg_reset[slot] || chip.mode_test_21[3] > 0) {
             chip.pg_phase[slot] = 0;
         }
     }
 
     void OPN2_EnvelopeSSGEG(IYm3438.IYm3438_Type chip) {
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int slot = chip.cycles;
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         int direction = 0;
         chip.eg_ssg_pgrst_latch[slot] = 0;
         chip.eg_ssg_repeat_latch[slot] = 0;
@@ -519,15 +556,15 @@ public class Ym3438 implements IYm3438 {
         if ((chip.ssg_eg[slot] & 0x08) > 0) {
             direction = chip.eg_ssg_dir[slot];
             if ((chip.eg_level[slot] & 0x200) > 0) {
-                /* Reset */
+                // Reset
                 if ((chip.ssg_eg[slot] & 0x03) == 0x00) {
                     chip.eg_ssg_pgrst_latch[slot] = 1;
                 }
-                /* Repeat */
+                // Repeat
                 if ((chip.ssg_eg[slot] & 0x01) == 0x00) {
                     chip.eg_ssg_repeat_latch[slot] = 1;
                 }
-                /* Inverse */
+                // Inverse
                 if ((chip.ssg_eg[slot] & 0x03) == 0x02) {
                     direction ^= 1;
                 }
@@ -535,7 +572,7 @@ public class Ym3438 implements IYm3438 {
                     direction = 1;
                 }
             }
-            /* Hold up */
+            // Hold up
             if (chip.eg_kon_latch[slot] > 0
                     && ((chip.ssg_eg[slot] & 0x07) == 0x05 || (chip.ssg_eg[slot] & 0x07) == 0x03)) {
                 chip.eg_ssg_hold_up_latch[slot] = 1;
@@ -549,43 +586,43 @@ public class Ym3438 implements IYm3438 {
     }
 
     void OPN2_EnvelopeADSR(IYm3438.IYm3438_Type chip) {
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int slot = (chip.cycles + 22) % 24;
 
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         int nkon = chip.eg_kon_latch[slot];
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         int okon = chip.eg_kon[slot];
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         boolean kon_event;
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         boolean koff_event;
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         int eg_off;
-        /* 16 bit signed */
+        // 16 bit signed
         int level;
-        /* 16 bit signed */
+        // 16 bit signed
         int nextlevel = 0;
-        /* 16 bit signed */
+        // 16 bit signed
         int ssg_level;
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         int nextstate = chip.eg_state[slot];
-        /* 16 bit signed */
+        // 16 bit signed
         int inc = 0;
         chip.eg_read[0] = chip.eg_read_inc;
         chip.eg_read_inc = chip.eg_inc > 0 ? 1 : 0;
 
-        /* Reset phase generator */
+        // Reset phase generator
         chip.pg_reset[slot] = (nkon > 0 && okon == 0) || chip.eg_ssg_pgrst_latch[slot] > 0;
 
-        /* KeyOn/Off */
+        // KeyOn/Off
         kon_event = (nkon > 0 && okon == 0) || (okon > 0 && chip.eg_ssg_repeat_latch[slot] > 0);
         koff_event = okon > 0 && nkon == 0;
 
         ssg_level = level = chip.eg_level[slot];
 
         if (chip.eg_ssg_inv[slot] > 0) {
-            /* Inverse */
+            // Inverse
             ssg_level = 512 - level;
             ssg_level &= 0x3ff;
         }
@@ -600,7 +637,7 @@ public class Ym3438 implements IYm3438 {
         nextlevel = level;
         if (kon_event) {
             nextstate = eg_num_attack;
-            /* Instant attack */
+            // Instant attack
             if (chip.eg_ratemax > 0) {
                 nextlevel = 0;
             } else if (chip.eg_state[slot] == eg_num_attack && level != 0 && chip.eg_inc > 0 && nkon > 0) {
@@ -645,7 +682,7 @@ public class Ym3438 implements IYm3438 {
             nextlevel |= chip.eg_tl[1] << 3;
         }
 
-        /* Envelope off */
+        // Envelope off
         if (!kon_event && chip.eg_ssg_hold_up_latch[slot] == 0 && chip.eg_state[slot] != eg_num_attack && eg_off > 0) {
             nextstate = eg_num_release;
             nextlevel = 0x3ff;
@@ -659,18 +696,18 @@ public class Ym3438 implements IYm3438 {
     }
 
     void OPN2_EnvelopePrepare(IYm3438.IYm3438_Type chip) {
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         int rate;
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         int sum;
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         int inc = 0;
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int slot = chip.cycles;
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         int rate_sel;
 
-        /* Prepare increment */
+        // Prepare increment
         rate = (chip.eg_rate << 1) + chip.eg_ksv;
 
         if (rate > 0x3f) {
@@ -703,7 +740,7 @@ public class Ym3438 implements IYm3438 {
         chip.eg_inc = inc;
         chip.eg_ratemax = ((rate >> 1) == 0x1f) ? 1 : 0;
 
-        /* Prepare rate & ksv */
+        // Prepare rate & ksv
         rate_sel = chip.eg_state[slot];
         if ((chip.eg_kon[slot] > 0 && chip.eg_ssg_repeat_latch[slot] > 0)
                 || (chip.eg_kon[slot] == 0 && chip.eg_kon_latch[slot] > 0)) {
@@ -725,13 +762,13 @@ public class Ym3438 implements IYm3438 {
             default:
                 break;
         }
-        chip.eg_ksv = chip.pg_kcode >> (chip.ks[slot] ^ 0x03);
+        chip.eg_ksv = chip.pg_kCode >> (chip.ks[slot] ^ 0x03);
         if (chip.am[slot] > 0) {
             chip.eg_lfo_am = chip.lfo_am >> eg_am_shift[chip.ams[chip.channel]];
         } else {
             chip.eg_lfo_am = 0;
         }
-        /* Delay TL & SL value */
+        // Delay TL & SL value
         chip.eg_tl[1] = chip.eg_tl[0];
         chip.eg_tl[0] = chip.tl[slot];
         chip.eg_sl[1] = chip.eg_sl[0];
@@ -739,15 +776,15 @@ public class Ym3438 implements IYm3438 {
     }
 
     void OPN2_EnvelopeGenerate(IYm3438.IYm3438_Type chip) {
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int slot = (chip.cycles + 23) % 24;
-        /* 16 bit unsigned */
+        // 16 bit unsigned
         int level;
 
         level = chip.eg_level[slot];
 
         if (chip.eg_ssg_inv[slot] > 0) {
-            /* Inverse */
+            // Inverse
             level = 512 - level;
         }
         if (chip.mode_test_21[5] > 0) {
@@ -755,10 +792,10 @@ public class Ym3438 implements IYm3438 {
         }
         level &= 0x3ff;
 
-        /* Apply AM LFO */
+        // Apply AM LFO
         level += chip.eg_lfo_am;
 
-        /* Apply TL */
+        // Apply TL
         if (!(chip.mode_csm && chip.channel == 2 + 1)) {
             level += chip.eg_tl[0] << 3;
         }
@@ -779,20 +816,20 @@ public class Ym3438 implements IYm3438 {
     }
 
     void OPN2_FMPrepare(IYm3438.IYm3438_Type chip) {
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int slot = (chip.cycles + 6) % 24;
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int channel = chip.channel;
-        /* 16 bit signed */
+        // 16 bit signed
         int mod, mod1, mod2;
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int op = slot / 6;
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         int connect = chip.connect[channel];
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int prevslot = (chip.cycles + 18) % 24;
 
-        /* Calculate modulation */
+        // Calculate modulation
         mod1 = mod2 = 0;
 
         if (fm_algorithm[op][0][connect] > 0) {
@@ -812,7 +849,7 @@ public class Ym3438 implements IYm3438 {
         }
         mod = mod1 + mod2;
         if (op == 0) {
-            /* Feedback */
+            // Feedback
             mod = mod >> (10 - chip.fb[channel]);
             if (chip.fb[channel] == 0) {
                 mod = 0;
@@ -823,31 +860,31 @@ public class Ym3438 implements IYm3438 {
         chip.fm_mod[slot] = mod;
 
         slot = (chip.cycles + 18) % 24;
-        /* OP1 */
+        // OP1
         if (slot / 6 == 0) {
             chip.fm_op1[channel][1] = chip.fm_op1[channel][0];
             chip.fm_op1[channel][0] = chip.fm_out[slot];
         }
-        /* OP2 */
+        // OP2
         if (slot / 6 == 2) {
             chip.fm_op2[channel] = chip.fm_out[slot];
         }
     }
 
     void OPN2_ChGenerate(IYm3438.IYm3438_Type chip) {
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int slot = (chip.cycles + 18) % 24;
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int channel = chip.channel;
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int op = slot / 6;
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int test_dac = chip.mode_test_2c[5];
-        /* 16 bit signed */
+        // 16 bit signed
         int acc = chip.ch_acc[channel];
-        /* 16 bit signed */
+        // 16 bit signed
         int add = test_dac;
-        /* 16 bit signed */
+        // 16 bit signed
         int sum = 0;
         if (op == 0 && test_dac == 0) {
             acc = 0;
@@ -856,7 +893,7 @@ public class Ym3438 implements IYm3438 {
             add += chip.fm_out[slot] >> 5;
         }
         sum = acc + add;
-        /* Clamp */
+        // Clamp
         if (sum > 255) {
             sum = 255;
         } else if (sum < -256) {
@@ -870,36 +907,36 @@ public class Ym3438 implements IYm3438 {
     }
 
     void OPN2_ChOutput(IYm3438.IYm3438_Type chip) {
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int cycles = chip.cycles;
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int slot = chip.cycles;
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int channel = chip.channel;
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int test_dac = chip.mode_test_2c[5];
-        /* 16 bit signed */
+        // 16 bit signed
         short out;
-        /* 16 bit signed */
+        // 16 bit signed
         int sign;
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         boolean out_en;
         chip.ch_read = chip.ch_lock;
         if (slot < 12) {
-            /* Ch 4,5,6 */
+            // Ch 4,5,6
             channel++;
         }
         if ((cycles & 3) == 0) {
             if (test_dac == 0) {
-                /* Lock value */
+                // Lock value
                 chip.ch_lock = chip.ch_out[channel];
             }
             chip.ch_lock_l = chip.pan_l[channel];
             chip.ch_lock_r = chip.pan_r[channel];
         }
-        /* Ch 6 */
-        if ((((cycles >> 2) == 1) && chip.dacen > 0) || test_dac > 0) {
-            out = (short) chip.dacdata;
+        // Ch 6
+        if ((((cycles >> 2) == 1) && chip.dacEn > 0) || test_dac > 0) {
+            out = (short) chip.dacData;
             out <<= 7;
             out >>= 7;
         } else {
@@ -910,7 +947,7 @@ public class Ym3438 implements IYm3438 {
 
         if ((chip_type & ym3438_mode_ym2612) > 0) {
             out_en = ((cycles & 3) == 3) || test_dac > 0;
-            /* YM2612 DAC emulation(not verified) */
+            // YM2612 DAC emulation(not verified)
             sign = out >> 8;
             if (out >= 0) {
                 out++;
@@ -926,7 +963,7 @@ public class Ym3438 implements IYm3438 {
             } else {
                 chip.mor = sign;
             }
-            /* Amplify signal */
+            // Amplify signal
             chip.mol *= 3;
             chip.mor *= 3;
         } else {
@@ -941,30 +978,30 @@ public class Ym3438 implements IYm3438 {
     }
 
     void OPN2_FMGenerate(IYm3438.IYm3438_Type chip) {
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int slot = (chip.cycles + 19) % 24;
-        /* Calculate phase */
-        /* 16 bit unsigned */
+        // Calculate phase
+        // 16 bit unsigned
         int phase = (chip.fm_mod[slot] + (chip.pg_phase[slot] >> 10)) & 0x3ff;
-        /* 16 bit unsigned */
+        // 16 bit unsigned
         int quarter;
-        /* 16 bit unsigned */
+        // 16 bit unsigned
         int level;
-        /* 16 bit signed */
+        // 16 bit signed
         int output;
         if ((phase & 0x100) > 0) {
             quarter = (phase ^ 0xff) & 0xff;
         } else {
             quarter = phase & 0xff;
         }
-        level = logsinrom[quarter];
-        /* Apply envelope */
+        level = logSinRom[quarter];
+        // Apply envelope
         level += chip.eg_out[slot] << 2;
-        /* Transform */
+        // Transform
         if (level > 0x1fff) {
             level = 0x1fff;
         }
-        output = ((exprom[(level & 0xff) ^ 0xff] | 0x400) << 2) >> (level >> 8);
+        output = ((expRom[(level & 0xff) ^ 0xff] | 0x400) << 2) >> (level >> 8);
         if ((phase & 0x200) > 0) {
             output = ((~output) ^ (chip.mode_test_21[4] << 13)) + 1;
         } else {
@@ -976,34 +1013,34 @@ public class Ym3438 implements IYm3438 {
     }
 
     void OPN2_DoTimerA(IYm3438.IYm3438_Type chip) {
-        /* 16 bit unsigned */
+        // 16 bit unsigned
         int time;
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         boolean load;
         load = chip.timer_a_overflow > 0;
         if (chip.cycles == 2) {
-            /* Lock load value */
+            // Lock load value
             load |= (!chip.timer_a_load_lock && chip.timer_a_load);
             chip.timer_a_load_lock = chip.timer_a_load;
             if (chip.mode_csm) {
-                /* CSM KeyOn */
+                // CSM KeyOn
                 chip.mode_kon_csm = load;
             } else {
                 chip.mode_kon_csm = false;
             }
         }
-        /* Load counter */
+        // Load counter
         if (chip.timer_a_load_latch) {
             time = chip.timer_a_reg;
         } else {
             time = chip.timer_a_cnt;
         }
         chip.timer_a_load_latch = load;
-        /* Increase counter */
+        // Increase counter
         if ((chip.cycles == 1 && chip.timer_a_load_lock) || chip.mode_test_21[2] > 0) {
             time++;
         }
-        /* Set overflow flag */
+        // Set overflow flag
         if (chip.timer_a_reset) {
             chip.timer_a_reset = false;
             chip.timer_a_overflow_flag = false;
@@ -1015,32 +1052,32 @@ public class Ym3438 implements IYm3438 {
     }
 
     void OPN2_DoTimerB(IYm3438.IYm3438_Type chip) {
-        /* 16 bit unsigned */
+        // 16 bit unsigned
         int time;
-        /* 8 bit unsigned */
+        // 8 bit unsigned
         boolean load;
         load = chip.timer_b_overflow > 0;
         if (chip.cycles == 2) {
-            /* Lock load value */
+            // Lock load value
             load |= (!chip.timer_b_load_lock && chip.timer_b_load);
             chip.timer_b_load_lock = chip.timer_b_load;
         }
-        /* Load counter */
+        // Load counter
         if (chip.timer_b_load_latch) {
             time = chip.timer_b_reg;
         } else {
             time = chip.timer_b_cnt;
         }
         chip.timer_b_load_latch = load;
-        /* Increase counter */
+        // Increase counter
         if (chip.cycles == 1) {
-            chip.timer_b_subcnt++;
+            chip.timer_b_subCnt++;
         }
-        if ((chip.timer_b_subcnt == 0x10 && chip.timer_b_load_lock) || chip.mode_test_21[2] > 0) {
+        if ((chip.timer_b_subCnt == 0x10 && chip.timer_b_load_lock) || chip.mode_test_21[2] > 0) {
             time++;
         }
-        chip.timer_b_subcnt &= 0x0f;
-        /* Set overflow flag */
+        chip.timer_b_subCnt &= 0x0f;
+        // Set overflow flag
         if (chip.timer_b_reset) {
             chip.timer_b_reset = false;
             chip.timer_b_overflow_flag = false;
@@ -1052,41 +1089,40 @@ public class Ym3438 implements IYm3438 {
     }
 
     void OPN2_KeyOn(IYm3438.IYm3438_Type chip) {
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int slot = chip.cycles;
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int chan = chip.channel;
-        /* Key On */
+        // Key On
         chip.eg_kon_latch[slot] = chip.mode_kon[slot];
         chip.eg_kon_csm[slot] = 0;
         if (chip.channel == 2 && chip.mode_kon_csm) {
-            /* CSM Key On */
+            // CSM Key On
             chip.eg_kon_latch[slot] = 1;
             chip.eg_kon_csm[slot] = 1;
         }
         if (chip.cycles == chip.mode_kon_channel) {
-            /* OP1 */
+            // OP1
             chip.mode_kon[chan] = chip.mode_kon_operator[0];
-            /* OP2 */
+            // OP2
             chip.mode_kon[chan + 12] = chip.mode_kon_operator[1];
-            /* OP3 */
+            // OP3
             chip.mode_kon[chan + 6] = chip.mode_kon_operator[2];
-            /* OP4 */
+            // OP4
             chip.mode_kon[chan + 18] = chip.mode_kon_operator[3];
         }
     }
 
     @Override
     public void OPN2_Reset(IYm3438.IYm3438_Type chip) {
-        /* 32 bit unsigned */
-        int i;
-        for (i = 0; i < 24; i++) {
+        // 32 bit unsigned
+        for (int i = 0; i < 24; i++) {
             chip.eg_out[i] = 0x3ff;
             chip.eg_level[i] = 0x3ff;
             chip.eg_state[i] = eg_num_release;
             chip.multi[i] = 1;
         }
-        for (i = 0; i < 6; i++) {
+        for (int i = 0; i < 6; i++) {
             chip.pan_l[i] = 1;
             chip.pan_r[i] = 1;
         }
@@ -1099,13 +1135,13 @@ public class Ym3438 implements IYm3438 {
 
     @Override
     public void OPN2_Clock(IYm3438.IYm3438_Type chip, /* 16 bit signed */ int[] buffer) {
-        /* 32 bit unsigned */
+        // 32 bit unsigned
         int slot = chip.cycles;
         chip.lfo_inc = chip.mode_test_21[1];
         chip.pg_read >>= 1;
         chip.eg_read[1] >>= 1;
         chip.eg_cycle = (chip.eg_cycle + 1) & 0xFF;
-        /* Lock envelope generator timer value */
+        // Lock envelope generator timer value
         if (chip.cycles == 1 && chip.eg_quotient == 2) {
             if (chip.eg_cycle_stop > 0) {
                 chip.eg_shift_lock = 0;
@@ -1114,7 +1150,7 @@ public class Ym3438 implements IYm3438 {
             }
             chip.eg_timer_low_lock = chip.eg_timer & 0x03;
         }
-        /* Cycle specific functions */
+        // Cycle specific functions
         switch (chip.cycles) {
             case 0:
                 chip.lfo_pm = chip.lfo_cnt >> 2;
@@ -1180,36 +1216,36 @@ public class Ym3438 implements IYm3438 {
         OPN2_EnvelopeSSGEG(chip);
         OPN2_EnvelopePrepare(chip);
 
-        /* Prepare fnum & block */
+        // Prepare fNum & block
         if (chip.mode_ch3 > 0) {
-            /* Channel 3 special mode */
+            // Channel 3 special mode
             switch (slot) {
-                case 1: /* OP1 */
-                    chip.pg_fnum = chip.fnum_3ch[1];
+                case 1: // OP1
+                    chip.pg_fNum = chip.fNum_3ch[1];
                     chip.pg_block = chip.block_3ch[1];
-                    chip.pg_kcode = chip.kcode_3ch[1];
+                    chip.pg_kCode = chip.kCode_3ch[1];
                     break;
-                case 7: /* OP3 */
-                    chip.pg_fnum = chip.fnum_3ch[0];
+                case 7: // OP3
+                    chip.pg_fNum = chip.fNum_3ch[0];
                     chip.pg_block = chip.block_3ch[0];
-                    chip.pg_kcode = chip.kcode_3ch[0];
+                    chip.pg_kCode = chip.kCode_3ch[0];
                     break;
-                case 13: /* OP2 */
-                    chip.pg_fnum = chip.fnum_3ch[2];
+                case 13: // OP2
+                    chip.pg_fNum = chip.fNum_3ch[2];
                     chip.pg_block = chip.block_3ch[2];
-                    chip.pg_kcode = chip.kcode_3ch[2];
+                    chip.pg_kCode = chip.kCode_3ch[2];
                     break;
-                case 19: /* OP4 */
+                case 19: // OP4
                 default:
-                    chip.pg_fnum = chip.fnum[(chip.channel + 1) % 6];
+                    chip.pg_fNum = chip.fNum[(chip.channel + 1) % 6];
                     chip.pg_block = chip.block[(chip.channel + 1) % 6];
-                    chip.pg_kcode = chip.kcode[(chip.channel + 1) % 6];
+                    chip.pg_kCode = chip.kCode[(chip.channel + 1) % 6];
                     break;
             }
         } else {
-            chip.pg_fnum = chip.fnum[(chip.channel + 1) % 6];
+            chip.pg_fNum = chip.fNum[(chip.channel + 1) % 6];
             chip.pg_block = chip.block[(chip.channel + 1) % 6];
-            chip.pg_kcode = chip.kcode[(chip.channel + 1) % 6];
+            chip.pg_kCode = chip.kCode[(chip.channel + 1) % 6];
         }
 
         OPN2_UpdateLFO(chip);
@@ -1230,10 +1266,10 @@ public class Ym3438 implements IYm3438 {
         data &= 0xFF;
         chip.write_data = ((port << 7) & 0x100) | data;
         if ((port & 1) > 0) {
-            /* Data */
+            // Data
             chip.write_d |= 1;
         } else {
-            /* Address */
+            // Address
             chip.write_a |= 1;
         }
     }
@@ -1260,10 +1296,10 @@ public class Ym3438 implements IYm3438 {
     public /* 8 bit unsigned */ int OPN2_Read(IYm3438.IYm3438_Type chip, /* 32 bit unsigned */ int port) {
         if ((port & 3) == 0 || (chip_type & ym3438_mode_readmode) > 0) {
             if (chip.mode_test_21[6] > 0) {
-                /* Read test data */
-                /* 32 bit unsigned */
+                // Read test data
+                // 32 bit unsigned
                 int slot = (chip.cycles + 18) % 24;
-                /* 16 bit unsigned */
+                // 16 bit unsigned
                 int testdata = ((chip.pg_read & 0x01) << 15)
                         | ((chip.eg_read[chip.mode_test_21[0]] & 0x01) << 14);
                 if (chip.mode_test_2c[4] > 0) {

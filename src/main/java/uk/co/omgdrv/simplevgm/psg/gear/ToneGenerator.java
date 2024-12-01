@@ -64,7 +64,6 @@ public final class ToneGenerator {
      */
     private boolean enabled;
 
-
     /**
      * ToneGenerator Constructor.
      *
@@ -77,7 +76,6 @@ public final class ToneGenerator {
         reset();
     }
 
-
     /**
      * Reset Tone Generator to Default Values.
      */
@@ -88,7 +86,6 @@ public final class ToneGenerator {
         firstByte = 0;
         counter = 0;
     }
-
 
     /**
      * Toggle Channel On/Off.
@@ -201,5 +198,4 @@ public final class ToneGenerator {
     public void setFirstByte(int firstByte) {
         this.firstByte = firstByte;
     }
-
 }

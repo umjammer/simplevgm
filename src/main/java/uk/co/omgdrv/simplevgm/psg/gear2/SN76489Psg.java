@@ -1,3 +1,7 @@
+/*
+ * Copyright 2019 Federico Berti
+ */
+
 package uk.co.omgdrv.simplevgm.psg.gear2;
 
 import uk.co.omgdrv.simplevgm.psg.gear.PsgProvider;
@@ -7,7 +11,7 @@ import uk.co.omgdrv.simplevgm.psg.gear.PsgProvider;
  * SN76489Psg.
  *
  * @author Federico Berti
- * @version Copyright 2019
+ * @version 2019
  */
 public class SN76489Psg implements PsgProvider { // TODO gross
 

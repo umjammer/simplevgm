@@ -21,11 +21,12 @@
 
 package uk.co.omgdrv.simplevgm.psg.nuked;
 
+
 /**
- * PsgYm7101Impl.
+ * Yamaha YM7101 PSG.
  *
- * @author Federico Berti
- * @version Copyright 2019
+ * @author Alexey Khokholov (Nuke.YKT)
+ * @version 1.0.1
  */
 public class PsgYm7101Impl implements PsgYm7101 {
 

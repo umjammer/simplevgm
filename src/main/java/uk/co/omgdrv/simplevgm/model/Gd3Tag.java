@@ -65,7 +65,6 @@ public class Gd3Tag {
         return sb;
     }
 
-
     public static Gd3Tag parseTag(byte[] data, int position) {
         Gd3Tag g = new Gd3Tag();
         try {
@@ -99,5 +98,4 @@ public class Gd3Tag {
             }
         }
     }
-
 }

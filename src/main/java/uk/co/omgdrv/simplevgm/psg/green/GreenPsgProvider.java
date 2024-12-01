@@ -1,3 +1,7 @@
+/*
+ * Copyright 2019 Federico Berti
+ */
+
 package uk.co.omgdrv.simplevgm.psg.green;
 
 import libgme.util.StereoBuffer;
@@ -11,7 +15,7 @@ import uk.co.omgdrv.simplevgm.psg.gear.PsgProvider;
  * GreenPsgProvider.
  *
  * @author Federico Berti
- * @version Copyright 2019
+ * @version 2019
  */
 public class GreenPsgProvider extends BaseVgmPsgProvider {
 
@@ -19,7 +23,6 @@ public class GreenPsgProvider extends BaseVgmPsgProvider {
     static final int psgTimeBits = 12;
     static final int psgTimeUnit = 1 << psgTimeBits;
     static final int psgFactor = (int) (1.0 * psgTimeUnit / VGM_SAMPLE_RATE_HZ * CLOCK_HZ + 0.5);
-
 
     private VgmPsgProvider psg;
     private double nanosToNextSample = NANOS_PER_SAMPLE;

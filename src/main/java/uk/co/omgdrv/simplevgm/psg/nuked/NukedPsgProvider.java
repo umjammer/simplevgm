@@ -1,3 +1,7 @@
+/*
+ * Copyright 2019 Federico Berti
+ */
+
 package uk.co.omgdrv.simplevgm.psg.nuked;
 
 import java.nio.file.Path;
@@ -9,6 +13,8 @@ import java.util.stream.Collectors;
 import libgme.util.BlipBuffer;
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.PsgCompare;
+import uk.co.omgdrv.simplevgm.psg.nuked.PsgYm7101;
+import uk.co.omgdrv.simplevgm.psg.nuked.PsgYm7101Impl;
 import uk.co.omgdrv.simplevgm.util.DspUtil;
 import uk.co.omgdrv.simplevgm.util.Util;
 
@@ -19,7 +25,7 @@ import static uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ;
  * NukedPsgProvider.
  *
  * @author Federico Berti
- * @version Copyright 2019
+ * @version 2019
  * @see "https://forums.nesdev.com/viewtopic.php?f=23&t=15562"
  */
 public class NukedPsgProvider implements VgmPsgProvider {
@@ -75,7 +81,6 @@ public class NukedPsgProvider implements VgmPsgProvider {
 
     @Override
     public void writeGG(int time, int data) {
-
     }
 
     @Override

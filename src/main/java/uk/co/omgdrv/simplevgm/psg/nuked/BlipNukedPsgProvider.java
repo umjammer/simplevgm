@@ -1,3 +1,7 @@
+/*
+ * Copyright 2019 Federico Berti
+ */
+
 package uk.co.omgdrv.simplevgm.psg.nuked;
 
 import java.util.Arrays;
@@ -13,7 +17,7 @@ import uk.co.omgdrv.simplevgm.util.DspUtil;
  * BlipNukedPsgProvider.
  *
  * @author Federico Berti
- * @version Copyright 2019
+ * @version 2019
  * @see "https://forums.nesdev.com/viewtopic.php?f=23&t=15562"
  */
 public class BlipNukedPsgProvider extends NukedPsgProvider {
@@ -23,7 +27,6 @@ public class BlipNukedPsgProvider extends NukedPsgProvider {
     private static final int BLIP_BUFFER_SAMPLES_CLOCKS = (int) (CLOCK_HZ * (BLIP_BUFFER_SAMPLES_MS / 1000d));
     private static final int BLIP_BUFFER_SAMPLES_END_FRAME = BLIP_BUFFER_SAMPLES_CLOCKS / BLIP_FACTOR;
     private static final int BLIP_BUFFER_SIZE = BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ / (1000 / BLIP_BUFFER_SAMPLES_MS);
-
 
     private final BlipBuffer blipBuffer;
     private int blipSampleCounter;
@@ -66,7 +69,7 @@ public class BlipNukedPsgProvider extends NukedPsgProvider {
     private void updateBlipSampleBuffer(double sample) {
         byte scaledDelta = DspUtil.scaleClamp8bit(sample - lastSample, DspUtil.PSG_MAX_VOLUME_8_BIT);
         int clockRateTime = BLIP_FACTOR * blipSampleCounter;
-//        System.out.println(clockRateTime + "," + (scaledSample -lastScaledSample));
+//logger.log(Level.TRACE, clockRateTime + "," + (scaledSample -lastScaledSample));
         blipBuffer.addDelta(clockRateTime, scaledDelta);
         lastSample = sample;
         blipSampleCounter++;

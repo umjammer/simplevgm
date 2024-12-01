@@ -27,6 +27,7 @@ import libgme.util.BlipBuffer;
  *
  * WARNING don't set this as service provider. just for internal use.
  *
+ * @author Shay Green
  * @see "https://www.slack.net/~ant/"
  */
 public final class SmsApu implements VgmPsgProvider { // TODO gross

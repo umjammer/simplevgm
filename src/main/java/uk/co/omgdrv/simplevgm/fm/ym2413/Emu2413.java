@@ -27,17 +27,19 @@ import static uk.co.omgdrv.simplevgm.fm.ym2413.OPLL.OPLL_SLOT;
 
 /**
  * Ported by the nintaco team: https://nintaco.com
- * Original C implementation: https://github.com/digital-sound-antiques/emu2413
+ *
  * <p>
- * ---
- * 2019-10-01 Federico Berti
+ * @author Mitsutaka Okazaki
+ * @author Federico Berti
+ * @version 2019-10-01
  * - back-ported 0.63 changes: Support per-channel output
  * - update 2413 instruments
  * - adaptation work
+ * @see "Original C implementation: https://github.com/digital-sound-antiques/emu2413"
  */
 public final class Emu2413 {
 
-    //unused
+    // unused
     public static final short[] vrc7_inst = {
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x03, 0x21, 0x05, 0x06, 0xB8, 0x82, 0x42, 0x27,
@@ -63,39 +65,41 @@ public final class Emu2413 {
     /**
      * YM2413 TONES by Mitsutaka Okazaki
      * The following patches are referred from VRC7
-     * - @5: Clarinet
-     * - @7: Trumpet
-     * - Drums: BD/SD/HH/TM/TC
+     * <ul>
+     *  <li>@5: Clarinet</li>
+     *  <li>@7: Trumpet</li>
+     *  <li>Drums: BD/SD/HH/TM/TC</li>
+     * </ul>
      *
      * @see "https://siliconpr0n.org/archive/doku.php?id=vendor:yamaha:opl2#opll_vrc7_patch_format"
      */
     public static final short[] ym2413_inst = {
-            /* MULT  MULT modTL DcDmFb AR/DR AR/DR SL/RR SL/RR */
-            /*   0     1     2     3     4     5     6    7    */
-            0x49, 0x4c, 0x4c, 0x32, 0x00, 0x00, 0x00, 0x00,  //0
-            0x61, 0x61, 0x1E, 0x17, 0xF0, 0x7F, 0x00, 0x17,  //1
-            0x13, 0x41, 0x17, 0x0E, 0xFF, 0xFF, 0x23, 0x13,  //2
-            0x23, 0x01, 0x9A, 0x04, 0xA3, 0xf4, 0xF0, 0x23,  //3
-            0x11, 0x61, 0x0e, 0x07, 0xfa, 0x64, 0x70, 0x17,  //4
-            0x32, 0x21, 0x1e, 0x06, 0xe1, 0x76, 0x01, 0x28,  //5
-            0x21, 0x22, 0x16, 0x05, 0xf0, 0x71, 0x00, 0x18,  //6
-            0x21, 0x61, 0x1d, 0x07, 0x82, 0x81, 0x11, 0x07,  //7
-            0x23, 0x21, 0x2d, 0x16, 0x90, 0x90, 0x00, 0x07,  //8
-            0x21, 0x21, 0x1b, 0x06, 0x64, 0x65, 0x10, 0x17,  //9
-            0x21, 0x21, 0x0b, 0x1a, 0x85, 0xa0, 0x70, 0x07,  //A
-            0x23, 0x01, 0x83, 0x10, 0xff, 0xb4, 0x10, 0xf4,  //B
-            0x97, 0xc1, 0x20, 0x07, 0xff, 0xf4, 0x22, 0x22,  //C
-            0x61, 0x00, 0x0c, 0x05, 0xd2, 0xf6, 0x40, 0x43,  //D
-            0x01, 0x01, 0x56, 0x03, 0xf4, 0xf0, 0x03, 0x02,  //E
-            0x21, 0x41, 0x89, 0x03, 0xf1, 0xf4, 0xf0, 0x23,  //F
+            // MULT  MULT modTL DcDmFb AR/DR AR/DR SL/RR SL/RR
+            //   0     1     2     3     4     5     6    7
+            0x49, 0x4c, 0x4c, 0x32, 0x00, 0x00, 0x00, 0x00,  // 0
+            0x61, 0x61, 0x1E, 0x17, 0xF0, 0x7F, 0x00, 0x17,  // 1
+            0x13, 0x41, 0x17, 0x0E, 0xFF, 0xFF, 0x23, 0x13,  // 2
+            0x23, 0x01, 0x9A, 0x04, 0xA3, 0xf4, 0xF0, 0x23,  // 3
+            0x11, 0x61, 0x0e, 0x07, 0xfa, 0x64, 0x70, 0x17,  // 4
+            0x32, 0x21, 0x1e, 0x06, 0xe1, 0x76, 0x01, 0x28,  // 5
+            0x21, 0x22, 0x16, 0x05, 0xf0, 0x71, 0x00, 0x18,  // 6
+            0x21, 0x61, 0x1d, 0x07, 0x82, 0x81, 0x11, 0x07,  // 7
+            0x23, 0x21, 0x2d, 0x16, 0x90, 0x90, 0x00, 0x07,  // 8
+            0x21, 0x21, 0x1b, 0x06, 0x64, 0x65, 0x10, 0x17,  // 9
+            0x21, 0x21, 0x0b, 0x1a, 0x85, 0xa0, 0x70, 0x07,  // A
+            0x23, 0x01, 0x83, 0x10, 0xff, 0xb4, 0x10, 0xf4,  // B
+            0x97, 0xc1, 0x20, 0x07, 0xff, 0xf4, 0x22, 0x22,  // C
+            0x61, 0x00, 0x0c, 0x05, 0xd2, 0xf6, 0x40, 0x43,  // D
+            0x01, 0x01, 0x56, 0x03, 0xf4, 0xf0, 0x03, 0x02,  // E
+            0x21, 0x41, 0x89, 0x03, 0xf1, 0xf4, 0xf0, 0x23,  // F
 
-            /* drum instruments definitions */
-            /* MULTI MULTI modTL  xxx  AR/DR AR/DR SL/RR SL/RR */
-            /*   0     1     2     3     4     5     6    7    */
-            /* Drums dumped from the VRC7 using debug mode, these are likely also correct for ym2413(OPLL) but need verification */
-            0x01, 0x01, 0x18, 0x0f, 0xdf, 0xf8, 0x6a, 0x6d,/* BD */
-            0x01, 0x01, 0x00, 0x00, 0xc8, 0xd8, 0xa7, 0x68,/* HH, SD */
-            0x05, 0x01, 0x00, 0x00, 0xf8, 0xaa, 0x59, 0x55  /* TOM, TOP CYM */
+            // drum instruments definitions */
+            // MULTI MULTI modTL  xxx  AR/DR AR/DR SL/RR SL/RR
+            //   0     1     2     3     4     5     6    7
+            // Drums dumped from the VRC7 using debug mode, these are likely also correct for ym2413(OPLL) but need verification
+            0x01, 0x01, 0x18, 0x0f, 0xdf, 0xf8, 0x6a, 0x6d, // BD
+            0x01, 0x01, 0x00, 0x00, 0xc8, 0xd8, 0xa7, 0x68, // HH, SD
+            0x05, 0x01, 0x00, 0x00, 0xf8, 0xaa, 0x59, 0x55  // TOM, TOP CYM
     };
 
     public static final int CHANNELS = 9;
@@ -120,11 +124,11 @@ public final class Emu2413 {
     private static final double EG_STEP = 0.375;
     private static final int EG_BITS = 7;
 
-    // Dynamic range of total level
+    /** Dynamic range of total level */
     private static final double TL_STEP = 0.75;
     private static final int TL_BITS = 6;
 
-    // Dynamic range of sustine level
+    /** Dynamic range of sustain level */
     private static final double SL_STEP = 3.0;
 
     private static int EG2DB(int d) {
@@ -177,7 +181,7 @@ public final class Emu2413 {
     private static final double AM_SPEED = 3.6413;
     private static final double AM_DEPTH = 4.875;
 
-    // Cut the lower b bit(s) off.
+    /** Cut the lower b bit(s) off. */
     private static int HIGHBITS(int c, int b) {
         return c >> b;
     }
@@ -199,9 +203,9 @@ public final class Emu2413 {
         return ((s >> b) & 1) != 0;
     }
 
-    // Input clock
+    /** Input clock */
     private static int fmClockHz = 3579545;
-    // Sampling rate
+    /** Sampling rate */
     private static int fmRateHz = 49716;
 
     // WaveTable for each envelope amp
@@ -216,41 +220,38 @@ public final class Emu2413 {
 
     // Phase delta for LFO
     private static int pm_dphase
-            = (int) (PM_SPEED * PM_DP_WIDTH / (fmClockHz / 72));
+            = (int) (PM_SPEED * PM_DP_WIDTH / (fmClockHz / 72f));
     private static int am_dphase
-            = (int) (AM_SPEED * AM_DP_WIDTH / (fmClockHz / 72));
+            = (int) (AM_SPEED * AM_DP_WIDTH / (fmClockHz / 72f));
 
-    // dB to Liner table
+    /** dB to Liner table */
     private static final int[] DB2LIN_TABLE = new int[(DB_MUTE + DB_MUTE) * 2];
 
-    // Liner to Log curve conversion table (for Attack rate).
+    /** Liner to Log curve conversion table (for Attack rate). */
     private static final int[] AR_ADJUST_TABLE = new int[1 << EG_BITS];
 
-    // Empty voice data
-//  private static final OPLL_PATCH null_patch = new OPLL_PATCH();
+//    /** Empty voice data */
+//    private static final OPLL_PATCH null_patch = new OPLL_PATCH();
 
-    // Basic voice Data
+    /** Basic voice Data */
     private static final OPLL_PATCH[] default_patch
             = new OPLL_PATCH[(16 + 3) * 2];
 
-    // Phase incr table for Attack
+    /** Phase incr table for Attack */
     private static final int[][] dphaseARTable = new int[16][16];
-    // Phase incr table for Decay and Release
+    /** Phase incr table for Decay and Release */
     private static final int[][] dphaseDRTable = new int[16][16];
 
     // KSL + TL Table
     private static final int[][][][] tllTable = new int[16][8][1 << TL_BITS][4];
     private static final int[][][] rksTable = new int[2][8][2];
 
-    // Phase incr table for PG
+    /** Phase incr table for PG */
     private static final int[][][] dphaseTable = new int[512][8][16];
 
-    /***************************************************
+    // Create tables
 
-     Create tables
-     ****************************************************/
-
-    // Table for AR to LogCurve.
+    /** Table for AR to LogCurve. */
     private static void makeAdjustTable() {
         AR_ADJUST_TABLE[0] = (1 << EG_BITS) - 1;
         for (int i = 1; i < (1 << EG_BITS); i++) {
@@ -259,7 +260,7 @@ public final class Emu2413 {
         }
     }
 
-    // Table for dB(0 -- (1<<DB_BITS)-1) to Liner(0 -- DB2LIN_AMP_WIDTH)
+    /** Table for dB(0 -- (1<<DB_BITS)-1) to Liner(0 -- DB2LIN_AMP_WIDTH) */
     private static void makeDB2LinTable() {
         for (int i = 0; i < DB_MUTE + DB_MUTE; i++) {
             DB2LIN_TABLE[i] = (int) (((1 << DB2LIN_AMP_BITS) - 1)
@@ -271,7 +272,7 @@ public final class Emu2413 {
         }
     }
 
-    // Liner(+0.0 - +1.0) to dB((1<<DB_BITS) - 1 -- 0)
+    /** Liner(+0.0 - +1.0) to dB((1<<DB_BITS) - 1 -- 0) */
     private static int lin2db(double d) {
         if (d == 0) {
             return (DB_MUTE - 1);
@@ -280,7 +281,7 @@ public final class Emu2413 {
         }
     }
 
-    // Sin Table
+    /** Sin Table */
     private static void makeSinTable() {
         for (int i = 0; i < PG_WIDTH / 4; i++) {
             fullsintable[i] = lin2db(sin(2.0 * PI * i / PG_WIDTH));
@@ -308,7 +309,7 @@ public final class Emu2413 {
         }
     }
 
-    // Table for Pitch Modulator
+    /** Table for Pitch Modulator */
     private static void makePmTable() {
         for (int i = 0; i < PM_PG_WIDTH; i++) {
             pmtable[i] = (int) ((double) PM_AMP * pow(2, PM_DEPTH * saw(2.0
@@ -316,7 +317,7 @@ public final class Emu2413 {
         }
     }
 
-    // Table for Amp Modulator
+    /** Table for Amp Modulator */
     private static void makeAmTable() {
         for (int i = 0; i < AM_PG_WIDTH; i++) {
             amtable[i] = (int) (AM_DEPTH / 2 / DB_STEP * (1.0 + saw(2.0 * PI
@@ -328,7 +329,7 @@ public final class Emu2413 {
             6 * 2, 7 * 2, 8 * 2, 9 * 2, 10 * 2, 10 * 2, 12 * 2, 12 * 2, 15 * 2,
             15 * 2};
 
-    // Phase increment counter table
+    /** Phase increment counter table */
     private static void makeDphaseTable() {
         for (int fnum = 0; fnum < 512; fnum++) {
             for (int block = 0; block < 8; block++) {
@@ -373,7 +374,7 @@ public final class Emu2413 {
         }
     }
 
-    // Rate Table for Attack
+    /** Rate Table for Attack */
     private static void makeDphaseARTable() {
         for (int AR = 0; AR < 16; AR++) {
             for (int Rks = 0; Rks < 16; Rks++) {
@@ -397,7 +398,7 @@ public final class Emu2413 {
         }
     }
 
-    // Rate Table for Decay and Release
+    /** Rate Table for Decay and Release */
     private static void makeDphaseDRTable() {
         for (int DR = 0; DR < 16; DR++) {
             for (int Rks = 0; Rks < 16; Rks++) {
@@ -476,10 +477,7 @@ public final class Emu2413 {
         }
     }
 
-    /************************************************************
-
-     Calc Parameters
-     ************************************************************/
+    // Calc Parameters
 
     private static int calc_eg_dphase(OPLL_SLOT slot) {
 
@@ -497,7 +495,7 @@ public final class Emu2413 {
                 return dphaseDRTable[slot.patch.RR][slot.rks];
 
             case RELEASE:
-                if (slot.sustine) {
+                if (slot.sustain) {
                     return dphaseDRTable[5][slot.rks];
                 } else if (slot.patch.EG != 0) {
                     return dphaseDRTable[slot.patch.RR][slot.rks];
@@ -516,10 +514,8 @@ public final class Emu2413 {
         }
     }
 
-    /*************************************************************
+    // OPLL internal interfaces
 
-     OPLL internal interfaces
-     *************************************************************/
     private static final int SLOT_BD1 = 12;
     private static final int SLOT_BD2 = 13;
     private static final int SLOT_HH = 14;
@@ -559,7 +555,7 @@ public final class Emu2413 {
         UPDATE_EG(S);  // EG should be updated last.
     }
 
-    // Slot key on
+    /** Slot key on */
     private static void slotOn(OPLL_SLOT slot) {
         slot.eg_mode = ATTACK;
         slot.eg_phase = 0;
@@ -567,14 +563,14 @@ public final class Emu2413 {
         UPDATE_EG(slot);
     }
 
-    // Slot key on without reseting the phase
+    // Slot key on without resetting the phase */
     private static void slotOn2(OPLL_SLOT slot) {
         slot.eg_mode = ATTACK;
         slot.eg_phase = 0;
         UPDATE_EG(slot);
     }
 
-    // Slot key off
+    /** Slot key off */
     private static void slotOff(OPLL_SLOT slot) {
         if (slot.eg_mode == ATTACK) {
             slot.eg_phase = EXPAND_BITS(AR_ADJUST_TABLE[HIGHBITS(slot.eg_phase,
@@ -584,7 +580,7 @@ public final class Emu2413 {
         UPDATE_EG(slot);
     }
 
-    // Channel key on
+    /** Channel key on */
     private static void keyOn(OPLL opll, int i) {
         if (!opll.slot_on_flag[i * 2]) {
             slotOn(MOD(opll, i));
@@ -595,7 +591,7 @@ public final class Emu2413 {
         opll.key_status[i] = true;
     }
 
-    // Channel key off
+    /** Channel key off */
     private static void keyOff(OPLL opll, int i) {
         if (opll.slot_on_flag[i * 2 + 1]) {
             slotOff(CAR(opll, i));
@@ -674,12 +670,12 @@ public final class Emu2413 {
         slot.patch = patch;
     }
 
-    // Set sustine parameter
+    // Set sustain parameter
     private static void setSustine(OPLL opll, int c,
                                    boolean sustine) {
-        CAR(opll, c).sustine = sustine;
+        CAR(opll, c).sustain = sustine;
         if (MOD(opll, c).type) {
-            MOD(opll, c).sustine = sustine;
+            MOD(opll, c).sustain = sustine;
         }
     }
 
@@ -781,10 +777,7 @@ public final class Emu2413 {
         OPLL_PATCH.copy(patch, opll.patch[num]);
     }
 
-    /***********************************************************
-
-     Initializing
-     ***********************************************************/
+    // Initializing
 
     private static void OPLL_SLOT_reset(OPLL_SLOT slot,
                                         boolean type) {
@@ -800,7 +793,7 @@ public final class Emu2413 {
         slot.eg_dphase = 0;
         slot.rks = 0;
         slot.tll = 0;
-        slot.sustine = false;
+        slot.sustain = false;
         slot.fnum = 0;
         slot.block = 0;
         slot.volume = 0;
@@ -853,14 +846,14 @@ public final class Emu2413 {
         return opll;
     }
 
-    // Reset patch datas by system default.
+    /** Reset patch datas by system default. */
     public static void OPLL_reset_patch(OPLL opll) {
         for (int i = 0; i < 19 * 2; i++) {
             OPLL_copyPatch(opll, i, default_patch[i]);
         }
     }
 
-    // Reset whole of OPLL except patch datas.
+    /** Reset whole of OPLL except patch datas. */
     public static void OPLL_reset(OPLL opll) {
 
         if (opll == null) {
@@ -896,22 +889,19 @@ public final class Emu2413 {
         }
     }
 
-    /*********************************************************
+    // Generate wave data
 
-     Generate wave data
-     *********************************************************/
-
-    // Convert Amp(0 to EG_HEIGHT) to Phase(0 to 4PI).
+    /** Convert Amp(0 to EG_HEIGHT) to Phase(0 to 4PI). */
     private static int wave2_4pi(int e) {
         return e << (1 + PG_BITS - SLOT_AMP_BITS);
     }
 
-    // Convert Amp(0 to EG_HEIGHT) to Phase(0 to 8PI).
+    /** Convert Amp(0 to EG_HEIGHT) to Phase(0 to 8PI). */
     private static int wave2_8pi(int e) {
         return e << (2 + PG_BITS - SLOT_AMP_BITS);
     }
 
-    // Update AM, PM unit
+    /** Update AM, PM unit */
     private static void update_ampm(OPLL opll) {
         opll.pm_phase = (opll.pm_phase + pm_dphase) & (PM_DP_WIDTH - 1);
         opll.am_phase = (opll.am_phase + am_dphase) & (AM_DP_WIDTH - 1);
@@ -919,7 +909,7 @@ public final class Emu2413 {
         opll.lfo_pm = pmtable[HIGHBITS(opll.pm_phase, PM_DP_BITS - PM_PG_BITS)];
     }
 
-    // PG
+    /** PG */
     private static void calc_phase(OPLL_SLOT slot, int lfo) {
         if (slot.patch.PM != 0) {
             slot.phase += (slot.dphase * lfo) >> PM_AMP_BITS;
@@ -932,7 +922,7 @@ public final class Emu2413 {
         slot.pgout = HIGHBITS(slot.phase, DP_BASE_BITS);
     }
 
-    // Update Noise unit
+    /** Update Noise unit */
     private static void update_noise(OPLL opll) {
         if ((opll.noise_seed & 1) != 0) {
             opll.noise_seed ^= 0x8003020;
@@ -950,7 +940,7 @@ public final class Emu2413 {
             S2E(42.0), S2E(48.0)
     };
 
-    // EG
+    /** EG */
     private static void calc_envelope(OPLL_SLOT slot, int lfo) {
 
         int egout;
@@ -1033,7 +1023,7 @@ public final class Emu2413 {
         slot.egout = egout | 3;
     }
 
-    // CARRIOR
+    /** CARRIOR */
     private static int calc_slot_car(OPLL_SLOT slot, int fm) {
         if (slot.egout >= (DB_MUTE - 1)) {
             slot.output[0] = 0;
@@ -1046,7 +1036,7 @@ public final class Emu2413 {
         return slot.output[1];
     }
 
-    // MODULATOR
+    /** MODULATOR */
     private static int calc_slot_mod(OPLL_SLOT slot) {
 
         slot.output[1] = slot.output[0];
@@ -1066,7 +1056,7 @@ public final class Emu2413 {
         return slot.feedback;
     }
 
-    // TOM
+    /** TOM */
     private static int calc_slot_tom(OPLL_SLOT slot) {
         if (slot.egout >= (DB_MUTE - 1)) {
             return 0;
@@ -1075,7 +1065,7 @@ public final class Emu2413 {
         return DB2LIN_TABLE[slot.sintbl[slot.pgout] + slot.egout];
     }
 
-    // SNARE
+    /** SNARE */
     private static int calc_slot_snare(OPLL_SLOT slot,
                                        boolean noise) {
 
@@ -1090,7 +1080,7 @@ public final class Emu2413 {
         }
     }
 
-    // TOP-CYM
+    /** TOP-CYM */
     private static int calc_slot_cym(OPLL_SLOT slot, int pgout_hh) {
         int dbout;
 
@@ -1107,10 +1097,8 @@ public final class Emu2413 {
         return DB2LIN_TABLE[dbout + slot.egout];
     }
 
-    // HI-HAT
-    private static int calc_slot_hat(OPLL_SLOT slot, int pgout_cym,
-                                     boolean noise) {
-
+    /** HI-HAT */
+    private static int calc_slot_hat(OPLL_SLOT slot, int pgout_cym, boolean noise) {
         int dbout;
 
         if (slot.egout >= (DB_MUTE - 1)) {
@@ -1134,8 +1122,8 @@ public final class Emu2413 {
         return DB2LIN_TABLE[dbout + slot.egout];
     }
 
-    static int INST_VOL_MULT = 8;
-    static int RHYTHM_VOL_MULT = 16;
+    static final int INST_VOL_MULT = 8;
+    static final int RHYTHM_VOL_MULT = 16;
 
     private static void update_output(OPLL opll) {
 
@@ -1147,7 +1135,7 @@ public final class Emu2413 {
             calc_envelope(opll.slot[i], opll.lfo_am);
         }
 
-        //CH1-6
+        // CH1-6
         for (int i = 0; i < 6; i++) {
             if (CAR(opll, i).eg_mode != FINISH) {
                 opll.ch_out[i] += calc_slot_car(CAR(opll, i), calc_slot_mod(MOD(opll, i)));
@@ -1194,7 +1182,7 @@ public final class Emu2413 {
             }
         }
 
-        /* Always calc average of two samples */
+        // Always calc average of two samples
         for (int i = 0; i < 14; i++) {
             opll.ch_out[i] >>= 1;
         }
@@ -1220,10 +1208,7 @@ public final class Emu2413 {
         return mix_output(opll);
     }
 
-    /****************************************************
-
-     I/O Ctrl
-     *****************************************************/
+    // I/O Ctrl
 
     private static void OPLL_writeReg(OPLL opll, int reg, int data) {
 

@@ -56,8 +56,8 @@ import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.YM2612_DAC_PORT;
  *
  * system properties
  * <ul>
- *     <li>uk.co.omgdrv.simplevgm.psg ... a class name extends VgmPsgProvider</li>
- *     <li>uk.co.omgdrv.simplevgm.fm ... a class name extends VgmFmProvider</li>
+ *     <li>uk.co.omgdrv.simplevgm.psg ... a class name extends {@link VgmPsgProvider}</li>
+ *     <li>uk.co.omgdrv.simplevgm.fm ... a class name extends {@link VgmFmProvider}</li>
  * </ul>
  *
  * @see "https://www.slack.net/~ant/"
@@ -71,7 +71,7 @@ public class VgmEmu extends ClassicEmu {
 
     public VgmEmu() {
         this.psg = VgmPsgProvider.getProvider(getProperty("uk.co.omgdrv.simplevgm.psg")); // TODO no mean
-        this.fm = VgmFmProvider.getProvider(getProperty("uk.co.omgdrv.simplevgm.fm"));
+        this.fm = VgmFmProvider.getProvider(getProperty("uk.co.omgdrv.simplevgm.fm")); // TODO case not #init()
     }
 
     // TODO: use custom noise taps if present
@@ -114,8 +114,8 @@ logger.log(Level.WARNING, "VGM version " + vgmHeader.getVersionString() + " ( > 
             }
             buf.setVolume(1.0);
         }
-logger.log(Level.DEBUG, "psg: " + psg.getClass());
-logger.log(Level.DEBUG, "fm: " + fm.getClass());
+logger.log(Level.DEBUG, "psg: " + psg);
+logger.log(Level.DEBUG, "fm: " + fm);
 
         setClockRate(clockRate);
         psg.setOutput(buf.center(), buf.left(), buf.right());
@@ -235,7 +235,7 @@ logger.log(Level.DEBUG, vgmHeader.toString());
             switch (cmd) {
                 case CMD_END:
                     // TODO fix sample counting
-//                    System.out.println("End command after samples: " + sampleCounter);
+//logger.log(Level.TRACE, "End command after samples: " + sampleCounter);
                     boolean loopDone = sampleCounter >= vgmHeader.getNumSamples() + vgmHeader.getLoopSamples();
                     endOfStream = !endlessLoopFlag && loopDone;
 logger.log(Level.DEBUG, "LOOP: " + endlessLoopFlag);
@@ -378,7 +378,7 @@ logger.log(Level.DEBUG, vgmHeader.getIdent() + vgmHeader.getVersionString() + ",
                 pos += diff;
                 break;
             default:
-                logger.log(Level.ERROR, String.format("Unexpected command: %02x, at position: %02x", cmd, pos));
+                logger.log(Level.ERROR, "Unexpected command: %02x, at position: %02x".formatted(cmd, pos));
                 break;
         }
     }

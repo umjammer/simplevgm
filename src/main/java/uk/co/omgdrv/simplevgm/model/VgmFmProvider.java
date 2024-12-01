@@ -28,20 +28,20 @@ public interface VgmFmProvider {
     void update(int[] buf_lr, int offset, int end);
 
     default int readRegister(int type, int regNumber) {
-        throw new RuntimeException("Invalid");
+        throw new IllegalStateException("implement code in this subclass");
     }
 
     default void writePort(int addr, int data) {
-        throw new RuntimeException("Invalid");
+        throw new RuntimeException("implement code in this subclass");
     }
 
     // single port
     default void write(int addr, int data) {
-        throw new RuntimeException("Invalid");
+        throw new RuntimeException("implement code in this subclass");
     }
 
     default int read() {
-        throw new RuntimeException("Invalid");
+        throw new RuntimeException("implement code in this subclass");
     }
 
     static VgmFmProvider getProvider(String className) {

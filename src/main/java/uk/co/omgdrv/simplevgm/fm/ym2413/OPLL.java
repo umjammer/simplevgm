@@ -14,12 +14,14 @@ import java.io.Serializable;
 
 /**
  * Ported by the nintaco team: https://nintaco.com
- * Original C implementation: https://github.com/digital-sound-antiques/emu2413
  *
- * @version 2019-10-01 Federico Berti
+ * @author Mitsutaka Okazaki
+ * @author Federico Berti
+ * @version 2019-10-01
  * - back-ported 0.63 changes: Support per-channel output
  * - update 2413 instruments
  * - adaptation work
+ * @see "Original C implementation: https://github.com/digital-sound-antiques/emu2413"
  */
 public class OPLL implements Serializable {
 
@@ -87,22 +89,36 @@ public class OPLL implements Serializable {
         public final int[] output = new int[2];   // Output value of slot
 
         // for Phase Generator (PG)
-        public int[] sintbl;     // Wavetable
-        public int phase;        // Phase
-        public int dphase;       // Phase increment amount
-        public int pgout;        // output
+        /** Wavetable */
+        public int[] sintbl;
+        /** Phase */
+        public int phase;
+        /** Phase increment amount */
+        public int dphase;
+        /** output */
+        public int pgout;
 
         // for Envelope Generator (EG)
-        public int fnum;         // F-Number
-        public int block;        // Block
-        public int volume;       // Current volume
-        public boolean sustine;  // Sustine true = ON, false = OFF
-        public int tll;             // Total Level + Key scale level
-        public int rks;          // Key scale offset (Rks)
-        public int eg_mode;      // Current state
-        public int eg_phase;     // Phase
-        public int eg_dphase;    // Phase increment amount
-        public int egout;        // output
+        /** F-Number */
+        public int fnum;
+        /** Block */
+        public int block;
+        /** Current volume */
+        public int volume;
+        /** Sustain true = ON, false = OFF */
+        public boolean sustain;
+        /** Total Level + Key scale level */
+        public int tll;
+        /** Key scale offset (Rks) */
+        public int rks;
+        /** Current state */
+        public int eg_mode;
+        /** Phase */
+        public int eg_phase;
+        /** Phase increment amount */
+        public int eg_dphase;
+        /** output */
+        public int egout;
     }
 
     public static final class OPLL_PATCH implements Serializable {

@@ -50,7 +50,7 @@ public class BlipHelper implements StereoBuffer.Observer {
             int right = Util.getSigned16BE(out[i + 2], out[i + 3]);
             int val = (left + right) >> 1;
             int printVal = bit8 ? val >> 8 : val;
-            System.out.println(name + "," + printVal);
+logger.log(Level.DEBUG, name + "," + printVal);
             lines.add("" + val);
         }
         writeToFile(lines);

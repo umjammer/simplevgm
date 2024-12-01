@@ -1,3 +1,20 @@
+/*
+ * Ym2612 emulator
+ *
+ * Almost constants are taken from the MAME core
+ *
+ * This source is a part of Gens project
+ * Written by Stéphane Dallongeville (gens@consolemul.com)
+ * Copyright (c) 2002 by Stéphane Dallongeville
+ *
+ * Modified by Maxim, Blargg
+ * - removed non-Sound-related functionality
+ * - added high-pass PCM filter
+ * - added per-channel muting control
+ * - made it use a context struct to allow multiple
+ * instances
+ */
+
 package uk.co.omgdrv.simplevgm.fm.ym2621;
 
 import static uk.co.omgdrv.simplevgm.fm.MdFmProvider.FM_ADDRESS_PORT0;
@@ -8,6 +25,7 @@ import static uk.co.omgdrv.simplevgm.fm.MdFmProvider.FM_ADDRESS_PORT1;
  * Test port of Gens YM2612 core.
  *
  * @author Stephan Dittrich
+ * @author Blargg
  * @version 2005
  */
 public final class YM2612 {
@@ -110,7 +128,7 @@ public final class YM2612 {
     private static final int LIMIT_CH_OUT = ((int) (((1 << OUT_BITS) * 1.5) - 1));
 
     private static final int PG_CUT_OFF = ((int) (78.0 / ENV_STEP));
-//	  private static final int	  ENV_CUT_OFF			  = ((int) (68.0 / ENV_STEP));
+//	  private static final int ENV_CUT_OFF = ((int) (68.0 / ENV_STEP));
 
     private static final int AR_RATE = 399128;
     private static final int DR_RATE = 5514396;
@@ -286,7 +304,6 @@ public final class YM2612 {
             x *= (1 << (LFO_HBITS - 1)) - 1;
             LFO_FREQ_TAB[i] = (int) x;
         }
-
 
         for (i = 0; i < ENVLEN; i++) {
             x = Math.pow(((double) ((ENVLEN - 1) - i) / (double) (ENVLEN)), 8);
@@ -530,10 +547,10 @@ public final class YM2612 {
         if (channels[1].slots[0].fInc == -1) calc_FINC_CH(channels[1]);
         if (channels[2].slots[0].fInc == -1) {
             if ((mode & 0x40) != 0) {
-                calc_FINC_SL((channels[2].slots[S0]), FINC_TAB[channels[2].fNum[2]] >> (7 - channels[2].fOct[2]), channels[2].kc[2]);
-                calc_FINC_SL((channels[2].slots[S1]), FINC_TAB[channels[2].fNum[3]] >> (7 - channels[2].fOct[3]), channels[2].kc[3]);
-                calc_FINC_SL((channels[2].slots[S2]), FINC_TAB[channels[2].fNum[1]] >> (7 - channels[2].fOct[1]), channels[2].kc[1]);
-                calc_FINC_SL((channels[2].slots[S3]), FINC_TAB[channels[2].fNum[0]] >> (7 - channels[2].fOct[0]), channels[2].kc[0]);
+                calc_FINC_SL(channels[2].slots[S0], FINC_TAB[channels[2].fNum[2]] >> (7 - channels[2].fOct[2]), channels[2].kc[2]);
+                calc_FINC_SL(channels[2].slots[S1], FINC_TAB[channels[2].fNum[3]] >> (7 - channels[2].fOct[3]), channels[2].kc[3]);
+                calc_FINC_SL(channels[2].slots[S2], FINC_TAB[channels[2].fNum[1]] >> (7 - channels[2].fOct[1]), channels[2].kc[1]);
+                calc_FINC_SL(channels[2].slots[S3], FINC_TAB[channels[2].fNum[0]] >> (7 - channels[2].fOct[0]), channels[2].kc[0]);
             } else {
                 calc_FINC_CH(channels[2]);
             }
@@ -559,11 +576,11 @@ public final class YM2612 {
             algo_type |= 8;
         }
 
-        updateChannel((channels[0].algo + algo_type), (channels[0]), buf_lr, offset, end);
-        updateChannel((channels[1].algo + algo_type), (channels[1]), buf_lr, offset, end);
-        updateChannel((channels[2].algo + algo_type), (channels[2]), buf_lr, offset, end);
-        updateChannel((channels[3].algo + algo_type), (channels[3]), buf_lr, offset, end);
-        updateChannel((channels[4].algo + algo_type), (channels[4]), buf_lr, offset, end);
+        updateChannel(channels[0].algo + algo_type, channels[0], buf_lr, offset, end);
+        updateChannel(channels[1].algo + algo_type, channels[1], buf_lr, offset, end);
+        updateChannel(channels[2].algo + algo_type, channels[2], buf_lr, offset, end);
+        updateChannel(channels[3].algo + algo_type, channels[3], buf_lr, offset, end);
+        updateChannel(channels[4].algo + algo_type, channels[4], buf_lr, offset, end);
         if (dac == 0)
             updateChannel(channels[5].algo + algo_type, channels[5], buf_lr, offset, end);
 
@@ -825,21 +842,21 @@ public final class YM2612 {
                 if (timerAL != ((1024 - timerA) << 12)) {
                     timerACnt = timerAL = (1024 - timerA) << 12;
                 }
-//				  System.out.println("Timer AH: " + Integer.toHexString(timerA));
+//logger.log(Level.TRACE, "Timer AH: " + Integer.toHexString(timerA));
                 break;
             case 0x25:
                 timerA = (timerA & 0x3fc) | (data & 3);
                 if (timerAL != ((1024 - timerA) << 12)) {
                     timerACnt = timerAL = (1024 - timerA) << 12;
                 }
-//				  System.out.println("Timer AL: " + Integer.toHexString(timerA));
+//logger.log(Level.TRACE, "Timer AL: " + Integer.toHexString(timerA));
                 break;
             case 0x26:
                 timerB = data;
                 if (timerBL != ((256 - timerB) << (4 + 12))) {
                     timerBCnt = timerBL = (256 - timerB) << (4 + 12);
                 }
-//				  System.out.println("Timer B : " + Integer.toHexString(timerB));
+//logger.log(Level.TRACE, "Timer B : " + Integer.toHexString(timerB));
                 break;
             case 0x27:
                 if (((data ^ mode) & 0x40) != 0) {

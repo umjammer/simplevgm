@@ -1,5 +1,5 @@
 /*
- * NoiseGenerator.java
+ * Copyright (C) 2002-2003 Chris White
  *
  *  This file is part of JavaGear.
  *
@@ -20,10 +20,11 @@
 
 package uk.co.omgdrv.simplevgm.psg.gear;
 
+
 /**
  * Texas SN76496 noise generator emulation.
  *
- * @author Copyright (C) 2002-2003 Chris White
+ * @author Chris White
  * @version 18th January 2003
  * @see "JavaGear Final Project Report"
  */

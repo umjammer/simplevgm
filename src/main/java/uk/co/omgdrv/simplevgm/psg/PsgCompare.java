@@ -1,3 +1,7 @@
+/*
+ * Copyright 2019 Federico Berti
+ */
+
 package uk.co.omgdrv.simplevgm.psg;
 
 import java.lang.System.Logger;
@@ -27,7 +31,7 @@ import static uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ;
  * PsgCompare.
  *
  * @author Federico Berti
- * @version Copyright 2019
+ * @version 2019
  */
 public class PsgCompare implements VgmPsgProvider {
 
@@ -118,9 +122,9 @@ public class PsgCompare implements VgmPsgProvider {
     }
 
     private void checkIntervalDone() {
-//        System.out.println("Seconds: " + nukePsg.secondsElapsed);
+//logger.log(Level.TRACE, "Seconds: " + nukePsg.secondsElapsed);
         if (nukePsg.secondsElapsed >= RUN_FOR_SECONDS) {
-            System.out.println("Stopping after: " + RUN_FOR_SECONDS + " seconds");
+logger.log(Level.DEBUG, "Stopping after: " + RUN_FOR_SECONDS + " seconds");
             main(null);
             System.exit(0);
         }

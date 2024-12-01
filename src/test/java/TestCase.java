@@ -55,6 +55,8 @@ class TestCase {
         if (localPropertiesExists()) {
             PropsEntity.Util.bind(this);
         }
+
+        System.setProperty("uk.co.omgdrv.simplevgm.fm", "uk.co.omgdrv.simplevgm.fm.mdsound.YM2612Provider");
 Debug.println("volume: " + volume);
     }
 

@@ -1,3 +1,7 @@
+/*
+ * Copyright 2019 Federico Berti
+ */
+
 package uk.co.omgdrv.simplevgm.psg;
 
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
@@ -8,7 +12,7 @@ import libgme.util.BlipBuffer;
  * BaseVgmPsgProvider.
  *
  * @author Federico Berti
- * @version Copyright 2019
+ * @version 2019
  */
 public abstract class BaseVgmPsgProvider implements VgmPsgProvider {
 
@@ -34,10 +38,9 @@ public abstract class BaseVgmPsgProvider implements VgmPsgProvider {
         currentVgmDelayCycle = 0;
     }
 
-    //TODO implement
+    // TODO implement
     @Override
     public void writeGG(int time, int data) {
-
     }
 
     @Override

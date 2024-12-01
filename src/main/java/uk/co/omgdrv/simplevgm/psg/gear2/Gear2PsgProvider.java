@@ -1,3 +1,7 @@
+/*
+ * Copyright 2019 Federico Berti
+ */
+
 package uk.co.omgdrv.simplevgm.psg.gear2;
 
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
@@ -10,7 +14,7 @@ import uk.co.omgdrv.simplevgm.psg.nuked.NukedPsgProvider;
  * Gear2PsgProvider.
  *
  * @author Federico Berti
- * @version Copyright 2019
+ * @version 2019
  */
 public class Gear2PsgProvider extends GearPsgProvider {
 
