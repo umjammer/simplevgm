@@ -29,21 +29,23 @@ public interface VgmPsgProvider {
 
     void endFrame(int endTime);
 
+    ServiceLoader<VgmPsgProvider> serviceLoader = ServiceLoader.load(VgmPsgProvider.class);
+
     static VgmPsgProvider getProvider(String className) {
         VgmPsgProvider nullProvider = null;
-        for (VgmPsgProvider provider : ServiceLoader.load(VgmPsgProvider.class)) {
+        for (VgmPsgProvider provider : serviceLoader) {
             if (provider.getClass() == NullVgmPsgProvider.class) {
                 nullProvider = provider;
             }
             if (provider.getClass().getName().equals(className)) {
-                logger.log(Level.TRACE, "psg: " + provider.getClass());
+logger.log(Level.TRACE, "psg: " + provider.getClass());
                 return provider;
             }
         }
         if (nullProvider == null) {
             throw new IllegalStateException("no null provider is found");
         }
-        logger.log(Level.WARNING, "no such a class: " + className);
+logger.log(Level.WARNING, "no such a class: " + className);
         return nullProvider;
     }
 }

@@ -44,21 +44,23 @@ public interface VgmFmProvider {
         throw new RuntimeException("implement code in this subclass");
     }
 
+    ServiceLoader<VgmFmProvider> serviceLoader = ServiceLoader.load(VgmFmProvider.class);
+
     static VgmFmProvider getProvider(String className) {
         VgmFmProvider nullProvider = null;
-        for (VgmFmProvider provider : ServiceLoader.load(VgmFmProvider.class)) {
+        for (VgmFmProvider provider : serviceLoader) {
             if (provider.getClass() == NullVgmFmProvider.class) {
                 nullProvider = provider;
             }
             if (provider.getClass().getName().equals(className)) {
-                logger.log(Level.TRACE, "fm: " + provider.getClass());
+logger.log(Level.TRACE, "fm: " + provider.getClass());
                 return provider;
             }
         }
         if (nullProvider == null) {
             throw new IllegalStateException("no null provider is found");
         }
-        logger.log(Level.WARNING, "no such a class: " + className);
+logger.log(Level.WARNING, "no such a class: " + className);
         return nullProvider;
     }
 }
