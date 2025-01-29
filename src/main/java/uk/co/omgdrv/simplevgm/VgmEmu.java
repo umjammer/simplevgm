@@ -56,8 +56,8 @@ import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.YM2612_DAC_PORT;
  *
  * system properties
  * <ul>
- *     <li>uk.co.omgdrv.simplevgm.psg ... a class name extends {@link VgmPsgProvider}</li>
- *     <li>uk.co.omgdrv.simplevgm.fm ... a class name extends {@link VgmFmProvider}</li>
+ *     <li>uk.co.omgdrv.simplevgm.psg ... a class name extends {@link VgmPsgProvider} for PSG</li>
+ *     <li>uk.co.omgdrv.simplevgm.fm ... a class name extends {@link VgmFmProvider} for YM2612 compatible FM</li>
  * </ul>
  *
  * @see "https://www.slack.net/~ant/"
@@ -95,8 +95,9 @@ logger.log(Level.WARNING, "VGM version " + vgmHeader.getVersionString() + " ( > 
 
         // PSG clock rate
         int clockRate = vgmHeader.getSn76489Clk();
-        //this needs to be set even if there is no psg
+        // this needs to be set even if there is no psg
         clockRate = clockRate > 0 ? clockRate : 3579545;
+//        psg = psg.getClass() == NullVgmPsgProvider.class ? VgmPsgProvider.getProvider(GreenPsgProvider.class.getName()) : psg;
         psg = SmsApu.getInstance(); // this needs to be created even if there is no psg
         psgFactor = (int) ((float) psgTimeUnit / vgmRate * clockRate + 0.5);
 
@@ -106,12 +107,11 @@ logger.log(Level.WARNING, "VGM version " + vgmHeader.getVersionString() + " ( > 
             fm = fm.getClass() == NullVgmFmProvider.class ? VgmFmProvider.getProvider(YM2612Provider.class.getName()) : fm;
             buf.setVolume(0.7);
             fm.init(fm_clock_rate, sampleRate());
-        } else {
-            fm_clock_rate = vgmHeader.getYm2413Clk();
-            if (fm_clock_rate > 0) {
-                fm = VgmFmProvider.getProvider(Ym2413Provider.class.getName());
-                fm.init(fm_clock_rate, sampleRate());
-            }
+        }
+        fm_clock_rate = vgmHeader.getYm2413Clk();
+        if (fm_clock_rate > 0) {
+            fm = VgmFmProvider.getProvider(Ym2413Provider.class.getName());
+            fm.init(fm_clock_rate, sampleRate());
             buf.setVolume(1.0);
         }
 logger.log(Level.DEBUG, "psg: " + psg);

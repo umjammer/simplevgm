@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
 import libgme.util.BlipBuffer;
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.PsgCompare;
-import uk.co.omgdrv.simplevgm.psg.nuked.PsgYm7101;
-import uk.co.omgdrv.simplevgm.psg.nuked.PsgYm7101Impl;
 import uk.co.omgdrv.simplevgm.util.DspUtil;
 import uk.co.omgdrv.simplevgm.util.Util;
 

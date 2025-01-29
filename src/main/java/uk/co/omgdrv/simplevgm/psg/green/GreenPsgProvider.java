@@ -4,6 +4,7 @@
 
 package uk.co.omgdrv.simplevgm.psg.green;
 
+import libgme.util.BlipBuffer;
 import libgme.util.StereoBuffer;
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider;
@@ -24,7 +25,7 @@ public class GreenPsgProvider extends BaseVgmPsgProvider {
     static final int psgTimeUnit = 1 << psgTimeBits;
     static final int psgFactor = (int) (1.0 * psgTimeUnit / VGM_SAMPLE_RATE_HZ * CLOCK_HZ + 0.5);
 
-    private VgmPsgProvider psg;
+    private final VgmPsgProvider psg;
     private double nanosToNextSample = NANOS_PER_SAMPLE;
     public int sampleCounter = 0;
 
@@ -34,26 +35,26 @@ public class GreenPsgProvider extends BaseVgmPsgProvider {
     protected final PsgCompare.PsgType type = PsgCompare.PsgType.GREEN;
     protected StereoBuffer stereoBuffer;
 
+    public GreenPsgProvider() {
+        psg = SmsApu.getInstance();
+    }
+
     public static GreenPsgProvider createInstance(PsgCompare compare) {
         GreenPsgProvider g = (GreenPsgProvider) VgmPsgProvider.getProvider(GreenPsgProvider.class.getName());
-        g.psg = SmsApu.getInstance();
         g.psgCompare = compare;
         g.stereoBuffer = new StereoBuffer();
 //        g.stereoBuffer.setObserver(new BlipHelper("GreenPsg", false));
-        g.init();
+        g.stereoBuffer.setSampleRate(VGM_SAMPLE_RATE_HZ, 1000);
+        g.stereoBuffer.setClockRate(CLOCK_HZ);
+        g.psg.setOutput(g.stereoBuffer.center(), g.stereoBuffer.left(), g.stereoBuffer.right());
         return g;
-    }
-
-    private void init() {
-        stereoBuffer.setSampleRate(VGM_SAMPLE_RATE_HZ, 1000);
-        stereoBuffer.setClockRate(CLOCK_HZ);
-        psg.setOutput(stereoBuffer.center(), stereoBuffer.left(), stereoBuffer.right());
     }
 
     @Override
     public void writeData(int vgmDelayCycles, int data) {
-        super.writeData(vgmDelayCycles, data);
-        psg.writeData((int) toPsgCycles(vgmDelayCycles), data);
+//        super.writeData(vgmDelayCycles, data);
+//        psg.writeData((int) toPsgCycles(vgmDelayCycles), data);
+        psg.writeData(vgmDelayCycles, data);
     }
 
     private void endFrameInternal(int vgmDelayCycles) {
@@ -82,5 +83,25 @@ public class GreenPsgProvider extends BaseVgmPsgProvider {
     @Override
     protected long toPsgCycles(long vgmDelayCycles) {
         return (vgmDelayCycles * psgFactor + psgTimeUnit / 2) >> psgTimeBits;
+    }
+
+    @Override
+    public void setOutput(BlipBuffer center, BlipBuffer left, BlipBuffer right) {
+        psg.setOutput(center, left, right);
+    }
+
+    @Override
+    public void reset() {
+        psg.reset();
+    }
+
+    @Override
+    public void writeGG(int time, int data) {
+        psg.writeGG(time, data);
+    }
+
+    @Override
+    public void endFrame(int vgmDelayCycles) {
+        psg.endFrame(vgmDelayCycles);
     }
 }
