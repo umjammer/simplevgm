@@ -8,7 +8,18 @@
  mavenized vgm player
 
 * made it one of the [vavi-sound-emu](https://github.com/umjammer/vavi-sound-emu) spi
-* made psg and fm use service provider 
+* made *psg* and *fm* use service provider 
+
+| name      | common name | type | status | comment                  |
+|-----------|-------------|------|:------:|--------------------------|
+| Ym2612    | OPN2        | FM   |   ✅️   | mame:dallongeville+green |
+| Ym3438    | OPN2 (cmos) | FM   |   ✅️   | nukeykt                  |
+| Ym2612    | OPN2        | FM   |   ✅️   | MDSound                  |
+| Ym2413    | OPLL        | FM   |   ✅️   | okaxaki                  |
+| Sn76489   |             | PSG  |  ✅ 🚧  | green                    |
+| Sn76489   |             | PSG  |        | javageer:white           |
+| Sn76496   |             | PSG  |        | javageer-2:white         |
+| Ym7101    |             | PSG  |        | nukeykt                  |
 
 ## Install
 
@@ -17,11 +28,31 @@
 ## Usage
 
 ```java
-AudioInputStream ais = AudioSystem.getAudioInputStream(Paths.get(vgz).toFile());
-Clip clip = AudioSystem.getClip();
-clip.open(AudioSystem.getAudioInputStream(new AudioFormat(44100, 16, 2, true, true), ais));
-clip.loop(Clip.LOOP_CONTINUOUSLY);
+  AudioInputStream vgmAis = AudioSystem.getAudioInputStream(Paths.get(vgm).toFile());
+  AudioFormat inFormat = sourceAis.getFormat();
+  AudioFormat outFormat = new AudioFormat(inFormat.getSampleRate(), 16, inFormat.getChannels(), true, true, props);
+  AudioInputStream pcmAis = AudioSystem.getAudioInputStream(outFormat, vgmAis);
+  SourceDataLine line = (SourceDataLine) AudioSystem.getLine(new DataLine.Info(SourceDataLine.class, pcmAis.getFormat()));
+  line.open(pcmAis.getFormat());
+  line.start();
+  byte[] buffer = new byte[line.getBufferSize()];
+  int bytesRead;
+  while ((bytesRead = pcmAis.read(buffer)) != -1) {
+    line.write(buffer, 0, bytesRead);
+  }
+  line.drain();
 ```
+
+### properties for target `AudioFormat`
+
+ * `track` ... specify track # in the file to play
+
+### system properties
+
+ * `libgme.endless` ... loop audio playing or not, default `false`
+ * `uk.co.omgdrv.simplevgm.psg` ... a class name extends `uk.co.omgdrv.simplevgm.model.VgmPsgProvider`
+ * `uk.co.omgdrv.simplevgm.fm` ... a class name extends `uk.co.omgdrv.simplevgm.model.VgmFmProvider`
+
 
 ## References
 
@@ -30,11 +61,22 @@ clip.loop(Clip.LOOP_CONTINUOUSLY);
  * https://github.com/vlcoo/P3synthVG
  * https://github.com/GhostSonic21/Java_VGMPlayer
  * https://github.com/toyoshim/tss
+ * https://sourceforge.net/projects/javagear/
+ * https://github.com/abbruzze/sega-md
+ * https://github.com/abbruzze/sega-md/blob/main/src/ucesoft/smd/audio/FM.scala (nuke usage)
+ * psg
+   * https://github.com/ShreyasTheRag/PSG-audio
+   * https://github.com/GhostSonic21/Java_VGMPlayer
+   * https://github.com/gittymo/BBCSoundEditor
+ * https://github.com/fedex81/helios
+ * https://github.com/wide-dot/6809-game-builder
 
 ## TODO
 
  * ~~merge simplevgm as extended to~~
+ * psg has buffering engine? (so at least one psg instance is needed)
  * psg providers other than sms doesn't work???
+ * Sn76489(green) works alone but doesn't work as a spi
 
 ---
 

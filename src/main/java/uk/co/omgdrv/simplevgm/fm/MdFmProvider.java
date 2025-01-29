@@ -39,7 +39,7 @@ public interface MdFmProvider extends VgmFmProvider {
 
     // 27H
     // D7	D6	  D5	  D4	        D3	      D2	      D1	D0
-    //Ch3 mode	Reset B	Reset A	  Enable B	Enable A	Load B	Load A
+    // Ch3 mode	Reset B	Reset A	  Enable B	Enable A	Load B	Load A
     int FM_MODE_LOAD_A_MASK = 0x1;
     int FM_MODE_LOAD_B_MASK = 0x2;
     int FM_MODE_ENABLE_A_MASK = 0x4;

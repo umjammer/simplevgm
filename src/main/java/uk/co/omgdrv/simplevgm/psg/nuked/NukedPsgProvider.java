@@ -1,3 +1,7 @@
+/*
+ * Copyright 2019 Federico Berti
+ */
+
 package uk.co.omgdrv.simplevgm.psg.nuked;
 
 import java.nio.file.Path;
@@ -19,7 +23,7 @@ import static uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ;
  * NukedPsgProvider.
  *
  * @author Federico Berti
- * @version Copyright 2019
+ * @version 2019
  * @see "https://forums.nesdev.com/viewtopic.php?f=23&t=15562"
  */
 public class NukedPsgProvider implements VgmPsgProvider {
@@ -75,7 +79,6 @@ public class NukedPsgProvider implements VgmPsgProvider {
 
     @Override
     public void writeGG(int time, int data) {
-
     }
 
     @Override

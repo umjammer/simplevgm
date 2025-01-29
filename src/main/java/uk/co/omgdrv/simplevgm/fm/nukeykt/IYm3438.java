@@ -1,4 +1,33 @@
 /*
+ * Copyright (C) 2017-2022 Alexey Khokholov (Nuke.YKT)
+ *
+ * This file is part of Nuked OPN2.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ *
+ *  Nuked OPN2(Yamaha YM3438) emulator.
+ *  Thanks:
+ *      Silicon Pr0n:
+ *          Yamaha YM3438 decap and die shot(digshadow).
+ *      OPLx decapsulated(Matthew Gambrell, Olli Niemitalo):
+ *          OPL2 ROMs.
+ *
+ * version: 1.0.12
+ *
+ * ---
+ *
  * IYm3438
  * Copyright (c) 2018-2019 Federico Berti
  * Last modified: 07/04/19 16:01
@@ -19,17 +48,25 @@
 
 package uk.co.omgdrv.simplevgm.fm.nukeykt;
 
+
+/**
+ * Nuked OPN2(Yamaha YM3438) emulator.
+ *
+ * @version 1.0.12
+ * @see "Silicon Pr0n: Yamaha YM3438 decap and die shot(digshadow)."
+ * @see "OPLx decapsulated(Matthew Gambrell, Olli Niemitalo): OPL2 ROMs."
+ */
 public interface IYm3438 {
 
     void OPN2_Reset(IYm3438_Type chip);
 
-    void OPN2_SetChipType(/*32 bit unsigned */ int type);
+    void OPN2_SetChipType(/* 32 bit unsigned */ int type);
 
     void OPN2_Clock(IYm3438_Type chip, /* 16 bit signed */ int[] buffer);
 
-    void OPN2_Write(IYm3438_Type chip, /*32 bit unsigned */ int port, /* 8 bit unsigned */ int data);
+    void OPN2_Write(IYm3438_Type chip, /* 32 bit unsigned */ int port, /* 8 bit unsigned */ int data);
 
-    void OPN2_SetTestPin(IYm3438_Type chip, /*32 bit unsigned */ int value);
+    void OPN2_SetTestPin(IYm3438_Type chip, /* 32 bit unsigned */ int value);
 
     boolean OPN2_ReadTestPin(IYm3438_Type chip);
 
@@ -45,23 +82,22 @@ public interface IYm3438 {
         return chip.write_d_en;
     }
 
-
-    int ym3438_mode_ym2612 = 0x01;      /* Enables YM2612 emulation (MD1, MD2 VA2) */
-    int ym3438_mode_readmode = 0x02;     /* Enables status read on any port (TeraDrive, MD1 VA7, MD2, etc) */
-
+    /** Enables YM2612 emulation (MD1, MD2 VA2) */
+    int ym3438_mode_ym2612 = 0x01;
+    /** Enables status read on any port (TeraDrive, MD1 VA7, MD2, etc) */
+    int ym3438_mode_readmode = 0x02;
 
     int eg_num_attack = 0;
     int eg_num_decay = 1;
     int eg_num_sustain = 2;
     int eg_num_release = 3;
 
-
     class IYm3438_Type {
 
-        int cycles;   //32 bit unsigned
-        int channel;  //32 bit unsigned
+        int cycles;   // 32 bit unsigned
+        int channel;  // 32 bit unsigned
         /* 16 bit signed */ int mol, mor;
-        /* IO */
+        // IO
         /* 16 bit unsigned */ int write_data;
         /* 8 bit unsigned */ int write_a;
         /* 8 bit unsigned */ int write_d;
@@ -77,7 +113,7 @@ public interface IYm3438 {
         /* 8 bit unsigned */ int pin_test_in;
         /* 8 bit unsigned */ int pin_irq;
         /* 8 bit unsigned */ int busy;
-        /* LFO */
+        // LFO
         /* 8 bit unsigned */ int lfo_en;
         /* 8 bit unsigned */ int lfo_freq;
         /* 8 bit unsigned */ int lfo_pm;
@@ -85,15 +121,15 @@ public interface IYm3438 {
         /* 8 bit unsigned */ int lfo_cnt;
         /* 8 bit unsigned */ int lfo_inc;
         /* 8 bit unsigned */ int lfo_quotient;
-        /* Phase generator */
-        /* 16 bit unsigned */ int pg_fnum;
+        // Phase generator
+        /* 16 bit unsigned */ int pg_fNum;
         /* 8 bit unsigned */ int pg_block;
-        /* 8 bit unsigned */ int pg_kcode;
-        /*32 bit unsigned */ final int[] pg_inc = new int[24];
-        /*32 bit unsigned */ final int[] pg_phase = new int[24];
+        /* 8 bit unsigned */ int pg_kCode;
+        /* 32 bit unsigned */ final int[] pg_inc = new int[24];
+        /* 32 bit unsigned */ final int[] pg_phase = new int[24];
         /* 8 bit unsigned */ final boolean[] pg_reset = new boolean[24];
-        /*32 bit unsigned */ int pg_read;
-        /* Envelope generator */
+        /* 32 bit unsigned */ int pg_read;
+        // Envelope generator
         /* 8 bit unsigned */ int eg_cycle;
         /* 8 bit unsigned */ int eg_cycle_stop;
         /* 8 bit unsigned */ int eg_shift;
@@ -123,21 +159,21 @@ public interface IYm3438 {
         /* 8 bit unsigned */ final int[] eg_ssg_hold_up_latch = new int[24];
         /* 8 bit unsigned */ final int[] eg_ssg_dir = new int[24];
         /* 8 bit unsigned */ final int[] eg_ssg_inv = new int[24];
-        /*32 bit unsigned */ final int[] eg_read = new int[2];
+        /* 32 bit unsigned */ final int[] eg_read = new int[2];
         /* 8 bit unsigned */ int eg_read_inc;
-        /* FM */
+        // FM
         /* 16 bit signed */ final int[][] fm_op1 = new int[6][2];
         /* 16 bit signed */ final int[] fm_op2 = new int[6];
         /* 16 bit signed */ final int[] fm_out = new int[24];
         /* 16 bit unsigned */ final int[] fm_mod = new int[24];
-        /* Channel */
+        // Channel
         /* 16 bit signed */ final int[] ch_acc = new int[6];
         /* 16 bit signed */ final int[] ch_out = new int[6];
         /* 16 bit signed */ int ch_lock;
         /* 8 bit unsigned */ int ch_lock_l;
         /* 8 bit unsigned */ int ch_lock_r;
         /* 16 bit signed */ int ch_read;
-        /* Timer */
+        // Timer
         /* 16 bit unsigned */ int timer_a_cnt;
         /* 16 bit unsigned */ int timer_a_reg;
         /* 8 bit unsigned */ boolean timer_a_load_lock;
@@ -149,7 +185,7 @@ public interface IYm3438 {
         /* 8 bit unsigned */ int timer_a_overflow;
 
         /* 16 bit unsigned */ int timer_b_cnt;
-        /* 8 bit unsigned */ int timer_b_subcnt;
+        /* 8 bit unsigned */ int timer_b_subCnt;
         /* 16 bit unsigned */ int timer_b_reg;
         /* 8 bit unsigned */ boolean timer_b_load_lock;
         /* 8 bit unsigned */ boolean timer_b_load;
@@ -159,7 +195,7 @@ public interface IYm3438 {
         /* 8 bit unsigned */ boolean timer_b_overflow_flag;
         /* 8 bit unsigned */ int timer_b_overflow;
 
-        /* Register set */
+        // Register set
         /* 8 bit unsigned */ final int[] mode_test_21 = new int[8];
         /* 8 bit unsigned */ final int[] mode_test_2c = new int[8];
         /* 8 bit unsigned */ int mode_ch3;
@@ -168,8 +204,8 @@ public interface IYm3438 {
         /* 8 bit unsigned */ final int[] mode_kon = new int[24];
         /* 8 bit unsigned */ boolean mode_csm;
         /* 8 bit unsigned */ boolean mode_kon_csm;
-        /* 8 bit unsigned */ int dacen;
-        /* 16 bit signed */ int dacdata;
+        /* 8 bit unsigned */ int dacEn;
+        /* 16 bit signed */ int dacData;
 
         /* 8 bit unsigned */ final int[] ks = new int[24];
         /* 8 bit unsigned */ final int[] ar = new int[24];
@@ -183,12 +219,12 @@ public interface IYm3438 {
         /* 8 bit unsigned */ final int[] tl = new int[24];
         /* 8 bit unsigned */ final int[] ssg_eg = new int[24];
 
-        /* 16 bit unsigned */ final int[] fnum = new int[6];
+        /* 16 bit unsigned */ final int[] fNum = new int[6];
         /* 8 bit unsigned */ final int[] block = new int[6];
-        /* 8 bit unsigned */ final int[] kcode = new int[6];
-        /* 16 bit unsigned */ final int[] fnum_3ch = new int[6];
+        /* 8 bit unsigned */ final int[] kCode = new int[6];
+        /* 16 bit unsigned */ final int[] fNum_3ch = new int[6];
         /* 8 bit unsigned */ final int[] block_3ch = new int[6];
-        /* 8 bit unsigned */ final int[] kcode_3ch = new int[6];
+        /* 8 bit unsigned */ final int[] kCode_3ch = new int[6];
         /* 8 bit unsigned */ int reg_a4;
         /* 8 bit unsigned */ int reg_ac;
         /* 8 bit unsigned */ final int[] connect = new int[6];
@@ -198,6 +234,6 @@ public interface IYm3438 {
         /* 8 bit unsigned */ final int[] ams = new int[6];
         /* 8 bit unsigned */ final int[] pms = new int[6];
         /* 8 bit unsigned */ int status;
-        /*32 bit unsigned */ int status_time;
+        /* 32 bit unsigned */ int status_time;
     }
 }

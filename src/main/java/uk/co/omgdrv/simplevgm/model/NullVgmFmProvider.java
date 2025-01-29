@@ -14,28 +14,18 @@ package uk.co.omgdrv.simplevgm.model;
  */
 public class NullVgmFmProvider implements VgmFmProvider {
 
-    @Override
-    public void reset() {
-
+    @Override public void reset() {
     }
 
-    @Override
-    public void init(int Clock, int Rate) {
-
+    @Override public void init(int Clock, int Rate) {
     }
 
-    @Override
-    public void update(int[] buf_lr, int offset, int end) {
-
+    @Override public void update(int[] buf_lr, int offset, int end) {
     }
 
-    @Override
-    public void writePort(int addr, int data) {
-
+    @Override public void writePort(int addr, int data) {
     }
 
-    @Override
-    public void write(int addr, int data) {
-
+    @Override public void write(int addr, int data) {
     }
 }

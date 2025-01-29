@@ -56,8 +56,8 @@ import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.YM2612_DAC_PORT;
  *
  * system properties
  * <ul>
- *     <li>uk.co.omgdrv.simplevgm.psg ... a class name extends VgmPsgProvider</li>
- *     <li>uk.co.omgdrv.simplevgm.fm ... a class name extends VgmFmProvider</li>
+ *     <li>uk.co.omgdrv.simplevgm.psg ... a class name extends {@link VgmPsgProvider} for PSG</li>
+ *     <li>uk.co.omgdrv.simplevgm.fm ... a class name extends {@link VgmFmProvider} for YM2612 compatible FM</li>
  * </ul>
  *
  * @see "https://www.slack.net/~ant/"
@@ -71,7 +71,7 @@ public class VgmEmu extends ClassicEmu {
 
     public VgmEmu() {
         this.psg = VgmPsgProvider.getProvider(getProperty("uk.co.omgdrv.simplevgm.psg")); // TODO no mean
-        this.fm = VgmFmProvider.getProvider(getProperty("uk.co.omgdrv.simplevgm.fm"));
+        this.fm = VgmFmProvider.getProvider(getProperty("uk.co.omgdrv.simplevgm.fm")); // TODO case not #init()
     }
 
     // TODO: use custom noise taps if present
@@ -95,8 +95,9 @@ logger.log(Level.WARNING, "VGM version " + vgmHeader.getVersionString() + " ( > 
 
         // PSG clock rate
         int clockRate = vgmHeader.getSn76489Clk();
-        //this needs to be set even if there is no psg
+        // this needs to be set even if there is no psg
         clockRate = clockRate > 0 ? clockRate : 3579545;
+//        psg = psg.getClass() == NullVgmPsgProvider.class ? VgmPsgProvider.getProvider(GreenPsgProvider.class.getName()) : psg;
         psg = SmsApu.getInstance(); // this needs to be created even if there is no psg
         psgFactor = (int) ((float) psgTimeUnit / vgmRate * clockRate + 0.5);
 
@@ -106,16 +107,15 @@ logger.log(Level.WARNING, "VGM version " + vgmHeader.getVersionString() + " ( > 
             fm = fm.getClass() == NullVgmFmProvider.class ? VgmFmProvider.getProvider(YM2612Provider.class.getName()) : fm;
             buf.setVolume(0.7);
             fm.init(fm_clock_rate, sampleRate());
-        } else {
-            fm_clock_rate = vgmHeader.getYm2413Clk();
-            if (fm_clock_rate > 0) {
-                fm = VgmFmProvider.getProvider(Ym2413Provider.class.getName());
-                fm.init(fm_clock_rate, sampleRate());
-            }
+        }
+        fm_clock_rate = vgmHeader.getYm2413Clk();
+        if (fm_clock_rate > 0) {
+            fm = VgmFmProvider.getProvider(Ym2413Provider.class.getName());
+            fm.init(fm_clock_rate, sampleRate());
             buf.setVolume(1.0);
         }
-logger.log(Level.DEBUG, "psg: " + psg.getClass());
-logger.log(Level.DEBUG, "fm: " + fm.getClass());
+logger.log(Level.DEBUG, "psg: " + psg);
+logger.log(Level.DEBUG, "fm: " + fm);
 
         setClockRate(clockRate);
         psg.setOutput(buf.center(), buf.left(), buf.right());
@@ -235,7 +235,7 @@ logger.log(Level.DEBUG, vgmHeader.toString());
             switch (cmd) {
                 case CMD_END:
                     // TODO fix sample counting
-//                    System.out.println("End command after samples: " + sampleCounter);
+//logger.log(Level.TRACE, "End command after samples: " + sampleCounter);
                     boolean loopDone = sampleCounter >= vgmHeader.getNumSamples() + vgmHeader.getLoopSamples();
                     endOfStream = !endlessLoopFlag && loopDone;
 logger.log(Level.DEBUG, "LOOP: " + endlessLoopFlag);
@@ -378,7 +378,7 @@ logger.log(Level.DEBUG, vgmHeader.getIdent() + vgmHeader.getVersionString() + ",
                 pos += diff;
                 break;
             default:
-                logger.log(Level.ERROR, String.format("Unexpected command: %02x, at position: %02x", cmd, pos));
+                logger.log(Level.ERROR, "Unexpected command: %02x, at position: %02x".formatted(cmd, pos));
                 break;
         }
     }

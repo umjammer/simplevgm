@@ -48,8 +48,7 @@ public class VgmHeader {
         SN76489_SHIFT(42, 1),
         SN76489_FLAGS(43, 1),
         YM2612_CLK(44),
-        DATA_OFFSET(52),
-        ;
+        DATA_OFFSET(52);
 
         private final int position;
         private final int size;
@@ -96,7 +95,6 @@ public class VgmHeader {
     private int sn76489Flags;
 
     private Gd3Tag gd3 = Gd3Tag.NO_TAG;
-
 
     private VgmHeader() {
     }
@@ -191,7 +189,6 @@ public class VgmHeader {
     public int getGd3Offset() {
         return gd3Offset;
     }
-
 
     public int getNumSamples() {
         return numSamples;

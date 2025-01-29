@@ -1,9 +1,13 @@
 package uk.co.omgdrv.simplevgm.util;
 
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static java.lang.System.getLogger;
 
 
 /**
@@ -13,6 +17,8 @@ import java.util.stream.Stream;
  * @version Copyright 2019
  */
 public class DspUtil {
+
+    private static final Logger logger = getLogger(DspUtil.class.getName());
 
     public static final int PSG_MAX_VOLUME_8_BIT = 0x20;
     public static final int PSG_MAX_VOLUME_16_BIT = 0x7FFF;
@@ -32,7 +38,7 @@ public class DspUtil {
             out[k] = sample - out[k - 1] / 2; // hpf
             k++;
         }
-        //NOTE: no hpf here
+        // NOTE: no hpf here
         for (int i = k; i < out.length; i++) {
             out[i] = out[k - 1];
         }
@@ -53,7 +59,7 @@ public class DspUtil {
             out[k] = sample - (out[k - 1] >> 1); // hpf
             k++;
         }
-        //NOTE: no hpf here
+        // NOTE: no hpf here
         for (int i = k; i < out.length; i++) {
             out[i] = out[k - 1];
         }
@@ -72,7 +78,7 @@ public class DspUtil {
             }
             out[k++] = (in[i - sampleRatioHalf] + in[i + sampleRatioHalf]) / 2;
         }
-        //NOTE: no hpf here
+        // NOTE: no hpf here
         for (int i = k; i < out.length; i++) {
             out[i] = out[k - 1];
         }
@@ -122,6 +128,6 @@ public class DspUtil {
     }
 
     private static void printStream(Stream<String> s) {
-        System.out.println(s.collect(Collectors.joining("\n")));
+        logger.log(Level.DEBUG, s.collect(Collectors.joining("\n")));
     }
 }

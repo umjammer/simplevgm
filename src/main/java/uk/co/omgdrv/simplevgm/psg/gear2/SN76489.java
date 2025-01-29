@@ -37,6 +37,7 @@
 
 package uk.co.omgdrv.simplevgm.psg.gear2;
 
+
 /**
  * SN76489 PSG
  *
@@ -61,7 +62,7 @@ package uk.co.omgdrv.simplevgm.psg.gear2;
  * pattern appropriately.</li>
  * </ul>
  *
- * @author (C) 2008 Chris White (pointblnk@hotmail.com)
+ * @author Chris White (pointblnk@hotmail.com)
  * @version 17th June 2008
  * @see "http://www.smspower.org/dev/docs/wiki/Sound/PSG"
  */

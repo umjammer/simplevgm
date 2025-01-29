@@ -1,3 +1,7 @@
+/*
+ * Copyright 2019 Federico Berti
+ */
+
 package uk.co.omgdrv.simplevgm.fm.ym2413;
 
 import uk.co.omgdrv.simplevgm.model.VgmFmProvider;
@@ -10,7 +14,6 @@ import uk.co.omgdrv.simplevgm.model.VgmFmProvider;
  * </pre>
  *
  * @author Federico Berti
- * @version Copyright 2019
  */
 public class Ym2413Provider implements VgmFmProvider {
 
@@ -47,9 +50,9 @@ public class Ym2413Provider implements VgmFmProvider {
 
     @Override
     public void update(int[] buf_lr, int offset, int samples441) {
-        offset <<= 1; //stereo
+        offset <<= 1; // stereo
         sampleRateCalcAcc += samples441 / rateRatio;
-        int total = (int) sampleRateCalcAcc + 1; //needed to match the offsets
+        int total = (int) sampleRateCalcAcc + 1; // needed to match the offsets
         for (int i = 0; i < total; i++) {
             int res = Emu2413.OPLL_calc(opll) << AUDIO_SCALE_BITS;
             rateRatioAcc += rateRatio;

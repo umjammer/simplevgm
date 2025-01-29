@@ -11,23 +11,18 @@ import libgme.util.BlipBuffer;
  */
 public class NullVgmPsgProvider implements VgmPsgProvider {
 
-    @Override
-    public void writeData(int time, int data) {
+    @Override public void writeData(int time, int data) {
     }
 
-    @Override
-    public void setOutput(BlipBuffer center, BlipBuffer left, BlipBuffer right) {
+    @Override public void setOutput(BlipBuffer center, BlipBuffer left, BlipBuffer right) {
     }
 
-    @Override
-    public void reset() {
+    @Override public void reset() {
     }
 
-    @Override
-    public void writeGG(int time, int data) {
+    @Override public void writeGG(int time, int data) {
     }
 
-    @Override
-    public void endFrame(int endTime) {
+    @Override public void endFrame(int endTime) {
     }
 }

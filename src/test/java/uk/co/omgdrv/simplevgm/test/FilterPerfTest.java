@@ -6,6 +6,7 @@ import java.util.Arrays;
 import uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.nuked.NukedPsgProvider;
 import uk.co.omgdrv.simplevgm.util.DspUtil;
+import vavi.util.Debug;
 
 
 /**
@@ -28,7 +29,6 @@ public class FilterPerfTest {
         testFastHpfResamplePerf();
     }
 
-
     public static void testFastHpfResamplePerf() throws IOException {
         double[] data = FilterTest.getFileContents();
         double[] oneSecData = Arrays.copyOfRange(data, 0, NukedPsgProvider.NUKED_PSG_SAMPLING_HZ);
@@ -43,7 +43,7 @@ public class FilterPerfTest {
                 DspUtil.fastHpfResample(oneSecData, outBuffer);
             }
             long durationNs = System.nanoTime() - start;
-            System.out.println("hpfResample: " + durationNs / NANOS_PER_SECOND + " sec, cycles: " + TEST);
+Debug.println("hpfResample: " + durationNs / NANOS_PER_SECOND + " sec, cycles: " + TEST);
         } while (true);
     }
 }

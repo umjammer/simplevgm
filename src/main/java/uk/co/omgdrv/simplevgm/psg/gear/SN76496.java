@@ -1,5 +1,5 @@
 /*
- * SN76496.java
+ * Copyright (C) 2002-2003 Chris White
  *
  * This file is part of JavaGear.
  *
@@ -32,7 +32,7 @@ import static java.lang.System.getLogger;
 /**
  * Texas SN76496 Emulation.
  *
- * @author Copyright (C) 2002-2003 Chris White
+ * @author Chris White
  * @version 18th January 2003
  * @see "JavaGear Final Project Report"
  */

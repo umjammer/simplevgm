@@ -5,6 +5,9 @@
  */
 
 import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,11 +19,14 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineEvent.Type;
 import javax.sound.sampled.SourceDataLine;
 
+import libgme.EmuPlayer.Engine;
 import libgme.EmuPlayer.JavaEngine;
+import libgme.MusicEmu;
 import libgme.VGMPlayer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import uk.co.omgdrv.simplevgm.VgmEmu;
 import vavi.util.Debug;
 import vavi.util.properties.annotation.Property;
@@ -50,11 +56,16 @@ class TestCase {
     @Property
     String vgz = "src/test/resources/test.vgm";
 
+    @Property(name = "uk.co.omgdrv.simplevgm.fm")
+    String provider = "";
+
     @BeforeEach
     void setup() throws Exception {
         if (localPropertiesExists()) {
             PropsEntity.Util.bind(this);
         }
+
+        System.setProperty("uk.co.omgdrv.simplevgm.fm", provider);
 Debug.println("volume: " + volume);
     }
 
@@ -120,5 +131,77 @@ Debug.println("OUT: " + outAudioFormat);
         line.drain();
         line.stop();
         line.close();
+    }
+
+    @Test
+    @DisplayName("pcm out")
+    @EnabledIfSystemProperty(named = "vavi.test", matches = "ide")
+    void test3() throws Exception {
+        VGMPlayer player = new VGMPlayer(VgmEmu.VGM_SAMPLE_RATE_HZ);
+
+        CountDownLatch cdl = new CountDownLatch(1);
+
+        Engine engine = new Engine() { // pcm out
+
+            MusicEmu emu;
+            boolean playing;
+            OutputStream os;
+
+            @Override
+            public void run() {
+                try {
+                    byte[] buf = new byte[8192];
+                    this.playing = true;
+                    while(this.playing && !this.emu.trackEnded()) {
+                        int count = this.emu.play(buf, buf.length / 2);
+                        this.os.write(buf, 0, count * 2);
+                    }
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                } finally {
+                    cdl.countDown();
+                }
+            }
+
+            @Override public void setEmu(MusicEmu emu) {
+                this.emu = emu;
+            }
+
+            @Override public void init() {
+                try {
+                    os = Files.newOutputStream(Path.of("tmp", "out.pcm"));
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            }
+
+            @Override public void reset() {
+            }
+
+            @Override public void setVolume(double v) {
+            }
+
+            @Override public void setSampleRate(int i) {
+            }
+
+            @Override public void stop() {
+                playing = false;
+            }
+
+            @Override public boolean isPlaying() {
+                return playing;
+            }
+
+            @Override public void setPlaying(boolean b) {
+                this.playing = b;
+            }
+        };
+
+Debug.println(vgz);
+        player.setEngine(engine);
+        player.loadFile(vgz);
+        player.startTrack(1);
+
+        cdl.await();
     }
 }

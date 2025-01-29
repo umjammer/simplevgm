@@ -1,10 +1,14 @@
+/*
+ * Copyright 2019 Federico Berti
+ */
+
 package uk.co.omgdrv.simplevgm.psg.nuked;
 
 /**
  * PsgYm7101.
  *
  * @author Federico Berti
- * @version Copyright 2019
+ * @version 2019
  */
 public interface PsgYm7101 {
 

@@ -34,7 +34,7 @@ public class Util {
 
     public static final Predicate<String> compressedVgm = n -> n.endsWith(".GZ") || n.endsWith(".VGZ");
 
-    // Loads given URL and file within archive, and caches archive for future access
+    /** Loads given URL and file within archive, and caches archive for future access */
     public static byte[] readFile(String path) throws Exception {
         boolean isCompressed = isCompressedByteStream(path);
         byte[] res;
@@ -59,7 +59,7 @@ public class Util {
         return isCompressed;
     }
 
-    // "Resizes" array to new size and preserves elements from in
+    /** "Resizes" array to new size and preserves elements from in */
     public static byte[] resize(byte[] in, int size) {
         byte[] out = new byte[size];
         if (size > in.length)
@@ -97,7 +97,7 @@ public class Util {
         }
     }
 
-    // bit 1 -> true
+    /** bit 1 -> true */
     public static boolean bitSetTest(long number, int position) {
         return ((number & (1L << position)) != 0);
     }
@@ -115,7 +115,7 @@ public class Util {
         return 31 - Integer.numberOfLeadingZeros(n);
     }
 
-    // unit / pow( 2.0, (double) x / step )
+    /** unit / pow(2.0, (double) x / step) */
     public static int int_log(int x, int step, int unit) {
         int shift = x / step;
         int fraction = (x - shift * step) * unit / step;
@@ -224,7 +224,7 @@ public class Util {
                     , input.length());
             AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, output);
             audioInputStream.close();
-            System.out.println(fileName + ".wav recorded");
+            logger.log(Level.DEBUG, fileName + ".wav recorded");
         } catch (IOException ioe) {
             logger.log(Level.ERROR, "Error writing WAV file", ioe);
         }

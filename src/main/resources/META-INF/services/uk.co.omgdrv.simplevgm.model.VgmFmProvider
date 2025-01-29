@@ -1,3 +1,4 @@
 uk.co.omgdrv.simplevgm.model.NullVgmFmProvider
 uk.co.omgdrv.simplevgm.fm.ym2413.Ym2413Provider
 uk.co.omgdrv.simplevgm.fm.ym2621.YM2612Provider
+uk.co.omgdrv.simplevgm.fm.nukeykt.Ym3438Provider

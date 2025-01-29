@@ -1,3 +1,7 @@
+/*
+ * Copyright 2019 Federico Berti
+ */
+
 package uk.co.omgdrv.simplevgm.psg.gear;
 
 import uk.co.omgdrv.simplevgm.psg.nuked.NukedPsgProvider;
@@ -7,7 +11,7 @@ import uk.co.omgdrv.simplevgm.psg.nuked.NukedPsgProvider;
  * PsgProvider.
  *
  * @author Federico Berti
- * @version Copyright 2018
+ * @version 2018
  */
 public interface PsgProvider {
 
@@ -34,29 +38,19 @@ public interface PsgProvider {
 
     PsgProvider NO_SOUND = new PsgProvider() {
 
-        @Override
-        public void init() {
-
+        @Override public void init() {
         }
 
-        @Override
-        public void write(int data) {
-
+        @Override public void write(int data) {
         }
 
-        @Override
-        public void output(byte[] ouput) {
-
+        @Override public void output(byte[] ouput) {
         }
 
-        @Override
-        public void output(byte[] output, int offset, int end) {
-
+        @Override public void output(byte[] output, int offset, int end) {
         }
 
-        @Override
-        public void reset() {
-
+        @Override public void reset() {
         }
     };
 }
