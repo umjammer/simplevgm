@@ -12,6 +12,8 @@ import uk.co.omgdrv.simplevgm.fm.MdFmProvider;
 
 /**
  * YM2612Provider.
+ * <p>
+ * this class is YM2612 compatible.
  *
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
  * @version 0.00 2024-08-30 nsano initial version <br>
