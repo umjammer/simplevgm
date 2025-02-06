@@ -20,12 +20,13 @@ package uk.co.omgdrv.simplevgm;
 
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.NoSuchElementException;
 
 import libgme.ClassicEmu;
 import uk.co.omgdrv.simplevgm.fm.MdFmProvider;
 import uk.co.omgdrv.simplevgm.fm.ym2413.Ym2413Provider;
-import uk.co.omgdrv.simplevgm.fm.ym2621.YM2612Provider;
-import uk.co.omgdrv.simplevgm.model.NullVgmFmProvider;
 import uk.co.omgdrv.simplevgm.model.VgmFmProvider;
 import uk.co.omgdrv.simplevgm.model.VgmHeader;
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
@@ -33,7 +34,6 @@ import uk.co.omgdrv.simplevgm.psg.green.SmsApu;
 import uk.co.omgdrv.simplevgm.util.Util;
 
 import static java.lang.System.getLogger;
-import static java.lang.System.getProperty;
 import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_DATA_BLOCK;
 import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_DELAY;
 import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_DELAY_735;
@@ -47,6 +47,8 @@ import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_SHORT_DELAY;
 import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_YM2413_PORT;
 import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_YM2612_PORT0;
 import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_YM2612_PORT1;
+import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_YMF262_PORT0;
+import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_YMF262_PORT1;
 import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.PCM_BLOCK_TYPE;
 import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.YM2612_DAC_PORT;
 
@@ -68,11 +70,6 @@ public class VgmEmu extends ClassicEmu {
 
     public static final int VGM_SAMPLE_RATE_HZ = 44100;
     public static final int FADE_LENGTH_SEC = 5;
-
-    public VgmEmu() {
-        this.psg = VgmPsgProvider.getProvider(getProperty("uk.co.omgdrv.simplevgm.psg")); // TODO no mean
-        this.fm = VgmFmProvider.getProvider(getProperty("uk.co.omgdrv.simplevgm.fm")); // TODO case not #init()
-    }
 
     // TODO: use custom noise taps if present
     @Override
@@ -103,19 +100,35 @@ logger.log(Level.WARNING, "VGM version " + vgmHeader.getVersionString() + " ( > 
 
         // FM clock rate
         fm_clock_rate = vgmHeader.getYm2612Clk();
+logger.log(Level.DEBUG, "Ym2612 clock: " + fm_clock_rate);
         if (fm_clock_rate > 0) {
-            fm = fm.getClass() == NullVgmFmProvider.class ? VgmFmProvider.getProvider(YM2612Provider.class.getName()) : fm;
+            VgmFmProvider fm = VgmFmProvider.getProvider("YM2612");
             buf.setVolume(0.7);
             fm.init(fm_clock_rate, sampleRate());
+            fms.put("YM2612", fm);
         }
         fm_clock_rate = vgmHeader.getYm2413Clk();
+logger.log(Level.DEBUG, "Ym2413 clock: " + fm_clock_rate);
         if (fm_clock_rate > 0) {
-            fm = VgmFmProvider.getProvider(Ym2413Provider.class.getName());
+            VgmFmProvider fm = VgmFmProvider.getProvider("YM2413");
             fm.init(fm_clock_rate, sampleRate());
             buf.setVolume(1.0);
+            fms.put("YM2413", fm);
+        }
+        fm_clock_rate = vgmHeader.getYmF262Clk();
+logger.log(Level.DEBUG, "YmF262 clock: " + fm_clock_rate);
+        if (fm_clock_rate > 0) {
+            try {
+                VgmFmProvider fm = VgmFmProvider.getProvider("YMF262");
+                fm.init(fm_clock_rate, sampleRate());
+                buf.setVolume(0.7);
+                fms.put("YMF262", fm);
+            } catch (NoSuchElementException e) {
+logger.log(Level.INFO, "no YmF262 provider");
+            }
         }
 logger.log(Level.DEBUG, "psg: " + psg);
-logger.log(Level.DEBUG, "fm: " + fm);
+logger.log(Level.DEBUG, "fms: " + fms.values());
 
         setClockRate(clockRate);
         psg.setOutput(buf.center(), buf.left(), buf.right());
@@ -143,7 +156,7 @@ logger.log(Level.DEBUG, vgmHeader.toString());
     static final int psgTimeUnit = 1 << psgTimeBits;
 
     VgmPsgProvider psg;
-    VgmFmProvider fm;
+    Map<String, VgmFmProvider> fms = new HashMap<>();
     VgmHeader vgmHeader;
     int fm_clock_rate;
     int pos;
@@ -169,7 +182,7 @@ logger.log(Level.DEBUG, vgmHeader.toString());
         loopFlag = false;
 
         psg.reset();
-        fm.reset();
+        fms.values().forEach(VgmFmProvider::reset);
     }
 
     private void setFade() {
@@ -196,7 +209,7 @@ logger.log(Level.DEBUG, vgmHeader.toString());
     private void runFM(int vgmTime) {
         int count = toFMTime(vgmTime) - fm_pos;
         if (count > 0) {
-            fm.update(fm_buf_lr, fm_pos, count);
+            fms.values().forEach(fm -> fm.update(fm_buf_lr, fm_pos, count));
             fm_pos += count;
         }
     }
@@ -233,42 +246,43 @@ logger.log(Level.DEBUG, vgmHeader.toString());
             if (pos < data.length)
                 cmd = data[pos++] & 0xFF;
             switch (cmd) {
-                case CMD_END:
+                case CMD_END -> {
                     // TODO fix sample counting
 //logger.log(Level.TRACE, "End command after samples: " + sampleCounter);
                     boolean loopDone = sampleCounter >= vgmHeader.getNumSamples() + vgmHeader.getLoopSamples();
                     endOfStream = !endlessLoopFlag && loopDone;
-logger.log(Level.DEBUG, "LOOP: " + endlessLoopFlag);
+                    logger.log(Level.DEBUG, "LOOP: " + endlessLoopFlag);
                     if (vgmHeader.getLoopSamples() == 0 && sampleCounter < vgmHeader.getNumSamples()) {
                         pos = data.length;
                     } else {
                         pos = loopDone ? vgmHeader.getDataOffset() : vgmHeader.getLoopOffset();
                     }
-                    break;
-                case CMD_DELAY_735:
+                }
+                case CMD_DELAY_735 -> {
                     time += 735;
-                    break;
+                }
 
-                case CMD_DELAY_882:
+                case CMD_DELAY_882 -> {
                     time += 882;
-                    break;
+                }
 
-                case CMD_GG_STEREO:
+                case CMD_GG_STEREO -> {
                     psg.writeGG(toPSGTime(time), data[pos++] & 0xFF);
-                    break;
+                }
 
-                case CMD_PSG:
+                case CMD_PSG -> {
                     psg.writeData(toPSGTime(time), data[pos++] & 0xFF);
-                    break;
+                }
                 // 0x51	aa dd	YM2413, write value dd to register aa
-                case CMD_YM2413_PORT:
+                case CMD_YM2413_PORT -> {
                     runFM(time);
                     int reg1 = data[pos++] & 0xFF;
                     int val1 = data[pos++] & 0xFF;
+                    VgmFmProvider fm = fms.get("YM2413");
                     fm.write(Ym2413Provider.FmReg.ADDR_LATCH_REG.ordinal(), reg1);
                     fm.write(Ym2413Provider.FmReg.DATA_REG.ordinal(), val1);
-                    break;
-                case CMD_YM2612_PORT0:
+                }
+                case CMD_YM2612_PORT0 -> {
                     int port = data[pos++] & 0xFF;
                     int val = data[pos++] & 0xFF;
                     if (port == YM2612_DAC_PORT) {
@@ -279,24 +293,44 @@ logger.log(Level.DEBUG, "LOOP: " + endlessLoopFlag);
                             dac_amp |= dac_disabled;
                         }
                         runFM(time);
+                        VgmFmProvider fm = fms.get("YM2612");
                         fm.writePort(MdFmProvider.FM_ADDRESS_PORT0, port);
                         fm.writePort(MdFmProvider.FM_DATA_PORT0, val);
                     }
-                    break;
+                }
 
-                case CMD_YM2612_PORT1:
+                case CMD_YM2612_PORT1 -> {
                     runFM(time);
                     int fmPort = data[pos++] & 0xFF;
                     int fmVal = data[pos++] & 0xFF;
+                    VgmFmProvider fm = fms.get("YM2612");
                     fm.writePort(MdFmProvider.FM_ADDRESS_PORT1, fmPort);
                     fm.writePort(MdFmProvider.FM_DATA_PORT1, fmVal);
-                    break;
+                }
 
-                case CMD_DELAY:
+                case CMD_YMF262_PORT0 -> {
+                    int port = data[pos++] & 0xFF;
+                    int val = data[pos++] & 0xFF;
+                    runFM(time);
+                    VgmFmProvider fm = fms.get("YMF262");
+                    fm.writePort(MdFmProvider.FM_ADDRESS_PORT0, port);
+                    fm.writePort(MdFmProvider.FM_DATA_PORT0, val);
+                }
+
+                case CMD_YMF262_PORT1 -> {
+                    runFM(time);
+                    int fmPort = data[pos++] & 0xFF;
+                    int fmVal = data[pos++] & 0xFF;
+                    VgmFmProvider fm = fms.get("YMF262");
+                    fm.writePort(MdFmProvider.FM_ADDRESS_PORT1, fmPort);
+                    fm.writePort(MdFmProvider.FM_DATA_PORT1, fmVal);
+                }
+
+                case CMD_DELAY -> {
                     time += (data[pos + 1] & 0xFF) * 0x100 + (data[pos] & 0xFF);
                     pos += 2;
-                    break;
-                case CMD_DATA_BLOCK:
+                }
+                case CMD_DATA_BLOCK -> {
                     if (data[pos++] != CMD_END)
                         logger.log(Level.ERROR, "emulation error");
                     int type = data[pos++];
@@ -305,27 +339,28 @@ logger.log(Level.DEBUG, "LOOP: " + endlessLoopFlag);
                     if (type == PCM_BLOCK_TYPE)
                         pcm_data = pos;
                     pos += (int) size;
-                    break;
+                }
 
-                case CMD_PCM_SEEK:
+                case CMD_PCM_SEEK -> {
                     pcm_pos = pcm_data + Util.getUInt32LE(data, pos);
                     pos += 4;
-                    break;
+        }
 
-                default:
+                default -> {
                     switch (cmd & 0xF0) {
-                        case CMD_PCM_DELAY:
+                        case CMD_PCM_DELAY -> {
                             write_pcm(time, data[pcm_pos++] & 0xFF);
                             time += cmd & 0x0F;
-                            break;
+                        }
 
-                        case CMD_SHORT_DELAY:
+                        case CMD_SHORT_DELAY -> {
                             time += (cmd & 0x0F) + 1;
-                            break;
-                        default:
+                        }
+                        default -> {
                             handleUnsupportedCommand(cmd);
-                            break;
+                        }
                     }
+                }
             }
         }
         runFM(duration);
@@ -350,36 +385,24 @@ logger.log(Level.DEBUG, "LOOP: " + endlessLoopFlag);
 logger.log(Level.DEBUG, vgmHeader.getIdent() + vgmHeader.getVersionString() + ", unsupported command: " + Integer.toHexString(cmd));
         switch (cmd & 0xF0) {
             // unsupported one operand
-            case 0x30:
-            case 0x40:
-                pos += 1;
-                break;
+            case 0x30, 0x40 -> pos += 1;
+
             // unsupported two operands
-            case 0x50:
-            case 0xA0:
-            case 0xB0:
-                pos += 2;
-                break;
+            case 0x50, 0xA0, 0xB0 -> pos += 2;
+
             // unsupported three operands
-            case 0xC0:
-            case 0xD0:
-                pos += 3;
-                break;
+            case 0xC0, 0xD0 -> pos += 3;
+
             // unsupported four operands
-            case 0xE0:
-            case 0xF0:
-                pos += 4;
-                break;
-            case 0x90:  //vgm 1.60, dac stream control 0x90 - 0x95
+            case 0xE0, 0xF0 -> pos += 4;
+            case 0x90 -> {
                 int subCmd = cmd & 0x7;
                 int diff = subCmd < 2 || subCmd == 5 ? 4 : 5;
                 diff = subCmd == 3 ? 10 : diff;
                 diff = subCmd == 4 ? 1 : diff;
                 pos += diff;
-                break;
-            default:
-                logger.log(Level.ERROR, "Unexpected command: %02x, at position: %02x".formatted(cmd, pos));
-                break;
+            }
+            default -> logger.log(Level.ERROR, "Unexpected command: %02x, at position: %02x".formatted(cmd, pos));
         }
     }
 
