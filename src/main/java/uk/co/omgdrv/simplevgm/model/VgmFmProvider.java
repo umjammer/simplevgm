@@ -2,6 +2,7 @@ package uk.co.omgdrv.simplevgm.model;
 
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
+import java.util.NoSuchElementException;
 import java.util.ServiceLoader;
 
 import uk.co.omgdrv.simplevgm.VgmEmu;
@@ -46,21 +47,14 @@ public interface VgmFmProvider {
 
     ServiceLoader<VgmFmProvider> serviceLoader = ServiceLoader.load(VgmFmProvider.class);
 
-    static VgmFmProvider getProvider(String className) {
-        VgmFmProvider nullProvider = null;
+    /** @throws NoSuchElementException no suitable provider is found */
+    static VgmFmProvider getProvider(String name) {
         for (VgmFmProvider provider : serviceLoader) {
-            if (provider.getClass() == NullVgmFmProvider.class) {
-                nullProvider = provider;
-            }
-            if (provider.getClass().getName().equals(className)) {
+            if (name != null && provider.getClass().getName().toLowerCase().contains(name.toLowerCase())) {
 logger.log(Level.TRACE, "fm: " + provider.getClass());
                 return provider;
             }
         }
-        if (nullProvider == null) {
-            throw new IllegalStateException("no null provider is found");
-        }
-logger.log(Level.WARNING, "no such a class: " + className);
-        return nullProvider;
+        throw new NoSuchElementException("no provider found for: " + name);
     }
 }

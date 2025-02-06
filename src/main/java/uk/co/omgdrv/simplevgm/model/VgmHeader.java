@@ -19,6 +19,7 @@ import static uk.co.omgdrv.simplevgm.model.VgmHeader.Field.SN76489_SHIFT;
 import static uk.co.omgdrv.simplevgm.model.VgmHeader.Field.VERSION;
 import static uk.co.omgdrv.simplevgm.model.VgmHeader.Field.YM2413_CLK;
 import static uk.co.omgdrv.simplevgm.model.VgmHeader.Field.YM2612_CLK;
+import static uk.co.omgdrv.simplevgm.model.VgmHeader.Field.YMF262_CLK;
 
 
 /**
@@ -48,7 +49,8 @@ public class VgmHeader {
         SN76489_SHIFT(42, 1),
         SN76489_FLAGS(43, 1),
         YM2612_CLK(44),
-        DATA_OFFSET(52);
+        DATA_OFFSET(52),
+        YMF262_CLK(0x5c);
 
         private final int position;
         private final int size;
@@ -84,6 +86,7 @@ public class VgmHeader {
     private int sn76489Clk;
     private int ym2612Clk;
     private int ym2413Clk;
+    private int ymf262Clk;
 
     private int rate;
 
@@ -120,6 +123,7 @@ public class VgmHeader {
         if (v.ym2612Clk == 0 && v.version <= 0x101) {
 //            v.ym2612Clk = v.ym2413Clk;
         }
+        v.ymf262Clk = getIntValue(data, YMF262_CLK);
         v.dataOffset = getIntValue(data, DATA_OFFSET);
         v.dataOffset = v.dataOffset == 0 ? DEFAULT_DATA_OFFSET : v.dataOffset + DATA_OFFSET.getPosition();
         if (v.gd3Offset > 0) {
@@ -176,6 +180,10 @@ public class VgmHeader {
 
     public int getYm2413Clk() {
         return ym2413Clk;
+    }
+
+    public int getYmF262Clk() {
+        return ymf262Clk;
     }
 
     public int getRate() {

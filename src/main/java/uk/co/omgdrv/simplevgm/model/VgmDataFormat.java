@@ -13,6 +13,8 @@ public class VgmDataFormat {
     public static final int CMD_YM2413_PORT = 0x51;
     public static final int CMD_YM2612_PORT0 = 0x52;
     public static final int CMD_YM2612_PORT1 = 0x53;
+    public static final int CMD_YMF262_PORT0 = 0x5e;
+    public static final int CMD_YMF262_PORT1 = 0x5f;
     public static final int CMD_DELAY = 0x61;
     public static final int CMD_DELAY_735 = 0x62;
     public static final int CMD_DELAY_882 = 0x63;

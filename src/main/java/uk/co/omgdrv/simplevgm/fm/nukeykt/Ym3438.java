@@ -1263,7 +1263,7 @@ public class Ym3438 implements IYm3438 {
     @Override
     public void OPN2_Write(IYm3438.IYm3438_Type chip, /* 32 bit unsigned */ int port, /* 8 bit unsigned */ int data) {
         port &= 3;
-        data &= 0xFF;
+        data &= 0xff;
         chip.write_data = ((port << 7) & 0x100) | data;
         if ((port & 1) > 0) {
             // Data
@@ -1280,7 +1280,7 @@ public class Ym3438 implements IYm3438 {
     }
 
     @Override
-    public/* 32 bit unsigned */ boolean OPN2_ReadTestPin(IYm3438.IYm3438_Type chip) {
+    public /* 32 bit unsigned */ boolean OPN2_ReadTestPin(IYm3438.IYm3438_Type chip) {
         if (chip.mode_test_2c[7] == 0) {
             return false;
         }
@@ -1288,7 +1288,7 @@ public class Ym3438 implements IYm3438 {
     }
 
     @Override
-    public/* 32 bit unsigned */ boolean OPN2_ReadIRQPin(IYm3438.IYm3438_Type chip) {
+    public /* 32 bit unsigned */ boolean OPN2_ReadIRQPin(IYm3438.IYm3438_Type chip) {
         return chip.timer_a_overflow_flag || chip.timer_b_overflow_flag;
     }
 

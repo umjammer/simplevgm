@@ -1,4 +1,3 @@
-uk.co.omgdrv.simplevgm.model.NullVgmPsgProvider
 uk.co.omgdrv.simplevgm.psg.gear.GearPsgProvider
 uk.co.omgdrv.simplevgm.psg.gear2.Gear2PsgProvider
 uk.co.omgdrv.simplevgm.psg.green.GreenPsgProvider
