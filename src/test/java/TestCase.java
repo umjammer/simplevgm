@@ -56,8 +56,11 @@ class TestCase {
     @Property
     String vgz = "src/test/resources/test.vgm";
 
-    @Property(name = "uk.co.omgdrv.simplevgm.fm")
-    String provider = "";
+    @Property(name = "uk.co.omgdrv.simplevgm.fm2612")
+    String fm2612 = "";
+
+    @Property(name = "uk.co.omgdrv.simplevgm.psg")
+    String psg = "";
 
     @BeforeEach
     void setup() throws Exception {
@@ -65,7 +68,8 @@ class TestCase {
             PropsEntity.Util.bind(this);
         }
 
-        System.setProperty("uk.co.omgdrv.simplevgm.fm", provider);
+        System.setProperty("uk.co.omgdrv.simplevgm.fm2612", fm2612);
+        System.setProperty("uk.co.omgdrv.simplevgm.psg", psg);
 Debug.println("volume: " + volume);
     }
 

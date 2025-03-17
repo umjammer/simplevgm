@@ -50,7 +50,7 @@ public interface VgmFmProvider {
     /** @throws NoSuchElementException no suitable provider is found */
     static VgmFmProvider getProvider(String name) {
         for (VgmFmProvider provider : serviceLoader) {
-            if (name != null && provider.getClass().getName().toLowerCase().contains(name.toLowerCase())) {
+            if (name != null && !name.isEmpty() && provider.getClass().getName().toLowerCase().contains(name.toLowerCase())) {
 logger.log(Level.TRACE, "fm: " + provider.getClass());
                 return provider;
             }
