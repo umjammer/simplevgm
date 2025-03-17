@@ -59,7 +59,7 @@ import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.YM2612_DAC_PORT;
  * system properties
  * <ul>
  *     <li>uk.co.omgdrv.simplevgm.psg ... a class name extends {@link VgmPsgProvider} for PSG</li>
- *     <li>uk.co.omgdrv.simplevgm.fm ... a class name extends {@link VgmFmProvider} for YM2612 compatible FM</li>
+ *     <li>uk.co.omgdrv.simplevgm.fm2612 ... a class name extends {@link VgmFmProvider} for YM2612 compatible FM</li>
  * </ul>
  *
  * @see "https://www.slack.net/~ant/"
@@ -95,14 +95,20 @@ logger.log(Level.WARNING, "VGM version " + vgmHeader.getVersionString() + " ( > 
         // this needs to be set even if there is no psg
         clockRate = clockRate > 0 ? clockRate : 3579545;
 //        psg = psg.getClass() == NullVgmPsgProvider.class ? VgmPsgProvider.getProvider(GreenPsgProvider.class.getName()) : psg;
-        psg = SmsApu.getInstance(); // this needs to be created even if there is no psg
+        try {
+            psg = VgmPsgProvider.getProvider(System.getProperty("uk.co.omgdrv.simplevgm.psg"));
+logger.log(Level.DEBUG, "here1: @" + psg.hashCode());
+        } catch (NoSuchElementException e) {
+            psg = SmsApu.getInstance(); // this needs to be created even if there is no psg
+logger.log(Level.DEBUG, "here2: @" + psg.hashCode());
+        }
         psgFactor = (int) ((float) psgTimeUnit / vgmRate * clockRate + 0.5);
 
         // FM clock rate
         fm_clock_rate = vgmHeader.getYm2612Clk();
 logger.log(Level.DEBUG, "Ym2612 clock: " + fm_clock_rate);
         if (fm_clock_rate > 0) {
-            VgmFmProvider fm = VgmFmProvider.getProvider("YM2612");
+            VgmFmProvider fm = VgmFmProvider.getProvider(System.getProperty("uk.co.omgdrv.simplevgm.fm2612", "YM2612"));
             buf.setVolume(0.7);
             fm.init(fm_clock_rate, sampleRate());
             fms.put("YM2612", fm);
@@ -128,7 +134,7 @@ logger.log(Level.INFO, "no YmF262 provider");
             }
         }
 logger.log(Level.DEBUG, "psg: " + psg);
-logger.log(Level.DEBUG, "fms: " + fms.values());
+logger.log(Level.DEBUG, "fms: " + fms);
 
         setClockRate(clockRate);
         psg.setOutput(buf.center(), buf.left(), buf.right());
@@ -244,7 +250,7 @@ logger.log(Level.DEBUG, vgmHeader.toString());
         while (time < duration && !endOfStream) {
             int cmd = CMD_END;
             if (pos < data.length)
-                cmd = data[pos++] & 0xFF;
+                cmd = data[pos++] & 0xff;
             switch (cmd) {
                 case CMD_END -> {
                     // TODO fix sample counting
@@ -267,28 +273,28 @@ logger.log(Level.DEBUG, vgmHeader.toString());
                 }
 
                 case CMD_GG_STEREO -> {
-                    psg.writeGG(toPSGTime(time), data[pos++] & 0xFF);
+                    psg.writeGG(toPSGTime(time), data[pos++] & 0xff);
                 }
 
                 case CMD_PSG -> {
-                    psg.writeData(toPSGTime(time), data[pos++] & 0xFF);
+                    psg.writeData(toPSGTime(time), data[pos++] & 0xff);
                 }
                 // 0x51	aa dd	YM2413, write value dd to register aa
                 case CMD_YM2413_PORT -> {
                     runFM(time);
-                    int reg1 = data[pos++] & 0xFF;
-                    int val1 = data[pos++] & 0xFF;
+                    int reg1 = data[pos++] & 0xff;
+                    int val1 = data[pos++] & 0xff;
                     VgmFmProvider fm = fms.get("YM2413");
                     fm.write(Ym2413Provider.FmReg.ADDR_LATCH_REG.ordinal(), reg1);
                     fm.write(Ym2413Provider.FmReg.DATA_REG.ordinal(), val1);
                 }
                 case CMD_YM2612_PORT0 -> {
-                    int port = data[pos++] & 0xFF;
-                    int val = data[pos++] & 0xFF;
+                    int port = data[pos++] & 0xff;
+                    int val = data[pos++] & 0xff;
                     if (port == YM2612_DAC_PORT) {
                         write_pcm(time, val);
                     } else {
-                        if (port == 0x2B) {
+                        if (port == 0x2b) {
                             dac_disabled = (val >> 7 & 1) - 1;
                             dac_amp |= dac_disabled;
                         }
@@ -301,16 +307,16 @@ logger.log(Level.DEBUG, vgmHeader.toString());
 
                 case CMD_YM2612_PORT1 -> {
                     runFM(time);
-                    int fmPort = data[pos++] & 0xFF;
-                    int fmVal = data[pos++] & 0xFF;
+                    int fmPort = data[pos++] & 0xff;
+                    int fmVal = data[pos++] & 0xff;
                     VgmFmProvider fm = fms.get("YM2612");
                     fm.writePort(MdFmProvider.FM_ADDRESS_PORT1, fmPort);
                     fm.writePort(MdFmProvider.FM_DATA_PORT1, fmVal);
                 }
 
                 case CMD_YMF262_PORT0 -> {
-                    int port = data[pos++] & 0xFF;
-                    int val = data[pos++] & 0xFF;
+                    int port = data[pos++] & 0xff;
+                    int val = data[pos++] & 0xff;
                     runFM(time);
                     VgmFmProvider fm = fms.get("YMF262");
                     fm.writePort(MdFmProvider.FM_ADDRESS_PORT0, port);
@@ -319,15 +325,15 @@ logger.log(Level.DEBUG, vgmHeader.toString());
 
                 case CMD_YMF262_PORT1 -> {
                     runFM(time);
-                    int fmPort = data[pos++] & 0xFF;
-                    int fmVal = data[pos++] & 0xFF;
+                    int fmPort = data[pos++] & 0xff;
+                    int fmVal = data[pos++] & 0xff;
                     VgmFmProvider fm = fms.get("YMF262");
                     fm.writePort(MdFmProvider.FM_ADDRESS_PORT1, fmPort);
                     fm.writePort(MdFmProvider.FM_DATA_PORT1, fmVal);
                 }
 
                 case CMD_DELAY -> {
-                    time += (data[pos + 1] & 0xFF) * 0x100 + (data[pos] & 0xFF);
+                    time += (data[pos + 1] & 0xff) * 0x100 + (data[pos] & 0xff);
                     pos += 2;
                 }
                 case CMD_DATA_BLOCK -> {
@@ -344,17 +350,17 @@ logger.log(Level.DEBUG, vgmHeader.toString());
                 case CMD_PCM_SEEK -> {
                     pcm_pos = pcm_data + Util.getUInt32LE(data, pos);
                     pos += 4;
-        }
+                }
 
                 default -> {
-                    switch (cmd & 0xF0) {
+                    switch (cmd & 0xf0) {
                         case CMD_PCM_DELAY -> {
-                            write_pcm(time, data[pcm_pos++] & 0xFF);
+                            write_pcm(time, data[pcm_pos++] & 0xff);
                             time += cmd & 0x0F;
                         }
 
                         case CMD_SHORT_DELAY -> {
-                            time += (cmd & 0x0F) + 1;
+                            time += (cmd & 0x0f) + 1;
                         }
                         default -> {
                             handleUnsupportedCommand(cmd);
@@ -383,18 +389,18 @@ logger.log(Level.DEBUG, vgmHeader.toString());
 
     private void handleUnsupportedCommand(int cmd) {
 logger.log(Level.DEBUG, vgmHeader.getIdent() + vgmHeader.getVersionString() + ", unsupported command: " + Integer.toHexString(cmd));
-        switch (cmd & 0xF0) {
+        switch (cmd & 0xf0) {
             // unsupported one operand
             case 0x30, 0x40 -> pos += 1;
 
             // unsupported two operands
-            case 0x50, 0xA0, 0xB0 -> pos += 2;
+            case 0x50, 0xa0, 0xb0 -> pos += 2;
 
             // unsupported three operands
-            case 0xC0, 0xD0 -> pos += 3;
+            case 0xc0, 0xd0 -> pos += 3;
 
             // unsupported four operands
-            case 0xE0, 0xF0 -> pos += 4;
+            case 0xe0, 0xf0 -> pos += 4;
             case 0x90 -> {
                 int subCmd = cmd & 0x7;
                 int diff = subCmd < 2 || subCmd == 5 ? 4 : 5;
@@ -412,11 +418,11 @@ logger.log(Level.DEBUG, vgmHeader.getIdent() + vgmHeader.getVersionString() + ",
         int in_off = fm_pos;
 
         while (--count >= 0) {
-            int s = (out[out_off] << 8) + (out[out_off + 1] & 0xFF);
+            int s = (out[out_off] << 8) + (out[out_off + 1] & 0xff);
             s = (s >> 2) + fm_buf_lr[in_off];
             in_off++;
             if ((short) s != s)
-                s = (s >> 31) ^ 0x7FFF;
+                s = (s >> 31) ^ 0x7fff;
             out[out_off] = (byte) (s >> 8);
             out_off++;
             out[out_off] = (byte) s;

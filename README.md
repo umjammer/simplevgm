@@ -10,16 +10,16 @@
 * made it one of the [vavi-sound-emu](https://github.com/umjammer/vavi-sound-emu) spi
 * made *psg* and *fm* use service provider 
 
-| name      | common name | type | status | comment                  |
-|-----------|-------------|------|:------:|--------------------------|
-| Ym2612    | OPN2        | FM   |   ✅️   | mame:dallongeville+green |
-| Ym3438    | OPN2 (cmos) | FM   |   ✅️   | nukeykt                  |
-| Ym2612    | OPN2        | FM   |   ✅️   | MDSound                  |
-| Ym2413    | OPLL        | FM   |   ✅️   | okaxaki                  |
-| Sn76489   |             | PSG  |  ✅ 🚧  | green                    |
-| Sn76489   |             | PSG  |        | javageer:white           |
-| Sn76496   |             | PSG  |        | javageer-2:white         |
-| Ym7101    |             | PSG  |        | nukeykt                  |
+| name      | common name | type | status | comment                      |
+|-----------|-------------|------|:------:|------------------------------|
+| Ym2612    | OPN2        | FM   |   ✅️   | mame:dallongeville+green     |
+| Ym3438    | OPN2 (cmos) | FM   |   ✅️   | nukeykt                      |
+| Ym2612    | OPN2        | FM   |   ✅️   | MDSound (see mdsound branch) |
+| Ym2413    | OPLL        | FM   |   ✅️   | okaxaki                      |
+| Sn76489   |             | PSG  |  ✅ 🚧  | green                        |
+| Sn76489   |             | PSG  |        | javageer:white               |
+| Sn76496   |             | PSG  |        | javageer-2:white             |
+| Ym7101    |             | PSG  |        | nukeykt                      |
 
 ## Install
 

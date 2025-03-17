@@ -41,7 +41,7 @@ public class PsgYm7101Impl implements PsgYm7101 {
     };
 
     @Override
-    public void PSG_Reset(PsgYm7101.PsgContext chip) {
+    public void PSG_Reset(PsgContext chip) {
         // TODO: verify
         chip.latch = 7;
         chip.volume[0] = 0x0f;

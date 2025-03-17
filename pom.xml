@@ -5,7 +5,7 @@
 
   <groupId>uk.co.omgdrv</groupId>
   <artifactId>simplevgm</artifactId>
-  <version>1.5.5</version>
+  <version>1.5.6</version>
 
   <properties>
     <vavi.test.volume>0.02</vavi.test.volume>
@@ -82,7 +82,7 @@
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
-        <version>5.10.3</version>
+        <version>5.11.2</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
