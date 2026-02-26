@@ -96,7 +96,7 @@ Debug.println(vgz);
     }
 
     @Test
-    @DisplayName("as spi")
+    @DisplayName("via spi")
     void test2() throws Exception {
         System.setProperty("libgme.endless", String.valueOf(onIde));
 
