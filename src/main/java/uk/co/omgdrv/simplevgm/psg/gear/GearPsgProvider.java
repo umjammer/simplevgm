@@ -4,9 +4,7 @@
 
 package uk.co.omgdrv.simplevgm.psg.gear;
 
-import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider;
-import uk.co.omgdrv.simplevgm.psg.PsgCompare;
 
 
 /**
@@ -17,24 +15,16 @@ import uk.co.omgdrv.simplevgm.psg.PsgCompare;
  */
 public class GearPsgProvider extends BaseVgmPsgProvider {
 
-    private static final double NANOS_PER_CYCLE = NANOS_TO_SEC / PsgProvider.GEAR_CLOCK_HZ / 2; // div2 //TODO Why
+    private static final double NANOS_PER_CYCLE = NANOS_TO_SEC / GearPsg.GEAR_CLOCK_HZ / 2; // div2 TODO Why
 
-    protected PsgProvider psg;
+    protected GearPsg psg;
     private double nanosToNextSample = NANOS_PER_SAMPLE;
     public int sampleCounter = 0;
     public final byte[] gearBuffer = new byte[VGM_SAMPLE_RATE_HZ];
-    protected PsgCompare psgCompare;
-    protected PsgCompare.PsgType type = PsgCompare.PsgType.GEAR;
 
-    public static GearPsgProvider createInstance() {
-        return createInstance(null);
-    }
-
-    public static GearPsgProvider createInstance(PsgCompare compare) {
-        GearPsgProvider g = (GearPsgProvider) VgmPsgProvider.getProvider(GearPsgProvider.class.getName());
-        g.psg = PsgProvider.createInstance(VGM_SAMPLE_RATE_HZ);
-        g.psgCompare = compare;
-        return g;
+    public GearPsgProvider() {
+        this.psg = new SN76496Psg();
+        this.psg.init(GearPsg.GEAR_CLOCK_HZ, VGM_SAMPLE_RATE_HZ);
     }
 
     @Override
@@ -45,7 +35,7 @@ public class GearPsgProvider extends BaseVgmPsgProvider {
 
     @Override
     protected long toPsgCycles(long vgmDelayCycles) {
-        return (long) ((vgmDelayCycles * 1.0 / VGM_SAMPLE_RATE_HZ) * PsgProvider.GEAR_CLOCK_HZ);
+        return (long) ((vgmDelayCycles * 1.0 / VGM_SAMPLE_RATE_HZ) * GearPsg.GEAR_CLOCK_HZ);
     }
 
     @Override
@@ -57,8 +47,8 @@ public class GearPsgProvider extends BaseVgmPsgProvider {
             sampleCounter++;
             if (sampleCounter == VGM_SAMPLE_RATE_HZ) {
                 sampleCounter = 0;
-                if (psgCompare != null) {
-                    psgCompare.pushData(type, gearBuffer);
+                if (comparator != null) {
+                    comparator.accept(gearBuffer);
                 }
             }
         }

@@ -40,15 +40,6 @@ public class PsgCompare implements VgmPsgProvider {
     private static final int RUN_FOR_SECONDS = 30;
     private static final boolean WRITE_FILE = false;
 
-    public enum PsgType {
-        GEAR,
-        GEAR2,
-        NUKED,
-        NUKED_FILTER,
-        NUKED_BLIP,
-        GREEN
-    }
-
     private static final boolean SIGNED = true;
     public static final AudioFormat audioFormat8bit =
             new AudioFormat(VGM_SAMPLE_RATE_HZ, 8, 1, SIGNED, false);
@@ -68,14 +59,44 @@ public class PsgCompare implements VgmPsgProvider {
     private final GreenPsgProvider greenPsg;
     private final BlipNukedPsgProvider blipNukedPsg;
 
+    public GearPsgProvider createGearPsg(PsgCompare compare) {
+        GearPsgProvider g = (GearPsgProvider) VgmPsgProvider.getProvider(GearPsgProvider.class.getName());
+        g.addComparator(buf -> pushData(GearPsgProvider.class, buf));
+        return g;
+    }
+
+    public Gear2PsgProvider createGear2Psg(PsgCompare compare) {
+        Gear2PsgProvider g = (Gear2PsgProvider) VgmPsgProvider.getProvider(Gear2PsgProvider.class.getName());
+        g.addComparator(buf -> pushData(Gear2PsgProvider.class, buf));
+        return g;
+    }
+
+    public NukedPsgProvider createNukedPsg(PsgCompare psgCompare) {
+        NukedPsgProvider n = (NukedPsgProvider) VgmPsgProvider.getProvider(NukedPsgProvider.class.getName());
+        n.addComparator(buf -> pushData(NukedPsgProvider.class, buf));
+        return n;
+    }
+
+    public BlipNukedPsgProvider createBlipNuked(PsgCompare psgCompare) {
+        BlipNukedPsgProvider n = (BlipNukedPsgProvider) VgmPsgProvider.getProvider(BlipNukedPsgProvider.class.getName());
+        n.addComparator(buf -> pushData(BlipNukedPsgProvider.class, buf));
+        return n;
+    }
+
+    public GreenPsgProvider createGreenPsg(PsgCompare compare) {
+        GreenPsgProvider g = (GreenPsgProvider) VgmPsgProvider.getProvider(GreenPsgProvider.class.getName());
+        g.addComparator(buf -> pushData(GreenPsgProvider.class, buf));
+        return g;
+    }
+
     private final SmsApu vgmEmuPsg;
 
     public PsgCompare() {
-        this.gearPsg = GearPsgProvider.createInstance(this);
-        this.gear2Psg = Gear2PsgProvider.createInstance(this);
-        this.nukePsg = NukedPsgProvider.createInstance(this);
-        this.blipNukedPsg = BlipNukedPsgProvider.createInstance(this);
-        this.greenPsg = GreenPsgProvider.createInstance(this);
+        this.gearPsg = createGearPsg(this);
+        this.gear2Psg = createGear2Psg(this);
+        this.nukePsg = createNukedPsg(this);
+        this.blipNukedPsg = createBlipNuked(this);
+        this.greenPsg = createGreenPsg(this);
 
         this.vgmEmuPsg = SmsApu.getInstance();
     }
@@ -140,26 +161,26 @@ logger.log(Level.DEBUG, "Stopping after: " + RUN_FOR_SECONDS + " seconds");
         }
     }
 
-    public void pushData(PsgType type, byte[] buffer) {
+    public void pushData(Class<? extends VgmPsgProvider> type, byte[] buffer) {
         if (WRITE_FILE) {
-            switch (type) {
-                case GEAR:
+            switch (type.getSimpleName()) {
+                case "GearPsgProvider":
                     Util.writeToFile(gearFile, buffer);
                     break;
-                case GEAR2:
+                case "Gear2PsgProvider":
 //                Util.writeToFile(gearFile2, buffer);
                     break;
-                case GREEN:
+                case "GreenPsgProvider":
                     // TODO this is 16bit
 //                Util.writeToFile(greenFile, buffer);
                     break;
-                case NUKED:
+                case "NukedPsgProvider":
                     Util.writeToFile(nukeFile, buffer);
                     break;
-                case NUKED_BLIP:
+                case "BlipNukedPsgProvider":
 //                Util.writeToFile(nukeBlipFile, buffer);
                     break;
-                case NUKED_FILTER:
+                case "NUKED_FILTER":
 //                Util.writeToFile(nukeFilterFile, buffer);
                     break;
             }

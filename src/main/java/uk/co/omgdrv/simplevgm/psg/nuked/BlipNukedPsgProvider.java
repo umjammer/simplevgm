@@ -6,10 +6,8 @@ package uk.co.omgdrv.simplevgm.psg.nuked;
 
 import java.util.Arrays;
 
-import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
-import uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider;
-import uk.co.omgdrv.simplevgm.psg.PsgCompare;
 import libgme.util.BlipBuffer;
+import uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider;
 import uk.co.omgdrv.simplevgm.util.DspUtil;
 
 
@@ -34,14 +32,6 @@ public class BlipNukedPsgProvider extends NukedPsgProvider {
     private final byte[] bufferSamples = new byte[BLIP_BUFFER_SIZE];
     private final byte[] bufferSamples16 = new byte[BLIP_BUFFER_SIZE * 2];
 
-    protected PsgCompare psgCompare;
-
-    public static BlipNukedPsgProvider createInstance(PsgCompare psgCompare) {
-        BlipNukedPsgProvider n = (BlipNukedPsgProvider) VgmPsgProvider.getProvider(BlipNukedPsgProvider.class.getName());
-        n.psgCompare = psgCompare;
-        return n;
-    }
-
     public BlipNukedPsgProvider() {
         super();
         blipBuffer = new BlipBuffer();
@@ -56,17 +46,17 @@ public class BlipNukedPsgProvider extends NukedPsgProvider {
     }
 
     @Override
-    protected boolean updateSampleBuffer() {
+    public void updateSampleBuffer() {
 //        // TODO wrong??
 //        boolean res = super.updateSampleBuffer();
 //        if (res) {
 //            updateBlipSampleBuffer(rawSample);
 //        }
 //        return res;
-        return false;
+//        return false;
     }
 
-    private void updateBlipSampleBuffer(double sample) {
+    public void updateBlipSampleBuffer(double sample) {
         byte scaledDelta = DspUtil.scaleClamp8bit(sample - lastSample, DspUtil.PSG_MAX_VOLUME_8_BIT);
         int clockRateTime = BLIP_FACTOR * blipSampleCounter;
 //logger.log(Level.TRACE, clockRateTime + "," + (scaledSample -lastScaledSample));
@@ -77,9 +67,9 @@ public class BlipNukedPsgProvider extends NukedPsgProvider {
             blipBuffer.endFrame(BLIP_BUFFER_SAMPLES_CLOCKS);
             int read = blipBuffer.readSamples8bit(bufferSamples, 0, BLIP_BUFFER_SIZE);
             blipSampleCounter = 0;
-            if (psgCompare != null) {
-                byte[] res = Arrays.copyOf(bufferSamples, read); //TODO
-                psgCompare.pushData(PsgCompare.PsgType.NUKED_BLIP, res);
+            if (comparator != null) {
+                byte[] res = Arrays.copyOf(bufferSamples, read); // TODO
+                comparator.accept(res);
             }
         }
     }

@@ -13,20 +13,18 @@ import uk.co.omgdrv.simplevgm.psg.nuked.NukedPsgProvider;
  * @author Federico Berti
  * @version 2018
  */
-public interface PsgProvider {
+public interface GearPsg {
 
     int GEAR_CLOCK_HZ = NukedPsgProvider.CLOCK_HZ / 32;
 
     int PSG_OUTPUT_SAMPLE_SIZE = 8;
     int PSG_OUTPUT_CHANNELS = 1;
 
-    static PsgProvider createInstance(int sampleRate) {
-        PsgProvider psgProvider = new SN76496(GEAR_CLOCK_HZ, sampleRate);
-        psgProvider.init();
-        return psgProvider;
-    }
-
-    void init();
+    /**
+     * @param clockSpeed Clock Speed (Hz)
+     * @param sampleRate Sample Rate (Hz)
+     */
+    void init(int clockSpeed, int sampleRate);
 
     void write(int data);
 
@@ -36,9 +34,9 @@ public interface PsgProvider {
 
     void reset();
 
-    PsgProvider NO_SOUND = new PsgProvider() {
+    GearPsg NO_SOUND = new GearPsg() {
 
-        @Override public void init() {
+        @Override public void init(int clockSpeed, int sampleRate) {
         }
 
         @Override public void write(int data) {

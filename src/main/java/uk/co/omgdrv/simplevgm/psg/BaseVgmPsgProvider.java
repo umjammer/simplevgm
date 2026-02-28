@@ -4,8 +4,11 @@
 
 package uk.co.omgdrv.simplevgm.psg;
 
-import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 import libgme.util.BlipBuffer;
+import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 
 
 /**
@@ -64,4 +67,12 @@ public abstract class BaseVgmPsgProvider implements VgmPsgProvider {
     protected abstract void updateSampleBuffer();
 
     protected abstract long toPsgCycles(long vgmDelayCycles);
+
+    // comparator
+
+    protected Consumer<byte[]> comparator;
+
+    public void addComparator(Consumer<byte[]> comparator) {
+        this.comparator = comparator;
+    }
 }

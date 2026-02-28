@@ -4,7 +4,7 @@
 
 package uk.co.omgdrv.simplevgm.psg.gear2;
 
-import uk.co.omgdrv.simplevgm.psg.gear.PsgProvider;
+import uk.co.omgdrv.simplevgm.psg.gear.GearPsg;
 
 
 /**
@@ -13,19 +13,14 @@ import uk.co.omgdrv.simplevgm.psg.gear.PsgProvider;
  * @author Federico Berti
  * @version 2019
  */
-public class SN76489Psg implements PsgProvider { // TODO gross
+public class SN76489Psg implements GearPsg {
 
     private SN76489 psg;
 
-    public static SN76489Psg createInstance(int clockSpeed, int sampleRate) {
-        SN76489Psg s = new SN76489Psg();
-        s.psg = new SN76489();
-        s.psg.init(clockSpeed, sampleRate);
-        return s;
-    }
-
     @Override
-    public void init() {
+    public void init(int clockSpeed, int sampleRate) {
+        this.psg = new SN76489();
+        this.psg.init(clockSpeed, sampleRate);
     }
 
     @Override

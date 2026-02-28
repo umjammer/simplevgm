@@ -88,12 +88,12 @@ public class SN76489 {
      */
     private final static int NO_ANTIALIAS = Integer.MIN_VALUE;
 
-    // ----
+    //
     // The SN76489 has 8 "registers": 
     // 4 x 4 bit volume registers, 
     // 3 x 10 bit tone registers and 
     // 1 x 3 bit noise register. 
-    // ----
+    //
 
     /**
      * SN76489 Registers

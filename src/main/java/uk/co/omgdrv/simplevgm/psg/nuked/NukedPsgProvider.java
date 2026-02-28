@@ -11,12 +11,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import libgme.util.BlipBuffer;
-import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
-import uk.co.omgdrv.simplevgm.psg.PsgCompare;
+import uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider;
 import uk.co.omgdrv.simplevgm.util.DspUtil;
 import uk.co.omgdrv.simplevgm.util.Util;
-
-import static uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ;
 
 
 /**
@@ -26,7 +23,7 @@ import static uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ;
  * @version 2019
  * @see "https://forums.nesdev.com/viewtopic.php?f=23&t=15562"
  */
-public class NukedPsgProvider implements VgmPsgProvider {
+public class NukedPsgProvider extends BaseVgmPsgProvider {
 
     public static final int PSG_MAX_VOLUME = 0x80;
     public static final int CLOCK_HZ = 3579545;
@@ -47,14 +44,6 @@ public class NukedPsgProvider implements VgmPsgProvider {
     private int currentCycle;
     private int sampleCounter = 0;
     public int secondsElapsed = 0;
-
-    protected PsgCompare psgCompare;
-
-    public static NukedPsgProvider createInstance(PsgCompare psgCompare) {
-        NukedPsgProvider n = (NukedPsgProvider) VgmPsgProvider.getProvider(NukedPsgProvider.class.getName());
-        n.psgCompare = psgCompare;
-        return n;
-    }
 
     public NukedPsgProvider() {
         psg = new PsgYm7101Impl();
@@ -94,7 +83,8 @@ public class NukedPsgProvider implements VgmPsgProvider {
         return (int) ((vgmDelayCycles * 1.0 / VGM_SAMPLE_RATE_HZ) * CLOCK_HZ);
     }
 
-    private void runUntil(int delayCycles) {
+    @Override
+    public void runUntil(int delayCycles) {
         if (delayCycles > currentCycle) {
             long count = delayCycles;
             while (count-- > 0) {
@@ -107,7 +97,8 @@ public class NukedPsgProvider implements VgmPsgProvider {
 
     protected double rawSample;
 
-    protected boolean updateSampleBuffer() {
+    @Override
+    public void updateSampleBuffer() {
         nanosToNextSample -= NANOS_PER_CYCLE;
         boolean hasSample = false;
         if (nanosToNextSample < 0) {
@@ -121,13 +112,18 @@ public class NukedPsgProvider implements VgmPsgProvider {
                 DspUtil.fastHpfResample(rawBuffer, resampleBuffer);
                 DspUtil.scale8bit(resampleBuffer, nukedBuffer);
 //                writeRawData(rawBuffer);
-                if (psgCompare != null) {
-                    psgCompare.pushData(PsgCompare.PsgType.NUKED, nukedBuffer);
+                if (comparator != null) {
+                    comparator.accept(nukedBuffer);
                 }
                 secondsElapsed++;
             }
         }
-        return hasSample;
+//        return hasSample;
+    }
+
+    @Override
+    protected long toPsgCycles(long vgmDelayCycles) {
+        return 0;
     }
 
     final Path rawFile = Paths.get(".", "NUKED_RAW_" + System.currentTimeMillis() + ".raw");
