@@ -4,7 +4,7 @@
  * Programmed by Naohide Sano
  */
 
-package uk.co.omgdrv.simplevgm.fm.ym2621;
+package uk.co.omgdrv.simplevgm.fm.ym2612;
 
 
 import uk.co.omgdrv.simplevgm.fm.MdFmProvider;
