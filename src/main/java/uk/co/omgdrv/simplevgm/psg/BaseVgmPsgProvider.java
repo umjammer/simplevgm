@@ -5,9 +5,8 @@
 package uk.co.omgdrv.simplevgm.psg;
 
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
-import libgme.util.BlipBuffer;
+import libgme.util.StereoBuffer;
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 
 
@@ -25,6 +24,9 @@ public abstract class BaseVgmPsgProvider implements VgmPsgProvider {
     public static final int CLOCK_HZ = 3579545;
 
     protected int currentVgmDelayCycle;
+    protected double interpolatedVgmCycle;
+
+    protected StereoBuffer buffer;
 
     @Override
     public void writeData(int vgmDelayCycles, int data) {
@@ -32,8 +34,8 @@ public abstract class BaseVgmPsgProvider implements VgmPsgProvider {
     }
 
     @Override
-    public void setOutput(BlipBuffer center, BlipBuffer left, BlipBuffer right) {
-        throw new IllegalArgumentException("Not implemented");
+    public void setOutput(StereoBuffer buffer) {
+        this.buffer = buffer;
     }
 
     @Override
@@ -41,7 +43,6 @@ public abstract class BaseVgmPsgProvider implements VgmPsgProvider {
         currentVgmDelayCycle = 0;
     }
 
-    // TODO implement
     @Override
     public void writeGG(int time, int data) {
     }
@@ -56,8 +57,11 @@ public abstract class BaseVgmPsgProvider implements VgmPsgProvider {
 
     protected void runUntil(int vgmDelayCycles) {
         if (vgmDelayCycles > currentVgmDelayCycle) {
-            long delayCycles = toPsgCycles(vgmDelayCycles);
-            while (delayCycles-- > 0) {
+            long startPsgCycles = toPsgCycles(currentVgmDelayCycle);
+            long endPsgCycles = toPsgCycles(vgmDelayCycles);
+            long cycles = endPsgCycles - startPsgCycles;
+            for (long i = 0; i < cycles; i++) {
+                interpolatedVgmCycle = currentVgmDelayCycle + (i * (double) (vgmDelayCycles - currentVgmDelayCycle)) / cycles;
                 updateSampleBuffer();
             }
             currentVgmDelayCycle = vgmDelayCycles;

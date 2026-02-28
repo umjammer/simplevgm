@@ -136,7 +136,7 @@ logger.log(Level.DEBUG, "psg: " + psg);
 logger.log(Level.DEBUG, "fms: " + fms);
 
         setClockRate(clockRate);
-        psg.setOutput(buf.center(), buf.left(), buf.right());
+        psg.setOutput(buf);
         pos = vgmHeader.getDataOffset();
 
 logger.log(Level.DEBUG, vgmHeader.toString());

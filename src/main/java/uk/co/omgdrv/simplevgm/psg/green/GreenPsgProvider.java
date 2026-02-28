@@ -4,7 +4,8 @@
 
 package uk.co.omgdrv.simplevgm.psg.green;
 
-import libgme.util.BlipBuffer;
+import java.lang.System.Logger.Level;
+
 import libgme.util.StereoBuffer;
 import uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.gear.GearPsg;
@@ -32,12 +33,12 @@ public class GreenPsgProvider extends BaseVgmPsgProvider {
     protected StereoBuffer stereoBuffer;
 
     public GreenPsgProvider() {
-        // TODO copy from compare instantiation
-        this.stereoBuffer = new StereoBuffer();
-//        this.stereoBuffer.setObserver(new BlipHelper("GreenPsg", false));
-        this.stereoBuffer.setSampleRate(VGM_SAMPLE_RATE_HZ, 1000);
-        this.stereoBuffer.setClockRate(GreenPsgProvider.CLOCK_HZ);
-        this.psg.setOutput(this.stereoBuffer.center(), this.stereoBuffer.left(), this.stereoBuffer.right());
+//        // TODO copy from compare instantiation
+//        this.stereoBuffer = new StereoBuffer();
+////        this.stereoBuffer.setObserver(new BlipHelper("GreenPsg", false));
+//        this.stereoBuffer.setSampleRate(VGM_SAMPLE_RATE_HZ, 1000);
+//        this.stereoBuffer.setClockRate(GreenPsgProvider.CLOCK_HZ);
+//        this.psg.setOutput(this.stereoBuffer.center(), this.stereoBuffer.left(), this.stereoBuffer.right());
     }
 
     @Override
@@ -72,12 +73,13 @@ public class GreenPsgProvider extends BaseVgmPsgProvider {
 
     @Override
     public long toPsgCycles(long vgmDelayCycles) {
+//logger.log(Level.INFO, "toPsgCycles: " + ((vgmDelayCycles * psgFactor + psgTimeUnit / 2) >> psgTimeBits));
         return (vgmDelayCycles * psgFactor + psgTimeUnit / 2) >> psgTimeBits;
     }
 
     @Override
-    public void setOutput(BlipBuffer center, BlipBuffer left, BlipBuffer right) {
-        psg.setOutput(center, left, right);
+    public void setOutput(StereoBuffer buffer) {
+        psg.setOutput(buffer.center(), buffer.left(), buffer.right());
     }
 
     @Override

@@ -12,12 +12,11 @@ import java.nio.file.Paths;
 import java.util.List;
 import javax.sound.sampled.AudioFormat;
 
-import libgme.util.BlipBuffer;
+import libgme.util.StereoBuffer;
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.gear.GearPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.gear2.Gear2PsgProvider;
 import uk.co.omgdrv.simplevgm.psg.green.GreenPsgProvider;
-import uk.co.omgdrv.simplevgm.psg.green.SmsApu;
 import uk.co.omgdrv.simplevgm.psg.nuked.BlipNukedPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.nuked.NukedPsgProvider;
 import uk.co.omgdrv.simplevgm.util.Util;
@@ -112,8 +111,8 @@ public class PsgCompare implements VgmPsgProvider {
     }
 
     @Override
-    public void setOutput(BlipBuffer center, BlipBuffer left, BlipBuffer right) {
-        vgmEmuPsg.setOutput(center, left, right);
+    public void setOutput(StereoBuffer buffer) {
+        vgmEmuPsg.setOutput(buffer);
     }
 
     @Override

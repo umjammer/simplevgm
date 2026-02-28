@@ -5,7 +5,7 @@ import java.lang.System.Logger.Level;
 import java.util.NoSuchElementException;
 import java.util.ServiceLoader;
 
-import libgme.util.BlipBuffer;
+import libgme.util.StereoBuffer;
 
 import static java.lang.System.getLogger;
 
@@ -22,7 +22,7 @@ public interface VgmPsgProvider {
 
     void writeData(int time, int data);
 
-    void setOutput(BlipBuffer center, BlipBuffer left, BlipBuffer right);
+    void setOutput(StereoBuffer buffer);
 
     void reset();
 

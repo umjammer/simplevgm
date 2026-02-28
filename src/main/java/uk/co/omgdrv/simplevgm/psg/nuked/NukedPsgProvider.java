@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import libgme.util.BlipBuffer;
 import uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider;
 import uk.co.omgdrv.simplevgm.util.DspUtil;
 import uk.co.omgdrv.simplevgm.util.Util;
@@ -52,13 +51,9 @@ public class NukedPsgProvider extends BaseVgmPsgProvider {
 
     @Override
     public void writeData(int vgmDelayCycles, int data) {
-        int delayCycles = toPsgClockCycles(vgmDelayCycles);
+        int delayCycles = (int) toPsgCycles(vgmDelayCycles);
         runUntil(delayCycles);
         psg.PSG_Write(context, data);
-    }
-
-    @Override
-    public void setOutput(BlipBuffer center, BlipBuffer left, BlipBuffer right) {
     }
 
     @Override
@@ -67,20 +62,12 @@ public class NukedPsgProvider extends BaseVgmPsgProvider {
     }
 
     @Override
-    public void writeGG(int time, int data) {
-    }
-
-    @Override
     public void endFrame(int vgmDelayCycles) {
-        long delayCycles = toPsgClockCycles(vgmDelayCycles);
+        long delayCycles = toPsgCycles(vgmDelayCycles);
         if (delayCycles > currentCycle) {
             runUntil(vgmDelayCycles);
         }
         currentCycle -= (int) delayCycles;
-    }
-
-    private static int toPsgClockCycles(long vgmDelayCycles) {
-        return (int) ((vgmDelayCycles * 1.0 / VGM_SAMPLE_RATE_HZ) * CLOCK_HZ);
     }
 
     @Override
@@ -96,17 +83,30 @@ public class NukedPsgProvider extends BaseVgmPsgProvider {
     }
 
     protected double rawSample;
+    private int lastSample = 0;
 
     @Override
     public void updateSampleBuffer() {
         nanosToNextSample -= NANOS_PER_CYCLE;
-        boolean hasSample = false;
+//        boolean hasSample = false;
         if (nanosToNextSample < 0) {
-            hasSample = true;
+//            hasSample = true;
             nanosToNextSample += NANOS_PER_SAMPLE;
+            psg.PSG_Cycle(context);
             rawSample = psg.PSG_GetSample(context);
             rawBuffer[sampleCounter] = rawSample;
             sampleCounter++;
+
+            // Same logic as GearPsg. Pass exactly what VgmEmu calculates for the BlipBuffer frame bound.
+            int intSample = (int) (rawSample * 64);
+            int delta = intSample - lastSample;
+            if (delta != 0) {
+                int time = (int) toPsgCycles((long) interpolatedVgmCycle);
+                if (time < 0) time = 0;
+                buffer.center().addDelta(time, delta);
+                lastSample = intSample;
+            }
+
             if (sampleCounter == NUKED_PSG_SAMPLING_HZ) {
                 sampleCounter = 0;
                 DspUtil.fastHpfResample(rawBuffer, resampleBuffer);
@@ -123,7 +123,7 @@ public class NukedPsgProvider extends BaseVgmPsgProvider {
 
     @Override
     public long toPsgCycles(long vgmDelayCycles) {
-        return 0;
+        return (long) ((vgmDelayCycles * 1.0 / VGM_SAMPLE_RATE_HZ) * CLOCK_HZ);
     }
 
     final Path rawFile = Paths.get(".", "NUKED_RAW_" + System.currentTimeMillis() + ".raw");
