@@ -30,7 +30,6 @@ import uk.co.omgdrv.simplevgm.fm.ym2413.Ym2413Provider;
 import uk.co.omgdrv.simplevgm.model.VgmFmProvider;
 import uk.co.omgdrv.simplevgm.model.VgmHeader;
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
-import uk.co.omgdrv.simplevgm.psg.green.SmsApu;
 import uk.co.omgdrv.simplevgm.util.Util;
 
 import static java.lang.System.getLogger;
@@ -99,7 +98,7 @@ logger.log(Level.WARNING, "VGM version " + vgmHeader.getVersionString() + " ( > 
             psg = VgmPsgProvider.getProvider(System.getProperty("uk.co.omgdrv.simplevgm.psg"));
 logger.log(Level.DEBUG, "here1: @" + psg.hashCode());
         } catch (NoSuchElementException e) {
-            psg = SmsApu.getInstance(); // this needs to be created even if there is no psg
+            psg = VgmPsgProvider.getProvider("uk.co.omgdrv.simplevgm.psg.green.GreenPsgProvider"); // this needs to be created even if there is no psg
 logger.log(Level.DEBUG, "here2: @" + psg.hashCode());
         }
         psgFactor = (int) ((float) psgTimeUnit / vgmRate * clockRate + 0.5);
@@ -198,14 +197,14 @@ logger.log(Level.DEBUG, vgmHeader.toString());
     }
 
     private int toPSGTime(int vgmTime) {
-        if (psg instanceof SmsApu) {
+        if (psg != null) {
             return toPSGTimeGreen(vgmTime);
         }
         return vgmTime;
     }
 
-    public static int toPSGTimeGreen(int vgmTime) {
-        return (vgmTime * psgFactor + psgTimeUnit / 2) >> psgTimeBits;
+    public int toPSGTimeGreen(int vgmTime) {
+        return (int) psg.toPsgCycles(vgmTime);
     }
 
     private int toFMTime(int vgmTime) {

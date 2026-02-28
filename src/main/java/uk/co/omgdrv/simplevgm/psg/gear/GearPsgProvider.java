@@ -34,7 +34,7 @@ public class GearPsgProvider extends BaseVgmPsgProvider {
     }
 
     @Override
-    protected long toPsgCycles(long vgmDelayCycles) {
+    public long toPsgCycles(long vgmDelayCycles) {
         return (long) ((vgmDelayCycles * 1.0 / VGM_SAMPLE_RATE_HZ) * GearPsg.GEAR_CLOCK_HZ);
     }
 

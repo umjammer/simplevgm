@@ -13,7 +13,6 @@ import java.util.List;
 import javax.sound.sampled.AudioFormat;
 
 import libgme.util.BlipBuffer;
-import uk.co.omgdrv.simplevgm.VgmEmu;
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.gear.GearPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.gear2.Gear2PsgProvider;
@@ -89,7 +88,7 @@ public class PsgCompare implements VgmPsgProvider {
         return g;
     }
 
-    private final SmsApu vgmEmuPsg;
+    private final GreenPsgProvider vgmEmuPsg;
 
     public PsgCompare() {
         this.gearPsg = createGearPsg(this);
@@ -98,7 +97,7 @@ public class PsgCompare implements VgmPsgProvider {
         this.blipNukedPsg = createBlipNuked(this);
         this.greenPsg = createGreenPsg(this);
 
-        this.vgmEmuPsg = SmsApu.getInstance();
+        this.vgmEmuPsg = greenPsg;
     }
 
     @Override
@@ -107,9 +106,9 @@ public class PsgCompare implements VgmPsgProvider {
         gearPsg.writeData(vgmDelayCycles, data);
         gear2Psg.writeData(vgmDelayCycles, data);
         blipNukedPsg.writeData(vgmDelayCycles, data);
-        greenPsg.writeData(vgmDelayCycles, data);
+        gear2Psg.writeData(vgmDelayCycles, data);
 
-        vgmEmuPsg.writeData(VgmEmu.toPSGTimeGreen(vgmDelayCycles), data);
+        vgmEmuPsg.writeData((int) gear2Psg.toPsgCycles(vgmDelayCycles), data);
     }
 
     @Override
@@ -128,7 +127,7 @@ public class PsgCompare implements VgmPsgProvider {
 
     @Override
     public void writeGG(int time, int data) {
-        vgmEmuPsg.writeGG(VgmEmu.toPSGTimeGreen(time), data);
+        vgmEmuPsg.writeGG((int) gear2Psg.toPsgCycles(time), data);
     }
 
     @Override
@@ -139,7 +138,12 @@ public class PsgCompare implements VgmPsgProvider {
         blipNukedPsg.endFrame(vgmDelayCycles);
         greenPsg.endFrame(vgmDelayCycles);
 
-        vgmEmuPsg.endFrame(VgmEmu.toPSGTimeGreen(vgmDelayCycles));
+        vgmEmuPsg.endFrame((int) toPsgCycles(vgmDelayCycles));
+    }
+
+    @Override
+    public long toPsgCycles(long vgmDelayCycles) {
+        return gear2Psg.toPsgCycles(vgmDelayCycles);
     }
 
     private void checkIntervalDone() {

@@ -122,7 +122,7 @@ public class NukedPsgProvider extends BaseVgmPsgProvider {
     }
 
     @Override
-    protected long toPsgCycles(long vgmDelayCycles) {
+    public long toPsgCycles(long vgmDelayCycles) {
         return 0;
     }
 

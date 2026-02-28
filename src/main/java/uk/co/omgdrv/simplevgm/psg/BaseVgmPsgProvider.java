@@ -66,7 +66,8 @@ public abstract class BaseVgmPsgProvider implements VgmPsgProvider {
 
     protected abstract void updateSampleBuffer();
 
-    protected abstract long toPsgCycles(long vgmDelayCycles);
+    @Override
+    public abstract long toPsgCycles(long vgmDelayCycles);
 
     // comparator
 

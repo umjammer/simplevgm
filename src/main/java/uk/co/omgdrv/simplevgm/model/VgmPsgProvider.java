@@ -30,6 +30,8 @@ public interface VgmPsgProvider {
 
     void endFrame(int endTime);
 
+    long toPsgCycles(long vgmDelayCycles);
+
     ServiceLoader<VgmPsgProvider> serviceLoader = ServiceLoader.load(VgmPsgProvider.class);
 
     static VgmPsgProvider getProvider(String name) {

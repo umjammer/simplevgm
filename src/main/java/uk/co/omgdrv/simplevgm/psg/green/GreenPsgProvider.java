@@ -6,7 +6,6 @@ package uk.co.omgdrv.simplevgm.psg.green;
 
 import libgme.util.BlipBuffer;
 import libgme.util.StereoBuffer;
-import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.gear.GearPsg;
 
@@ -24,7 +23,7 @@ public class GreenPsgProvider extends BaseVgmPsgProvider {
     static final int psgTimeUnit = 1 << psgTimeBits;
     static final int psgFactor = (int) (1.0 * psgTimeUnit / VGM_SAMPLE_RATE_HZ * CLOCK_HZ + 0.5);
 
-    private final VgmPsgProvider psg;
+    private final SmsApu psg = new SmsApu();
     private double nanosToNextSample = NANOS_PER_SAMPLE;
     public int sampleCounter = 0;
 
@@ -33,8 +32,7 @@ public class GreenPsgProvider extends BaseVgmPsgProvider {
     protected StereoBuffer stereoBuffer;
 
     public GreenPsgProvider() {
-        psg = SmsApu.getInstance();
-
+        // TODO copy from compare instantiation
         this.stereoBuffer = new StereoBuffer();
 //        this.stereoBuffer.setObserver(new BlipHelper("GreenPsg", false));
         this.stereoBuffer.setSampleRate(VGM_SAMPLE_RATE_HZ, 1000);
@@ -73,7 +71,7 @@ public class GreenPsgProvider extends BaseVgmPsgProvider {
     }
 
     @Override
-    protected long toPsgCycles(long vgmDelayCycles) {
+    public long toPsgCycles(long vgmDelayCycles) {
         return (vgmDelayCycles * psgFactor + psgTimeUnit / 2) >> psgTimeBits;
     }
 
