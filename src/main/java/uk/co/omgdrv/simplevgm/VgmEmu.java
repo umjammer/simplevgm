@@ -168,6 +168,7 @@ logger.log(Level.DEBUG, vgmHeader.toString());
     byte[] data;
     int delay;
     static int psgFactor;
+    /** FM sample buffer, PSG sample buffer is {@link #buf} */
     final int[] fm_buf_lr = new int[48000 / 10 * 2];
     int fm_pos;
     int dac_disabled; // -1 if disabled
@@ -253,10 +254,10 @@ logger.log(Level.DEBUG, vgmHeader.toString());
             switch (cmd) {
                 case CMD_END -> {
                     // TODO fix sample counting
-//logger.log(Level.TRACE, "End command after samples: " + sampleCounter);
+logger.log(Level.TRACE, "End command after samples: " + sampleCounter + " / " + (vgmHeader.getNumSamples() + vgmHeader.getLoopSamples()));
                     boolean loopDone = sampleCounter >= vgmHeader.getNumSamples() + vgmHeader.getLoopSamples();
-                    endOfStream = !endlessLoopFlag && loopDone;
-                    logger.log(Level.DEBUG, "LOOP: " + endlessLoopFlag);
+                    endOfStream = !isEndlessLoopFlag() && loopDone;
+                    logger.log(Level.INFO, "LOOP: " + isEndlessLoopFlag() + ", endOfStream: " + endOfStream + ", loopDone: " + loopDone);
                     if (vgmHeader.getLoopSamples() == 0 && sampleCounter < vgmHeader.getNumSamples()) {
                         pos = data.length;
                     } else {
