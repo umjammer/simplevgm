@@ -5,21 +5,23 @@
 
 # Simple VGM
 
- mavenized vgm player
+<img alt="logo" src="src/test/resources/duke_bass.png" width="180" />
+
+🎺 mavenized vgm player
 
 * made it one of the [vavi-sound-emu](https://github.com/umjammer/vavi-sound-emu) spi
 * made *psg* and *fm* use service provider 
 
-| name      | common name | type | status | comment                      |
-|-----------|-------------|------|:------:|------------------------------|
-| Ym2612    | OPN2        | FM   |   ✅️   | mame:dallongeville+green     |
-| Ym3438    | OPN2 (cmos) | FM   |   ✅️   | nukeykt                      |
-| Ym2612    | OPN2        | FM   |   ✅️   | MDSound (see mdsound branch) |
-| Ym2413    | OPLL        | FM   |   ✅️   | okaxaki                      |
-| Sn76489   |             | PSG  |  ✅ 🚧  | green                        |
-| Sn76489   |             | PSG  |        | javageer:white               |
-| Sn76496   |             | PSG  |        | javageer-2:white             |
-| Ym7101    |             | PSG  |        | nukeykt                      |
+| name      | common name | type | status | comment                       |
+|-----------|-------------|------|:------:|-------------------------------|
+| Ym2612    | OPN2        | FM   |   ✅️   | mame:dallongeville+green      |
+| Ym3438    | OPN2 (cmos) | FM   |   ✅️   | nukeykt                       |
+| Ym2612    | OPN2        | FM   |  ✅️*   | MDSound (*see mdsound branch) |
+| Ym2413    | OPLL        | FM   |   ✅️   | okaxaki                       |
+| Sn76489   |             | PSG  |   ✅    | green                         |
+| Sn76489   |             | PSG  |   ✅    | javageer:white                |
+| Sn76496   |             | PSG  |   ✅    | javageer-2:white              |
+| Ym7101    |             | PSG  |   ✅    | nukeykt                       |
 
 ## Install
 
@@ -50,9 +52,8 @@
 ### system properties
 
  * `libgme.endless` ... loop audio playing or not, default `false`
- * `uk.co.omgdrv.simplevgm.psg` ... a class name extends `uk.co.omgdrv.simplevgm.model.VgmPsgProvider`
- * `uk.co.omgdrv.simplevgm.fm` ... a class name extends `uk.co.omgdrv.simplevgm.model.VgmFmProvider`
-
+ * `uk.co.omgdrv.simplevgm.psg` ... name of a class that extends `uk.co.omgdrv.simplevgm.model.VgmPsgProvider`
+ * `uk.co.omgdrv.simplevgm.fm` ... name of a class that extends `uk.co.omgdrv.simplevgm.model.VgmFmProvider`
 
 ## References
 
@@ -74,9 +75,9 @@
 ## TODO
 
  * ~~merge simplevgm as extended to~~
- * psg has buffering engine? (so at least one psg instance is needed)
- * psg providers other than sms doesn't work???
- * Sn76489(green) works alone but doesn't work as a spi
+ * psg is tightly coupled with buffering engine? (so at least one psg instance is needed)
+ * ~~psg providers other than sms doesn't work ... use StereoBuffer~~
+ * ~~Sn76489(green) works alone but doesn't work as a spi~~
 
 ---
 
@@ -122,3 +123,8 @@ License
 This software is released under a GPL 2.0 license
 
 [1]: https://en.wikipedia.org/wiki/Video_game_music
+
+---
+
+<sub>image designed by @umjammer, drawn by nano banana</sub>
+
