@@ -50,9 +50,10 @@ public class NukedPsgProvider extends BaseVgmPsgProvider {
     }
 
     @Override
-    public void writeData(int vgmDelayCycles, int data) {
-        int delayCycles = (int) toPsgCycles(vgmDelayCycles);
-        runUntil(delayCycles);
+    public void writeData(int clockTime, int data) {
+        // clockTime is already PSG clock cycles (from VgmEmu.toPSGTime)
+        // Do NOT double-convert via toPsgCycles
+        runUntil(clockTime);
         psg.PSG_Write(context, data);
     }
 
@@ -62,23 +63,24 @@ public class NukedPsgProvider extends BaseVgmPsgProvider {
     }
 
     @Override
-    public void endFrame(int vgmDelayCycles) {
-        long delayCycles = toPsgCycles(vgmDelayCycles);
-        if (delayCycles > currentCycle) {
-            runUntil(vgmDelayCycles);
+    public void endFrame(int clockEndTime) {
+        // clockEndTime is already PSG clock cycles
+        if (clockEndTime > currentCycle) {
+            runUntil(clockEndTime);
         }
-        currentCycle -= (int) delayCycles;
+        currentCycle -= clockEndTime;
     }
 
     @Override
-    public void runUntil(int delayCycles) {
-        if (delayCycles > currentCycle) {
-            long count = delayCycles;
-            while (count-- > 0) {
+    public void runUntil(int targetCycle) {
+        while (currentCycle < targetCycle) {
+            // PSG_Cycle advances one of 4 channels per call (÷4 via rotation).
+            // SN76489 needs ÷16 total, so call PSG_Cycle every 4th clock: 4 × 4 = 16.
+            if ((currentCycle & 3) == 0) {
                 psg.PSG_Cycle(context);
-                updateSampleBuffer();
             }
-            currentCycle = delayCycles;
+            updateSampleBuffer();
+            currentCycle++;
         }
     }
 
@@ -92,16 +94,19 @@ public class NukedPsgProvider extends BaseVgmPsgProvider {
         if (nanosToNextSample < 0) {
 //            hasSample = true;
             nanosToNextSample += NANOS_PER_SAMPLE;
-            psg.PSG_Cycle(context);
+            // PSG_GetSample is a pure read — PSG_Cycle in the main loop already advances state
             rawSample = psg.PSG_GetSample(context);
             rawBuffer[sampleCounter] = rawSample;
             sampleCounter++;
 
-            // Same logic as GearPsg. Pass exactly what VgmEmu calculates for the BlipBuffer frame bound.
-            int intSample = (int) (rawSample * 64);
+            // Add delta to BlipBuffer at the current clock cycle position
+            // Scale to match GreenPsgProvider's BlipBuffer levels:
+            // Green uses volume(0-64) * masterVolume(204) = max 13056 per channel
+            // rawSample has per-channel range 0.0-1.0, so multiply by 13056
+            int intSample = (int) (rawSample * 13056);
             int delta = intSample - lastSample;
             if (delta != 0) {
-                int time = (int) toPsgCycles((long) interpolatedVgmCycle);
+                int time = currentCycle;
                 if (time < 0) time = 0;
                 buffer.center().addDelta(time, delta);
                 lastSample = intSample;
