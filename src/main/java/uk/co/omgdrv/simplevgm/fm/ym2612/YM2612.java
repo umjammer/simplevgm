@@ -15,7 +15,7 @@
  * instances
  */
 
-package uk.co.omgdrv.simplevgm.fm.ym2621;
+package uk.co.omgdrv.simplevgm.fm.ym2612;
 
 import static uk.co.omgdrv.simplevgm.fm.MdFmProvider.FM_ADDRESS_PORT0;
 import static uk.co.omgdrv.simplevgm.fm.MdFmProvider.FM_ADDRESS_PORT1;

@@ -18,19 +18,16 @@
 
 package uk.co.omgdrv.simplevgm.psg.green;
 
-import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 import libgme.util.BlipBuffer;
 
 
 /**
  * Sega Master System SN76489 PSG sound chip emulator
  *
- * WARNING don't set this as service provider. just for internal use.
- *
  * @author Shay Green
  * @see "https://www.slack.net/~ant/"
  */
-public final class SmsApu implements VgmPsgProvider { // TODO gross
+public final class SmsApu {
 
     int lastTime;
     int latch;
@@ -43,12 +40,6 @@ public final class SmsApu implements VgmPsgProvider { // TODO gross
     final SmsOsc[] oscs = new SmsOsc[oscCount];
 
     static final int[] noisePeriods = {0x100, 0x200, 0x400};
-
-    private static final SmsApu instance = new SmsApu();
-
-    public static SmsApu getInstance() {
-        return instance;
-    }
 
     private void runUntil(int endTime) {
         if (endTime > lastTime) {
@@ -71,14 +62,13 @@ public final class SmsApu implements VgmPsgProvider { // TODO gross
         }
     }
 
-    private SmsApu() {
+    public SmsApu() {
         for (int i = 0; i < 3; i++) {
             oscs[i] = squares[i] = new SmsSquare();
         }
         oscs[3] = noise;
     }
 
-    @Override
     public void setOutput(BlipBuffer center, BlipBuffer left, BlipBuffer right) {
         for (int i = 0; i < oscCount; i++) {
             SmsOsc osc = oscs[i];
@@ -107,12 +97,10 @@ public final class SmsApu implements VgmPsgProvider { // TODO gross
         noise.reset();
     }
 
-    @Override
     public void reset() {
         reset(0x0009, 16);
     }
 
-    @Override
     public void writeGG(int time, int data) {
         runUntil(time);
 
@@ -134,7 +122,6 @@ public final class SmsApu implements VgmPsgProvider { // TODO gross
             64, 50, 39, 31, 24, 19, 15, 12, 9, 7, 5, 4, 3, 2, 1, 0
     };
 
-    @Override
     public void writeData(int time, int data) {
         runUntil(time);
 
@@ -157,7 +144,6 @@ public final class SmsApu implements VgmPsgProvider { // TODO gross
         }
     }
 
-    @Override
     public void endFrame(int endTime) {
         if (endTime > lastTime)
             runUntil(endTime);

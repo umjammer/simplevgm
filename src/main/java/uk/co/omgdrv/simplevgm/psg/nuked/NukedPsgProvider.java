@@ -10,13 +10,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import libgme.util.BlipBuffer;
-import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
-import uk.co.omgdrv.simplevgm.psg.PsgCompare;
+import uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider;
 import uk.co.omgdrv.simplevgm.util.DspUtil;
 import uk.co.omgdrv.simplevgm.util.Util;
-
-import static uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ;
 
 
 /**
@@ -26,7 +22,7 @@ import static uk.co.omgdrv.simplevgm.psg.BaseVgmPsgProvider.VGM_SAMPLE_RATE_HZ;
  * @version 2019
  * @see "https://forums.nesdev.com/viewtopic.php?f=23&t=15562"
  */
-public class NukedPsgProvider implements VgmPsgProvider {
+public class NukedPsgProvider extends BaseVgmPsgProvider {
 
     public static final int PSG_MAX_VOLUME = 0x80;
     public static final int CLOCK_HZ = 3579545;
@@ -48,28 +44,17 @@ public class NukedPsgProvider implements VgmPsgProvider {
     private int sampleCounter = 0;
     public int secondsElapsed = 0;
 
-    protected PsgCompare psgCompare;
-
-    public static NukedPsgProvider createInstance(PsgCompare psgCompare) {
-        NukedPsgProvider n = (NukedPsgProvider) VgmPsgProvider.getProvider(NukedPsgProvider.class.getName());
-        n.psgCompare = psgCompare;
-        return n;
-    }
-
     public NukedPsgProvider() {
         psg = new PsgYm7101Impl();
         context = new PsgYm7101.PsgContext();
     }
 
     @Override
-    public void writeData(int vgmDelayCycles, int data) {
-        int delayCycles = toPsgClockCycles(vgmDelayCycles);
-        runUntil(delayCycles);
+    public void writeData(int clockTime, int data) {
+        // clockTime is already PSG clock cycles (from VgmEmu.toPSGTime)
+        // Do NOT double-convert via toPsgCycles
+        runUntil(clockTime);
         psg.PSG_Write(context, data);
-    }
-
-    @Override
-    public void setOutput(BlipBuffer center, BlipBuffer left, BlipBuffer right) {
     }
 
     @Override
@@ -78,56 +63,72 @@ public class NukedPsgProvider implements VgmPsgProvider {
     }
 
     @Override
-    public void writeGG(int time, int data) {
+    public void endFrame(int clockEndTime) {
+        // clockEndTime is already PSG clock cycles
+        if (clockEndTime > currentCycle) {
+            runUntil(clockEndTime);
+        }
+        currentCycle -= clockEndTime;
     }
 
     @Override
-    public void endFrame(int vgmDelayCycles) {
-        long delayCycles = toPsgClockCycles(vgmDelayCycles);
-        if (delayCycles > currentCycle) {
-            runUntil(vgmDelayCycles);
-        }
-        currentCycle -= (int) delayCycles;
-    }
-
-    private static int toPsgClockCycles(long vgmDelayCycles) {
-        return (int) ((vgmDelayCycles * 1.0 / VGM_SAMPLE_RATE_HZ) * CLOCK_HZ);
-    }
-
-    private void runUntil(int delayCycles) {
-        if (delayCycles > currentCycle) {
-            long count = delayCycles;
-            while (count-- > 0) {
+    public void runUntil(int targetCycle) {
+        while (currentCycle < targetCycle) {
+            // PSG_Cycle advances one of 4 channels per call (÷4 via rotation).
+            // SN76489 needs ÷16 total, so call PSG_Cycle every 4th clock: 4 × 4 = 16.
+            if ((currentCycle & 3) == 0) {
                 psg.PSG_Cycle(context);
-                updateSampleBuffer();
             }
-            currentCycle = delayCycles;
+            updateSampleBuffer();
+            currentCycle++;
         }
     }
 
     protected double rawSample;
+    private int lastSample = 0;
 
-    protected boolean updateSampleBuffer() {
+    @Override
+    public void updateSampleBuffer() {
         nanosToNextSample -= NANOS_PER_CYCLE;
-        boolean hasSample = false;
+//        boolean hasSample = false;
         if (nanosToNextSample < 0) {
-            hasSample = true;
+//            hasSample = true;
             nanosToNextSample += NANOS_PER_SAMPLE;
+            // PSG_GetSample is a pure read — PSG_Cycle in the main loop already advances state
             rawSample = psg.PSG_GetSample(context);
             rawBuffer[sampleCounter] = rawSample;
             sampleCounter++;
+
+            // Add delta to BlipBuffer at the current clock cycle position
+            // Scale to match GreenPsgProvider's BlipBuffer levels:
+            // Green uses volume(0-64) * masterVolume(204) = max 13056 per channel
+            // rawSample has per-channel range 0.0-1.0, so multiply by 13056
+            int intSample = (int) (rawSample * 13056);
+            int delta = intSample - lastSample;
+            if (delta != 0) {
+                int time = currentCycle;
+                if (time < 0) time = 0;
+                buffer.center().addDelta(time, delta);
+                lastSample = intSample;
+            }
+
             if (sampleCounter == NUKED_PSG_SAMPLING_HZ) {
                 sampleCounter = 0;
                 DspUtil.fastHpfResample(rawBuffer, resampleBuffer);
                 DspUtil.scale8bit(resampleBuffer, nukedBuffer);
 //                writeRawData(rawBuffer);
-                if (psgCompare != null) {
-                    psgCompare.pushData(PsgCompare.PsgType.NUKED, nukedBuffer);
+                if (comparator != null) {
+                    comparator.accept(nukedBuffer);
                 }
                 secondsElapsed++;
             }
         }
-        return hasSample;
+//        return hasSample;
+    }
+
+    @Override
+    public long toPsgCycles(long vgmDelayCycles) {
+        return (long) ((vgmDelayCycles * 1.0 / VGM_SAMPLE_RATE_HZ) * CLOCK_HZ);
     }
 
     final Path rawFile = Paths.get(".", "NUKED_RAW_" + System.currentTimeMillis() + ".raw");

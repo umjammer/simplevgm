@@ -27,7 +27,7 @@ import libgme.util.BlipBuffer;
  * @author Shay Green
  * @see "https://www.slack.net/~ant/"
  */
-public class SmsOsc {
+class SmsOsc {
 
     static final int masterVolume = (int) (0.40 * 65536 / 128);
 

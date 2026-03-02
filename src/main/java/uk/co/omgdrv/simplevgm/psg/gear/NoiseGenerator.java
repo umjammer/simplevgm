@@ -28,7 +28,7 @@ package uk.co.omgdrv.simplevgm.psg.gear;
  * @version 18th January 2003
  * @see "JavaGear Final Project Report"
  */
-public final class NoiseGenerator {
+final class NoiseGenerator {
 
     private static final int[] PARITY = {1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1};
 
@@ -104,7 +104,6 @@ public final class NoiseGenerator {
      */
     private boolean useChan2Freq;
 
-
     /**
      * NoiseGenerator Constructor.
      *
@@ -117,7 +116,6 @@ public final class NoiseGenerator {
         psgCycles = (clockSpeed / sampleRate) * 2;
         reset();
     }
-
 
     /**
      * Reset Noise Generator to Default Values.
@@ -179,7 +177,6 @@ public final class NoiseGenerator {
                 break;
         }
     }
-
 
     /**
      * Return a single sample from noise generator.
@@ -243,5 +240,4 @@ public final class NoiseGenerator {
     public void setVolume(int volume) {
         this.volume = volume;
     }
-
 }

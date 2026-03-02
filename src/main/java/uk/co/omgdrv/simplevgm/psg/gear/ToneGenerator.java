@@ -20,6 +20,7 @@
 
 package uk.co.omgdrv.simplevgm.psg.gear;
 
+
 /**
  * Texas SN76496 Tone Generator Emulation.
  *
@@ -27,7 +28,7 @@ package uk.co.omgdrv.simplevgm.psg.gear;
  * @version 18th January 2003
  * @see "JavaGear Final Project Report"
  */
-public final class ToneGenerator {
+final class ToneGenerator {
 
     /**
      * Volume of channel.

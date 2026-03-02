@@ -5,7 +5,7 @@
 
   <groupId>uk.co.omgdrv</groupId>
   <artifactId>simplevgm</artifactId>
-  <version>1.5.6</version>
+  <version>1.5.7</version>
 
   <properties>
     <vavi.test.volume>0.02</vavi.test.volume>
@@ -82,7 +82,7 @@
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
-        <version>5.11.2</version>
+        <version>6.0.2</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -91,9 +91,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.github.umjammer</groupId> <!-- com.github.umjammer / vavi -->
+      <groupId>com.github.umjammer</groupId> <!-- vavi / com.github.umjammer -->
       <artifactId>vavi-sound-emu</artifactId>
-      <version>0.0.8</version>
+      <version>0.0.10</version>
     </dependency>
 
     <dependency>
@@ -111,11 +111,16 @@
       <artifactId>junit-platform-commons</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <scope>test</scope>
+    </dependency>
 
     <dependency>
       <groupId>com.github.umjammer</groupId>
       <artifactId>vavi-commons</artifactId>
-      <version>1.1.14</version>
+      <version>1.1.16</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

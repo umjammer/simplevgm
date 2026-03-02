@@ -27,7 +27,7 @@ import libgme.util.BlipBuffer;
  * @author Shay Green
  * @see "https://www.slack.net/~ant/"
  */
-public final class SmsSquare extends SmsOsc {
+final class SmsSquare extends SmsOsc {
 
     int period;
     int phase;

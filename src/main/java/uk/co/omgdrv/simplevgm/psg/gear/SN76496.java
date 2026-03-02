@@ -20,14 +20,6 @@
 
 package uk.co.omgdrv.simplevgm.psg.gear;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
-import javax.sound.sampled.AudioFormat;
-
-import static java.lang.System.getLogger;
-
 
 /**
  * Texas SN76496 Emulation.
@@ -36,9 +28,7 @@ import static java.lang.System.getLogger;
  * @version 18th January 2003
  * @see "JavaGear Final Project Report"
  */
-public final class SN76496 implements PsgProvider {
-
-    private static final Logger logger = getLogger(SN76496.class.getName());
+public final class SN76496 {
 
     /**
      * Tone Generator 1.
@@ -66,54 +56,21 @@ public final class SN76496 implements PsgProvider {
     private ToneGenerator currentGenerator;
 
     /**
-     * For Recording Sound to Disk.
-     */
-    private FileWriter fileWriter;
-
-    /**
-     * PSG Clock Speed.
-     */
-    private final double clockSpeed;
-
-    /**
-     * Output Sample Rate.
-     */
-    private final int sampleRate;
-
-    /**
-     * Samples to Generate per video frame.
-     */
-    private int samplesPerFrame;
-
-    /**
      * Sound Enabled.
      */
     private boolean enabled;
 
     /**
-     * Record Sound to Disk.
-     */
-    private boolean recording;
-
-    private final AudioFormat audioFormat;
-
-    /**
      * SN76496 Constructor.
      *
-     * @param c Clock Speed (Hz)
-     * @param s Sample Rate (Hz)
+     * @param clockSpeed Clock Speed (Hz)
+     * @param sampleRate Sample Rate (Hz)
      */
-    public SN76496(double c, int s) {
-        clockSpeed = c;
-        sampleRate = s;
-
+    public SN76496(double clockSpeed, int sampleRate) {
         chan0 = new ToneGenerator(clockSpeed, sampleRate);
         chan1 = new ToneGenerator(clockSpeed, sampleRate);
         chan2 = new ToneGenerator(clockSpeed, sampleRate);
         chan3 = new NoiseGenerator(clockSpeed, sampleRate, chan2);
-
-        //AudioFormat(sample_rate(hz), sampleSizeInBits, channels, signed, bigEndian)
-        audioFormat = new AudioFormat(sampleRate, PSG_OUTPUT_SAMPLE_SIZE, PSG_OUTPUT_CHANNELS, true, false);
 
         // Reset to Defaults
         reset();
@@ -125,7 +82,6 @@ public final class SN76496 implements PsgProvider {
     /**
      * Reset SN76496 to Default Values.
      */
-    @Override
     public void reset() {
         currentGenerator = chan0;
         chan0.reset();
@@ -176,19 +132,13 @@ public final class SN76496 implements PsgProvider {
         }
     }
 
-    @Override
-    public void init() {
-        reset();
-    }
-
     /**
      * Program the PSG. Connected this procedure to a Z80 Port.
      *
      * @param value Value to write (0-0xFF)
      */
-    @Override
     public void write(int value) {
-        if ((!enabled) && (!isRecording())) {
+        if (!enabled) {
             return;
         }
 
@@ -236,9 +186,8 @@ public final class SN76496 implements PsgProvider {
         }
     }
 
-    @Override
     public void output(byte[] buffer, int offset, int end) {
-        if (!enabled && !isRecording()) {
+        if (!enabled) {
             return;
         }
 
@@ -262,82 +211,6 @@ public final class SN76496 implements PsgProvider {
             }
 
             buffer[i] = (byte) join;
-
-            if (isRecording()) {
-                try {
-                    fileWriter.write(join & 0xff); // output 8 bit signed mono
-                } catch (IOException ioe) {
-                    logger.log(Level.ERROR, "An error occurred while writing the sound file.");
-                }
-            }
         }
-    }
-
-    /**
-     * Convert PSG settings to Java Sound.
-     */
-    @Override
-    public void output(byte[] buffer) {
-        output(buffer, 0, buffer.length);
-    }
-
-    /**
-     * Toggle sound recording to WAV file.
-     */
-    public void setRecord() {
-        if (isRecording()) {
-            stopRecording();
-        } else {
-            startRecording();
-        }
-    }
-
-    /**
-     * Start sound recording to WAV file.
-     */
-    private void startRecording() {
-        if (!isRecording()) {
-            try {
-                fileWriter = new FileWriter("output.raw");
-            } catch (IOException ioe) {
-                logger.log(Level.ERROR, "Could not open file for recording.");
-            }
-            setRecording(true);
-        }
-    }
-
-    /**
-     * Stop sound recording to WAV file.
-     */
-    public void stopRecording() {
-        if (isRecording()) {
-            try {
-                fileWriter.close();
-                convertToWav();
-            } catch (IOException ioe) {
-                logger.log(Level.ERROR, "Failed whilst closing output.raw");
-            }
-            setRecording(false);
-        }
-    }
-
-    public boolean isRecording() {
-        return recording;
-    }
-
-    private void setRecording(boolean recording) {
-        this.recording = recording;
-    }
-
-    /**
-     * Convert RAW output to WAV file.
-     */
-    private void convertToWav() {
-//        SoundUtil.convertToWav(audioFormat, "ouput.raw");
-    }
-
-    public static void main(String[] args) {
-        AudioFormat audioFormat = new AudioFormat(11025, 8, 1, true, false);
-//        SoundUtil.convertToWav(audioFormat, "ouput.raw");
     }
 }

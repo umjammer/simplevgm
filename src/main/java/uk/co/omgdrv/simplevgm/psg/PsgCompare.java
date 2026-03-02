@@ -12,14 +12,11 @@ import java.nio.file.Paths;
 import java.util.List;
 import javax.sound.sampled.AudioFormat;
 
-import libgme.util.BlipBuffer;
-import uk.co.omgdrv.simplevgm.VgmEmu;
+import libgme.util.StereoBuffer;
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.gear.GearPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.gear2.Gear2PsgProvider;
 import uk.co.omgdrv.simplevgm.psg.green.GreenPsgProvider;
-import uk.co.omgdrv.simplevgm.psg.green.SmsApu;
-import uk.co.omgdrv.simplevgm.psg.nuked.BlipNukedPsgProvider;
 import uk.co.omgdrv.simplevgm.psg.nuked.NukedPsgProvider;
 import uk.co.omgdrv.simplevgm.util.Util;
 
@@ -40,15 +37,6 @@ public class PsgCompare implements VgmPsgProvider {
     private static final int RUN_FOR_SECONDS = 30;
     private static final boolean WRITE_FILE = false;
 
-    public enum PsgType {
-        GEAR,
-        GEAR2,
-        NUKED,
-        NUKED_FILTER,
-        NUKED_BLIP,
-        GREEN
-    }
-
     private static final boolean SIGNED = true;
     public static final AudioFormat audioFormat8bit =
             new AudioFormat(VGM_SAMPLE_RATE_HZ, 8, 1, SIGNED, false);
@@ -66,18 +54,40 @@ public class PsgCompare implements VgmPsgProvider {
     private final Gear2PsgProvider gear2Psg;
     private final NukedPsgProvider nukePsg;
     private final GreenPsgProvider greenPsg;
-    private final BlipNukedPsgProvider blipNukedPsg;
 
-    private final SmsApu vgmEmuPsg;
+    public GearPsgProvider createGearPsg(PsgCompare compare) {
+        GearPsgProvider g = (GearPsgProvider) VgmPsgProvider.getProvider(GearPsgProvider.class.getName());
+        g.addComparator(buf -> pushData(GearPsgProvider.class, buf));
+        return g;
+    }
+
+    public Gear2PsgProvider createGear2Psg(PsgCompare compare) {
+        Gear2PsgProvider g = (Gear2PsgProvider) VgmPsgProvider.getProvider(Gear2PsgProvider.class.getName());
+        g.addComparator(buf -> pushData(Gear2PsgProvider.class, buf));
+        return g;
+    }
+
+    public NukedPsgProvider createNukedPsg(PsgCompare psgCompare) {
+        NukedPsgProvider n = (NukedPsgProvider) VgmPsgProvider.getProvider(NukedPsgProvider.class.getName());
+        n.addComparator(buf -> pushData(NukedPsgProvider.class, buf));
+        return n;
+    }
+
+    public GreenPsgProvider createGreenPsg(PsgCompare compare) {
+        GreenPsgProvider g = (GreenPsgProvider) VgmPsgProvider.getProvider(GreenPsgProvider.class.getName());
+        g.addComparator(buf -> pushData(GreenPsgProvider.class, buf));
+        return g;
+    }
+
+    private final GreenPsgProvider vgmEmuPsg;
 
     public PsgCompare() {
-        this.gearPsg = GearPsgProvider.createInstance(this);
-        this.gear2Psg = Gear2PsgProvider.createInstance(this);
-        this.nukePsg = NukedPsgProvider.createInstance(this);
-        this.blipNukedPsg = BlipNukedPsgProvider.createInstance(this);
-        this.greenPsg = GreenPsgProvider.createInstance(this);
+        this.gearPsg = createGearPsg(this);
+        this.gear2Psg = createGear2Psg(this);
+        this.nukePsg = createNukedPsg(this);
+        this.greenPsg = createGreenPsg(this);
 
-        this.vgmEmuPsg = SmsApu.getInstance();
+        this.vgmEmuPsg = greenPsg;
     }
 
     @Override
@@ -85,15 +95,14 @@ public class PsgCompare implements VgmPsgProvider {
         nukePsg.writeData(vgmDelayCycles, data);
         gearPsg.writeData(vgmDelayCycles, data);
         gear2Psg.writeData(vgmDelayCycles, data);
-        blipNukedPsg.writeData(vgmDelayCycles, data);
-        greenPsg.writeData(vgmDelayCycles, data);
+        gear2Psg.writeData(vgmDelayCycles, data);
 
-        vgmEmuPsg.writeData(VgmEmu.toPSGTimeGreen(vgmDelayCycles), data);
+        vgmEmuPsg.writeData((int) gear2Psg.toPsgCycles(vgmDelayCycles), data);
     }
 
     @Override
-    public void setOutput(BlipBuffer center, BlipBuffer left, BlipBuffer right) {
-        vgmEmuPsg.setOutput(center, left, right);
+    public void setOutput(StereoBuffer buffer) {
+        vgmEmuPsg.setOutput(buffer);
     }
 
     @Override
@@ -102,12 +111,11 @@ public class PsgCompare implements VgmPsgProvider {
         gearPsg.reset();
         greenPsg.reset();
         gear2Psg.reset();
-        blipNukedPsg.reset();
     }
 
     @Override
     public void writeGG(int time, int data) {
-        vgmEmuPsg.writeGG(VgmEmu.toPSGTimeGreen(time), data);
+        vgmEmuPsg.writeGG((int) gear2Psg.toPsgCycles(time), data);
     }
 
     @Override
@@ -115,10 +123,14 @@ public class PsgCompare implements VgmPsgProvider {
         nukePsg.endFrame(vgmDelayCycles);
         gearPsg.endFrame(vgmDelayCycles);
         gear2Psg.endFrame(vgmDelayCycles);
-        blipNukedPsg.endFrame(vgmDelayCycles);
         greenPsg.endFrame(vgmDelayCycles);
 
-        vgmEmuPsg.endFrame(VgmEmu.toPSGTimeGreen(vgmDelayCycles));
+        vgmEmuPsg.endFrame((int) toPsgCycles(vgmDelayCycles));
+    }
+
+    @Override
+    public long toPsgCycles(long vgmDelayCycles) {
+        return gear2Psg.toPsgCycles(vgmDelayCycles);
     }
 
     private void checkIntervalDone() {
@@ -140,26 +152,23 @@ logger.log(Level.DEBUG, "Stopping after: " + RUN_FOR_SECONDS + " seconds");
         }
     }
 
-    public void pushData(PsgType type, byte[] buffer) {
+    public void pushData(Class<? extends VgmPsgProvider> type, byte[] buffer) {
         if (WRITE_FILE) {
-            switch (type) {
-                case GEAR:
+            switch (type.getSimpleName()) {
+                case "GearPsgProvider":
                     Util.writeToFile(gearFile, buffer);
                     break;
-                case GEAR2:
+                case "Gear2PsgProvider":
 //                Util.writeToFile(gearFile2, buffer);
                     break;
-                case GREEN:
+                case "GreenPsgProvider":
                     // TODO this is 16bit
 //                Util.writeToFile(greenFile, buffer);
                     break;
-                case NUKED:
+                case "NukedPsgProvider":
                     Util.writeToFile(nukeFile, buffer);
                     break;
-                case NUKED_BLIP:
-//                Util.writeToFile(nukeBlipFile, buffer);
-                    break;
-                case NUKED_FILTER:
+                case "NUKED_FILTER":
 //                Util.writeToFile(nukeFilterFile, buffer);
                     break;
             }

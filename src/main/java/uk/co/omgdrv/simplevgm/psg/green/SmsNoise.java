@@ -27,7 +27,7 @@ import libgme.util.BlipBuffer;
  * @author Shay Green
  * @see "https://www.slack.net/~ant/"
  */
-public final class SmsNoise extends SmsOsc {
+final class SmsNoise extends SmsOsc {
 
     int shifter;
     int feedback;

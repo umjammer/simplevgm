@@ -68,6 +68,8 @@ class TestCase {
             PropsEntity.Util.bind(this);
         }
 
+        System.setProperty("libgme.endless", String.valueOf(onIde));
+
         System.setProperty("uk.co.omgdrv.simplevgm.fm2612", fm2612);
         System.setProperty("uk.co.omgdrv.simplevgm.psg", psg);
 Debug.println("volume: " + volume);
@@ -78,8 +80,6 @@ Debug.println("volume: " + volume);
 
     @Test
     void test1() throws Exception {
-        System.setProperty("libgme.endless", String.valueOf(onIde));
-
         VGMPlayer player = new VGMPlayer(VgmEmu.VGM_SAMPLE_RATE_HZ);
         CountDownLatch cdl = new CountDownLatch(1);
 
@@ -96,11 +96,10 @@ Debug.println(vgz);
     }
 
     @Test
-    @DisplayName("as spi")
+    @DisplayName("via spi")
     void test2() throws Exception {
-        System.setProperty("libgme.endless", String.valueOf(onIde));
-
         Path path = Path.of(vgz);
+Debug.print(path + ", " + Files.exists(path));
         AudioInputStream sourceAis = AudioSystem.getAudioInputStream(new BufferedInputStream(Files.newInputStream(path)));
 
         AudioFormat inAudioFormat = sourceAis.getFormat();
