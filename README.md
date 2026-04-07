@@ -1,7 +1,7 @@
 [![Release](https://jitpack.io/v/umjammer/simplevgm.svg)](https://jitpack.io/#umjammer/simplevgm)
 [![Java CI](https://github.com/umjammer/simplevgm/actions/workflows/maven.yml/badge.svg)](https://github.com/umjammer/simplevgm/actions/workflows/maven.yml)
 [![CodeQL](https://github.com/umjammer/simplevgm/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/umjammer/simplevgm/actions/workflows/codeql-analysis.yml)
-![Java](https://img.shields.io/badge/Java-17-b07219)
+![Java](https://img.shields.io/badge/Java-25-b07219)
 
 # Simple VGM
 
