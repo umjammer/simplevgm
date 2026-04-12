@@ -90,7 +90,7 @@ Debug.println("volume: " + volume);
 Debug.println(vgz);
         player.setEngine(engine);
         player.loadFile(vgz);
-        player.startTrack(1);
+        player.startTrack(0);
 
         cdl.await();
     }
