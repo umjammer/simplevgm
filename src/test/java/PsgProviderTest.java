@@ -7,12 +7,10 @@ import libgme.EmuPlayer.Engine;
 import libgme.MusicEmu;
 import libgme.VGMPlayer;
 import uk.co.omgdrv.simplevgm.VgmEmu;
-import vavi.util.Debug;
 import vavi.util.properties.annotation.Property;
 import vavi.util.properties.annotation.PropsEntity;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -98,7 +96,7 @@ class PsgProviderTest {
 
         player.setEngine(engine);
         player.loadFile(psg);
-        player.startTrack(1);
+        player.startTrack(0);
 
         cdl.await();
 
