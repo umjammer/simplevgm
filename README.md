@@ -55,6 +55,13 @@
  * `uk.co.omgdrv.simplevgm.psg` ... name of a class that extends `uk.co.omgdrv.simplevgm.model.VgmPsgProvider`
  * `uk.co.omgdrv.simplevgm.fm` ... name of a class that extends `uk.co.omgdrv.simplevgm.model.VgmFmProvider`
 
+### jvm options
+
+```
+--add-opens=java.base/java.io=ALL-UNNAMED
+--add-opens=java.base/sun.nio.ch=ALL-UNNAMED
+```
+
 ## References
 
  * https://github.com/fedex81/simplevgm
