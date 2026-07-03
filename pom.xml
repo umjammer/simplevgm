@@ -95,7 +95,7 @@
     <dependency>
       <groupId>com.github.umjammer</groupId> <!-- vavi / com.github.umjammer -->
       <artifactId>vavi-sound-emu</artifactId>
-      <version>0.0.13</version>
+      <version>0.0.14</version>
     </dependency>
 
     <dependency>

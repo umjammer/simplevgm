@@ -24,6 +24,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import javax.sound.sampled.AudioFileFormat.Type;
+import javax.sound.sampled.AudioFormat.Encoding;
+
 import libgme.ClassicEmu;
 import uk.co.omgdrv.simplevgm.fm.MdFmProvider;
 import uk.co.omgdrv.simplevgm.fm.ym2413.Ym2413Provider;
@@ -31,6 +34,8 @@ import uk.co.omgdrv.simplevgm.model.VgmFmProvider;
 import uk.co.omgdrv.simplevgm.model.VgmHeader;
 import uk.co.omgdrv.simplevgm.model.VgmPsgProvider;
 import uk.co.omgdrv.simplevgm.util.Util;
+import vavi.sound.sampled.emu.EmuEncoding;
+import vavi.sound.sampled.emu.EmuFileFormatType;
 
 import static java.lang.System.getLogger;
 import static uk.co.omgdrv.simplevgm.model.VgmDataFormat.CMD_DATA_BLOCK;
@@ -151,6 +156,16 @@ logger.log(Level.DEBUG, vgmHeader.toString());
     @Override
     public boolean isSupportedByName(String s) {
         return Util.compressedVgm.test(s);
+    }
+
+    @Override
+    public Encoding getEncoding() {
+        return new EmuEncoding("VGM");
+    }
+
+    @Override
+    public Type getType() {
+        return new EmuFileFormatType("VGM", "vgm,vgz");
     }
 
     // private
